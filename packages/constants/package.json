@@ -1,5 +1,5 @@
 {
-  "name": "@intelligen/utils",
+  "name": "@intelligen/constants",
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
@@ -7,9 +7,5 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w"
-  },
-  "dependencies": {
-    "@intelligen/constants": "*",
-    "zod": "^3.23.8"
   }
 }

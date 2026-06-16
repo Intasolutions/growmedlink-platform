@@ -1,9 +1,13 @@
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR';
+export type EnquiryStatus = 'Pending' | 'In Progress' | 'Resolved';
+export type EnquiryType = 'Contact Form' | 'Talk to Expert';
+export type ServiceCategory = 'Immigration' | 'Language';
 
 export interface IUser {
   _id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
   createdAt: string;
   updatedAt: string;
@@ -12,12 +16,15 @@ export interface IUser {
 export interface IMedia {
   _id: string;
   filename: string;
+  folder: string;
   publicId: string;
   secureUrl: string;
   width: number;
   height: number;
   size: number;
-  uploadedBy: string; // Ref to User ID
+  uploadedBy: string | IUser; // Ref to User
+  isDeleted?: boolean;
+  deletedAt?: string;
   createdAt: string;
 }
 
@@ -25,17 +32,18 @@ export interface IService {
   _id: string;
   title: string;
   slug: string;
-  category: 'Immigration' | 'Language';
+  category: ServiceCategory;
   description: string;
   content: Record<string, any>; // Tiptap JSON content object
-  icon: string; // Lucide icon identifier
-  image: string | IMedia; // Media ID or full object
+  image: string | IMedia; // Media ID or full object reference
   metaTitle: string;
   metaDescription: string;
   keywords: string[];
   canonicalUrl: string;
   ogImage: string;
   isFeatured: boolean;
+  isDeleted?: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,16 +54,18 @@ export interface IBlog {
   slug: string;
   summary: string;
   content: Record<string, any>; // Tiptap JSON content object
-  author: string | IUser; // User ID or full object
-  image: string | IMedia; // Media ID or full object
+  author: string | IUser; // User ID or full object reference
+  image: string | IMedia; // Media ID or full object reference
   tags: string[];
   isPublished: boolean;
+  publishedAt?: string;
   metaTitle: string;
   metaDescription: string;
   keywords: string[];
   canonicalUrl: string;
   ogImage: string;
-  publishedAt?: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -65,12 +75,12 @@ export interface IEnquiry {
   name: string;
   email: string;
   phone: string;
-  type: 'Contact Form' | 'Talk to Expert';
+  type: EnquiryType;
   subject?: string;
   serviceOfInterest?: string;
   destinationCountry?: string;
   message: string;
-  status: 'Pending' | 'In Progress' | 'Resolved';
+  status: EnquiryStatus;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -81,13 +91,14 @@ export interface IPage {
   key: string; // 'about' | 'privacy' | 'terms'
   title: string;
   content: Record<string, any>; // Tiptap JSON content object
+  createdAt: string;
   updatedAt: string;
 }
 
 export interface ISettings {
   _id: string;
   companyName: string;
-  logo?: string | IMedia; // Media ID or full object
+  logo?: string | IMedia; // Media ID or full object reference
   contactEmail: string;
   contactPhone: string;
   address: string;
@@ -99,15 +110,17 @@ export interface ISettings {
   };
   seoDefaultTitle: string;
   seoDefaultDescription: string;
+  createdAt: string;
   updatedAt: string;
 }
 
 export interface IAuditLog {
   _id: string;
-  userId: string | IUser;
-  action: string; // e.g. 'Create Blog', 'Login', etc.
-  details: string;
-  ipAddress?: string;
+  userId: string | IUser; // Ref to User
+  action: string;
+  entityType: string; // e.g. 'Blog', 'Service', 'User', 'Settings'
+  entityId: string; // ObjectId of modified document
+  metadata?: Record<string, any>; // Event contextual parameters
   createdAt: string;
 }
 

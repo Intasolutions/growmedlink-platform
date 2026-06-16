@@ -7,7 +7,11 @@
   "scripts": {
     "dev": "node --import tsx --watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test:db": "node --import tsx src/testDb.ts",
+    "seed:admin": "node --import tsx src/scripts/seed.ts",
+    "test:auth": "node --import tsx src/testAuth.ts",
+    "test:media": "node --import tsx src/testMedia.ts"
   },
   "dependencies": {
     "@intelligen/types": "*",

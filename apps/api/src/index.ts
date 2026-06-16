@@ -4,6 +4,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import authRouter from './routes/auth.js';
+import mediaRouter from './routes/media.js';
 
 dotenv.config();
 
@@ -34,6 +36,10 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api', limiter);
+
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/media', mediaRouter);
 
 // Health Check Route
 app.get('/health', (req, res) => {
