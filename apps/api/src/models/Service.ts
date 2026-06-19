@@ -80,7 +80,6 @@ const serviceSchema = new Schema(
 serviceSchema.plugin(softDeletePlugin);
 
 // Explicit Index Declarations
-serviceSchema.index({ slug: 1 }, { unique: true });
 serviceSchema.index({ category: 1 });
 
 export const Service = model<ServiceDocument>('Service', serviceSchema);

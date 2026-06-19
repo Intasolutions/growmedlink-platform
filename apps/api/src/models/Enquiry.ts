@@ -6,60 +6,60 @@ const enquirySchema = new Schema<IEnquiry>(
   {
     name: {
       type: String,
-      required: [true, 'Contact name is required'],
+      required: [true, 'Name is required'],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Contact email is required'],
-      lowercase: true,
+      required: [true, 'Email is required'],
       trim: true,
+      lowercase: true,
     },
     phone: {
       type: String,
-      required: [true, 'Contact phone number is required'],
+      required: [true, 'Phone number is required'],
       trim: true,
     },
     type: {
       type: String,
+      enum: Object.values(ENQUIRY_TYPES),
       required: [true, 'Enquiry type is required'],
-      enum: {
-        values: [ENQUIRY_TYPES.CONTACT_FORM, ENQUIRY_TYPES.TALK_TO_EXPERT],
-        message: '{VALUE} is not a valid enquiry type',
-      },
     },
     subject: {
       type: String,
       trim: true,
-      default: '',
     },
     serviceOfInterest: {
       type: String,
       trim: true,
-      default: '',
     },
     destinationCountry: {
       type: String,
       trim: true,
-      default: '',
     },
     message: {
       type: String,
       required: [true, 'Message is required'],
-      trim: true,
     },
     status: {
       type: String,
-      enum: {
-        values: [ENQUIRY_STATUSES.PENDING, ENQUIRY_STATUSES.IN_PROGRESS, ENQUIRY_STATUSES.RESOLVED],
-        message: '{VALUE} is not a valid status',
-      },
+      enum: Object.values(ENQUIRY_STATUSES),
       default: ENQUIRY_STATUSES.PENDING,
     },
     notes: {
       type: String,
+    },
+    source: {
+      type: String,
       trim: true,
-      default: '',
+    },
+    pageUrl: {
+      type: String,
+      trim: true,
+    },
+    resolvedAt: {
+      type: Date,
+      default: null,
     },
   },
   {
@@ -67,8 +67,10 @@ const enquirySchema = new Schema<IEnquiry>(
   }
 );
 
-// Indexes
+// Indexes for searching and filtering
 enquirySchema.index({ status: 1 });
+enquirySchema.index({ type: 1 });
+enquirySchema.index({ name: 'text', email: 'text', phone: 'text' });
 enquirySchema.index({ createdAt: -1 });
 
 export const Enquiry = model<IEnquiry>('Enquiry', enquirySchema);

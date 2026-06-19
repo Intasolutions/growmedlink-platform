@@ -39,20 +39,23 @@ export const ServiceSchema = z.object({
   isFeatured: z.boolean().default(false),
 });
 
-export const BlogSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters long'),
-  slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. study-abroad-ielts-tips)'),
-  summary: z.string().min(10, 'Summary must be at least 10 characters long'),
+export const CreateBlogSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters long').max(200, 'Title cannot exceed 200 characters'),
+  slug: z.string().regex(slugRegex, 'Slug must be URL-safe and lowercase (e.g. study-abroad-guide)'),
+  summary: z.string().min(20, 'Summary must be at least 20 characters long').max(500, 'Summary cannot exceed 500 characters'),
   content: z.record(z.any(), { message: 'Content must be a valid Tiptap JSON object' }),
   image: z.string().min(1, 'Please select a featured image from media library'), // ObjectId of Media
-  tags: z.array(z.string()),
-  isPublished: z.boolean().default(false),
-  metaTitle: z.string().min(5, 'Meta title must be at least 5 characters').max(70),
-  metaDescription: z.string().min(10, 'Meta description must be at least 10 characters').max(160),
-  keywords: z.array(z.string()),
+  tags: z.array(z.string()).max(10, 'You can add a maximum of 10 tags'),
+  status: z.enum(['draft', 'published', 'archived']).default('draft'),
+  isFeatured: z.boolean().default(false),
+  metaTitle: z.string().max(60, 'Meta title cannot exceed 60 characters').optional().or(z.literal('')),
+  metaDescription: z.string().max(160, 'Meta description cannot exceed 160 characters').optional().or(z.literal('')),
+  keywords: z.array(z.string()).default([]),
   canonicalUrl: z.string().url('Please enter a valid canonical URL').optional().or(z.literal('')),
   ogImage: z.string().url('Please enter a valid Open Graph image URL').optional().or(z.literal('')),
 });
+
+export const UpdateBlogSchema = CreateBlogSchema.partial();
 
 export const EnquirySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
@@ -63,6 +66,9 @@ export const EnquirySchema = z.object({
   serviceOfInterest: z.string().optional().or(z.literal('')),
   destinationCountry: z.string().optional().or(z.literal('')),
   message: z.string().min(10, 'Message must be at least 10 characters long'),
+  source: z.string().optional(),
+  pageUrl: z.string().optional(),
+  turnstileToken: z.string().min(1, 'Turnstile verification is required'),
 });
 
 export const EnquiryUpdateSchema = z.object({

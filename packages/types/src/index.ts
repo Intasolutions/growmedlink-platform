@@ -57,7 +57,9 @@ export interface IBlog {
   author: string | IUser; // User ID or full object reference
   image: string | IMedia; // Media ID or full object reference
   tags: string[];
-  isPublished: boolean;
+  status: 'draft' | 'published' | 'archived';
+  readingTime: number;
+  isFeatured: boolean;
   publishedAt?: string;
   metaTitle: string;
   metaDescription: string;
@@ -82,6 +84,9 @@ export interface IEnquiry {
   message: string;
   status: EnquiryStatus;
   notes?: string;
+  source: string;
+  pageUrl: string;
+  resolvedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,6 +96,11 @@ export interface IPage {
   key: string; // 'about' | 'privacy' | 'terms'
   title: string;
   content: Record<string, any>; // Tiptap JSON content object
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  canonicalUrl: string;
+  ogImage: string;
   createdAt: string;
   updatedAt: string;
 }

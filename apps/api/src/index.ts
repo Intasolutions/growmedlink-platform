@@ -6,8 +6,16 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import authRouter from './routes/auth.js';
 import mediaRouter from './routes/media.js';
+import servicesRouter from './routes/services.js';
+import blogsRouter from './routes/blogs.js';
+import pagesRouter from './routes/pages.js';
+import enquiriesRouter from './routes/enquiries.js';
+import { connectDatabase } from './config/database.js';
 
 dotenv.config();
+
+// Connect to Database
+connectDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +48,10 @@ app.use('/api', limiter);
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/media', mediaRouter);
+app.use('/api/services', servicesRouter);
+app.use('/api/blogs', blogsRouter);
+app.use('/api/pages', pagesRouter);
+app.use('/api/enquiries', enquiriesRouter);
 
 // Health Check Route
 app.get('/health', (req, res) => {

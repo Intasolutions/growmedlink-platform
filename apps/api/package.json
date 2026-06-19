@@ -11,7 +11,12 @@
     "test:db": "node --import tsx src/testDb.ts",
     "seed:admin": "node --import tsx src/scripts/seed.ts",
     "test:auth": "node --import tsx src/testAuth.ts",
-    "test:media": "node --import tsx src/testMedia.ts"
+    "test:media": "node --import tsx src/testMedia.ts",
+    "test:services": "node --import tsx src/testServices.ts",
+    "test:blogs": "node --import tsx src/testBlogs.ts",
+    "seed:media": "node --import tsx scripts/seedMedia.ts",
+    "seed:pages": "node --import tsx scripts/seedPages.ts",
+    "seed:settings": "node --import tsx scripts/seedSettings.ts"
   },
   "dependencies": {
     "@intelligen/types": "*",

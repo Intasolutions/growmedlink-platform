@@ -2,7 +2,9 @@ import { Schema, model, Document } from 'mongoose';
 import { IBlog } from '@intelligen/types';
 import { softDeletePlugin, SoftDeleteDocument } from './plugins/softDelete.js';
 
-export interface BlogDocument extends Omit<IBlog, 'deletedAt' | '_id'>, SoftDeleteDocument, Document {}
+export interface BlogDocument extends Omit<IBlog, 'deletedAt' | '_id' | 'publishedAt'>, SoftDeleteDocument, Document {
+  publishedAt: Date | null;
+}
 
 const blogSchema = new Schema(
   {
@@ -42,7 +44,16 @@ const blogSchema = new Schema(
       type: [String],
       default: [],
     },
-    isPublished: {
+    status: {
+      type: String,
+      enum: ['draft', 'published', 'archived'],
+      default: 'draft',
+    },
+    readingTime: {
+      type: Number,
+      default: 0,
+    },
+    isFeatured: {
       type: Boolean,
       default: false,
     },
@@ -84,7 +95,6 @@ const blogSchema = new Schema(
 blogSchema.plugin(softDeletePlugin);
 
 // Explicit Index Declarations
-blogSchema.index({ slug: 1 }, { unique: true });
 blogSchema.index({ tags: 1 });
 blogSchema.index({ publishedAt: 1 });
 

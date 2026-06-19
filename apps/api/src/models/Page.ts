@@ -25,6 +25,30 @@ const pageSchema = new Schema<IPage>(
       required: [true, 'Page content blocks are required'],
       default: {},
     },
+    metaTitle: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    metaDescription: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
+    canonicalUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    ogImage: {
+      type: String,
+      default: '',
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -32,7 +56,6 @@ const pageSchema = new Schema<IPage>(
 );
 
 // Indexes
-pageSchema.index({ key: 1 }, { unique: true });
 
 export const Page = model<IPage>('Page', pageSchema);
 export default Page;
