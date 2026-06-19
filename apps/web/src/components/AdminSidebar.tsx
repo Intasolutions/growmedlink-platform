@@ -67,7 +67,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       name: 'Global Settings',
       path: '/admin/settings',
       icon: Settings,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN'],
     },
     {
       name: 'Users',
