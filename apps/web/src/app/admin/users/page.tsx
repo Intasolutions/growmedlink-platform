@@ -18,7 +18,6 @@ export default function AdminUsersPage() {
   const fetchUsers = async (page = 1) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const query = new URLSearchParams({
         page: page.toString(),
         limit: '10',
@@ -26,7 +25,7 @@ export default function AdminUsersPage() {
       if (search) query.append('search', search);
 
       const res = await fetch(`${API_BASE_URL}/api/users?${query.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok && data.success) {

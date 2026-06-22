@@ -29,13 +29,12 @@ export default function NewUserPage() {
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/api/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       const data = await res.json();

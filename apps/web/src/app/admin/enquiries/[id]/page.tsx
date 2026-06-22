@@ -25,7 +25,9 @@ export default function EnquiryDetailsPage({ params }: { params: Promise<{ id: s
         const resolvedParams = await params;
         setEnquiryId(resolvedParams.id);
 
-        const res = await fetch(`${API_BASE_URL}/api/enquiries/${resolvedParams.id}`);
+        const res = await fetch(`${API_BASE_URL}/api/enquiries/${resolvedParams.id}`, {
+          credentials: 'include'
+        });
         const data = await res.json();
         if (res.ok && data.success) {
           setEnquiry(data.data);
@@ -51,7 +53,10 @@ export default function EnquiryDetailsPage({ params }: { params: Promise<{ id: s
     try {
       const res = await fetch(`${API_BASE_URL}/api/enquiries/${enquiryId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify({ status, notes }),
       });
       const data = await res.json();

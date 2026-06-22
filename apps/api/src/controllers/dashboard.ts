@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { Enquiry } from '../models/Enquiry';
-import { Blog } from '../models/Blog';
-import { Service } from '../models/Service';
+import { Enquiry } from '../models/Enquiry.js';
+import { Blog } from '../models/Blog.js';
+import { Service } from '../models/Service.js';
 import { ENQUIRY_STATUSES } from '@intelligen/constants';
 
 // @desc    Get dashboard statistics

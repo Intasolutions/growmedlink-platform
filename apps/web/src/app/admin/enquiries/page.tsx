@@ -33,7 +33,9 @@ export default function AdminEnquiriesPage() {
       if (statusFilter) query.append('status', statusFilter);
       if (typeFilter) query.append('type', typeFilter);
 
-      const res = await fetch(`${API_BASE_URL}/api/enquiries?${query.toString()}`);
+      const res = await fetch(`${API_BASE_URL}/api/enquiries?${query.toString()}`, {
+        credentials: 'include'
+      });
       const data = await res.json();
       if (res.ok && data.success) {
         setEnquiries(data.data);

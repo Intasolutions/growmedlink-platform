@@ -33,9 +33,8 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
         const resolvedParams = await params;
         setUserId(resolvedParams.id);
 
-        const token = localStorage.getItem('token');
         const res = await fetch(`${API_BASE_URL}/api/users/${resolvedParams.id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
         const data = await res.json();
         
@@ -74,13 +73,12 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
         payload.password = formData.password;
       }
 
-      const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -104,10 +102,9 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     
     setIsDeleting(true);
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to delete user');

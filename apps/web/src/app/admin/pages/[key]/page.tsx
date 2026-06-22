@@ -33,7 +33,9 @@ export default function EditPage({ params }: { params: Promise<{ key: string }> 
         const resolvedParams = await params;
         setPageKey(resolvedParams.key);
 
-        const res = await fetch(`${API_BASE_URL}/api/pages/${resolvedParams.key}`);
+        const res = await fetch(`${API_BASE_URL}/api/pages/${resolvedParams.key}`, {
+          credentials: 'include'
+        });
         const data = await res.json();
 
         if (res.ok && data.success) {
@@ -76,6 +78,7 @@ export default function EditPage({ params }: { params: Promise<{ key: string }> 
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
 

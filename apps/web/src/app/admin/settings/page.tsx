@@ -35,11 +35,8 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const token = localStorage.getItem('token');
         const res = await fetch(`${API_BASE_URL}/api/settings`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          credentials: 'include'
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -62,9 +59,8 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      const token = localStorage.getItem('token');
       // Format payload: extract ID if logo is populated
-      const payload = {
+      const dataToSave = {
         ...formData,
         logo: formData.logo && typeof formData.logo === 'object' ? formData.logo._id : formData.logo,
       };
@@ -73,9 +69,9 @@ export default function AdminSettingsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(payload),
+        credentials: 'include',
+        body: JSON.stringify(dataToSave),
       });
 
       const data = await res.json();
