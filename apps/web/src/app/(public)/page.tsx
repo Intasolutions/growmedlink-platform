@@ -5,6 +5,7 @@ import { getServices } from '@/lib/api/services';
 import { getBlogs } from '@/lib/api/blogs';
 import { ArrowRight, Globe, BookOpen } from 'lucide-react';
 import StatsBanner from '@/components/public/StatsBanner';
+import PreNursingMatters from '@/components/public/PreNursingMatters';
 
 export const dynamic = 'force-dynamic';
 
@@ -140,6 +141,9 @@ export default async function Home() {
 
       {/* Interactive Stats Banner */}
       <StatsBanner />
+
+      {/* Why Pre-Nursing Matters Section */}
+      <PreNursingMatters />
 
       {/* Featured Services Section */}
       <section className="py-24 bg-[#0A192F]">
