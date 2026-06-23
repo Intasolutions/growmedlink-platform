@@ -15,7 +15,7 @@ export default async function PublicLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen flex flex-col bg-[#020C1B] text-white">
       <Navbar settings={settings} />
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
         {children}
       </main>
       <Footer settings={settings} />
