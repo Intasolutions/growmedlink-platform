@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ROLES, ENQUIRY_STATUSES, ENQUIRY_TYPES, SERVICE_CATEGORIES } from '@intelligen/constants';
+import { ROLES, ENQUIRY_STATUSES, ENQUIRY_TYPES, SERVICE_CATEGORIES, REVIEW_STATUSES } from '@intelligen/constants';
 
 // Helper custom validators
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -114,4 +114,17 @@ export const AuditLogCreateSchema = z.object({
   details: z.string(),
   ipAddress: z.string().optional(),
 });
+
+export const ReviewSchema = z.object({
+  studentName: z.string().min(2, 'Student name must be at least 2 characters long'),
+  studentImage: z.string().optional().or(z.literal('')),
+  rating: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5'),
+  comment: z.string().min(10, 'Review comment must be at least 10 characters long'),
+  service: z.string().optional().or(z.literal('')),
+  status: z.enum([REVIEW_STATUSES.PENDING, REVIEW_STATUSES.APPROVED, REVIEW_STATUSES.REJECTED]).default(REVIEW_STATUSES.PENDING),
+  isFeatured: z.boolean().default(false),
+});
+
+export const ReviewUpdateSchema = ReviewSchema.partial();
+
 

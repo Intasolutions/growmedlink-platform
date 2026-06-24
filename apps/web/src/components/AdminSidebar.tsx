@@ -14,7 +14,8 @@ import {
   Settings,
   Users,
   X,
-  GraduationCap
+  GraduationCap,
+  MessageSquare
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -43,6 +44,12 @@ export const AdminSidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       name: 'Blogs',
       path: '/admin/blogs',
       icon: FileText,
+      roles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
+    },
+    {
+      name: 'Reviews',
+      path: '/admin/reviews',
+      icon: MessageSquare,
       roles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
     },
     {

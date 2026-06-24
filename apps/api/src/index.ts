@@ -13,6 +13,7 @@ import enquiriesRouter from './routes/enquiries.js';
 import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
 import dashboardRouter from './routes/dashboard.js';
+import reviewsRouter from './routes/reviews.js';
 import { connectDatabase } from './config/database.js';
 
 dotenv.config();
@@ -60,6 +61,7 @@ app.use('/api/enquiries', enquiriesRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/reviews', reviewsRouter);
 
 // Health Check Route
 app.get('/health', (req, res) => {

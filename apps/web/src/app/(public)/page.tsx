@@ -3,18 +3,24 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getServices } from '@/lib/api/services';
 import { getBlogs } from '@/lib/api/blogs';
+import { getPublicReviews } from '@/lib/api/reviews';
 import { ArrowRight, Globe, BookOpen } from 'lucide-react';
 import StatsBanner from '@/components/public/StatsBanner';
 import PreNursingMatters from '@/components/public/PreNursingMatters';
 import FeaturedServices from '@/components/public/FeaturedServices';
+import ServicesCarouselSection from '@/components/public/ServicesCarouselSection';
+import WhySection from '@/components/public/WhySection';
+import ReviewsSection from '@/components/public/ReviewsSection';
+
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // Fetch featured services and blogs
-  const [allServices, allBlogs] = await Promise.all([
+  // Fetch featured services, blogs, and student reviews
+  const [allServices, allBlogs, allReviews] = await Promise.all([
     getServices().catch(() => []),
-    getBlogs().catch(() => [])
+    getBlogs().catch(() => []),
+    getPublicReviews().catch(() => [])
   ]);
 
   // Optionally filter for featured, or just take first 3
@@ -78,7 +84,7 @@ export default async function Home() {
         {/* Curly arrow + handwritten text */}
         <div className="absolute top-[90%] left-[60%] w-[240px] pointer-events-none">
           <Image src="/curly-arrow.png" alt="Arrow" width={100} height={50} className="w-28 h-auto" />
-          <span className="font-['Great_Day_Personal_Use'] text-[rgba(150,202,69,1)] text-2xl md:text-3xl absolute top-4 left-14 whitespace-nowrap rotate-[-5deg]">
+          <span className="font-script text-[rgba(150,202,69,1)] text-2xl md:text-3xl absolute top-4 left-14 whitespace-nowrap rotate-[-5deg]">
             Finally, your kind<br />of group chat
           </span>
         </div>
@@ -149,6 +155,14 @@ export default async function Home() {
       {/* Featured Services Interactive Section */}
       <FeaturedServices services={featuredServices} />
 
+      {/* Services Carousel Section */}
+      <ServicesCarouselSection services={allServices} />
+
+      {/* Why Section */}
+      <WhySection />
+
+      {/* Student Reviews Section */}
+      <ReviewsSection initialReviews={allReviews} />
     </div>
   );
 }

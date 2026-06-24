@@ -35,3 +35,12 @@ export const PAGE_KEYS = {
 } as const;
 
 export type PageKeyValue = typeof PAGE_KEYS[keyof typeof PAGE_KEYS];
+
+export const REVIEW_STATUSES = {
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected',
+} as const;
+
+export type ReviewStatusValue = typeof REVIEW_STATUSES[keyof typeof REVIEW_STATUSES];
+

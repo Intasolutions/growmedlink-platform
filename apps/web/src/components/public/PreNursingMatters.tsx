@@ -84,12 +84,20 @@ export default function PreNursingMatters() {
           </div>
 
           {/* Red Curly Arrow & Text */}
-          <div className="absolute -bottom-24 md:-bottom-28 -right-10 md:-right-48 pointer-events-none z-20 flex flex-col items-start w-[300px] animate-float-wiggle">
-            <Image src="/red-curly-arrow.png" alt="Arrow" width={100} height={100} className="w-16 md:w-20 h-auto ml-16" />
-            <div className="font-['Great_Day_Personal_Use'] text-[#b31b1b] text-4xl md:text-[40px] whitespace-nowrap mt-2 ml-24 transform rotate-[-3deg]">
-              See How Its Work!
+          <div className="absolute bottom-[-75px] md:bottom-[-95px] right-[4%] sm:right-[8%] md:right-[15%] pointer-events-none z-20 w-[240px] md:w-[320px]">
+            {/* custom-anim-float-wiggle owns ONLY its own transform — no children with transform */}
+            <div className="custom-anim-float-wiggle" style={{ willChange: 'transform' }}>
+              <div className="flex flex-col items-center md:items-start">
+                <Image src="/red-curly-arrow.png" alt="Arrow" width={100} height={100} className="w-12 md:w-16 h-auto md:ml-12" />
+                <div
+                  className="font-['Great_Day_Personal_Use'] text-[#b31b1b] text-3xl md:text-[38px] whitespace-nowrap mt-1 rotate-[-3deg] md:ml-16"
+                >
+                  See How Its Work!
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
 
         {/* Avatars at bottom */}

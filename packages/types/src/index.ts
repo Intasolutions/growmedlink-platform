@@ -141,3 +141,21 @@ export interface ApiResponse<T> {
   message?: string;
   errors?: Record<string, string>;
 }
+
+export type ReviewStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface IReview {
+  _id: string;
+  studentName: string;
+  studentImage?: string;
+  rating: number;
+  comment: string;
+  service?: string | IService;
+  status: ReviewStatus;
+  isFeatured: boolean;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
