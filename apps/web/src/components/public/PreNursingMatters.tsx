@@ -48,7 +48,7 @@ export default function PreNursingMatters() {
         <Image src="/light-sunburst.png" alt="Sunburst" fill className="object-contain" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
         
         {/* Header */}
         <h2 className="text-4xl md:text-[56px] font-medium mb-6 tracking-tight bg-white px-8">

@@ -39,7 +39,7 @@ export default async function Home() {
   </div>
 
   {/* Top Centered Content */}
-  <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center mt-10 md:mt-16">
+  <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center mt-10 md:mt-16">
     
     {/* Sunburst behind title */}
     <div className="relative inline-block">
@@ -59,7 +59,7 @@ export default async function Home() {
   </div>
 
   {/* Bottom Content Split */}
-  <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-auto pt-48 md:pt-64 lg:pt-80 flex flex-col lg:flex-row items-end justify-between gap-12">
+  <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mt-auto pt-48 md:pt-64 lg:pt-80 flex flex-col lg:flex-row items-end justify-between gap-12">
 
     {/* Bottom Left */}
     <div className="max-w-xs w-full relative z-20">

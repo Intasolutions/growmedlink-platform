@@ -27,7 +27,7 @@ export default function StatsBanner() {
 
   return (
     <section className="bg-white py-20 md:py-32 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* The green bar container */}
         <div 
