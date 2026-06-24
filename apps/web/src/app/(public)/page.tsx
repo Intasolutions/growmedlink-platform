@@ -6,6 +6,7 @@ import { getBlogs } from '@/lib/api/blogs';
 import { ArrowRight, Globe, BookOpen } from 'lucide-react';
 import StatsBanner from '@/components/public/StatsBanner';
 import PreNursingMatters from '@/components/public/PreNursingMatters';
+import FeaturedServices from '@/components/public/FeaturedServices';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,112 +146,10 @@ export default async function Home() {
       {/* Why Pre-Nursing Matters Section */}
       <PreNursingMatters />
 
-      {/* Featured Services Section */}
-      <section className="py-24 bg-[#0A192F]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-black font-heading text-white mb-4">Our Core Services</h2>
-              <p className="text-gray-400 max-w-2xl">We offer specialized immigration pathways and world-class language coaching tailored to your global ambitions.</p>
-            </div>
-            <Link href="/services" className="hidden md:flex items-center gap-2 text-secondary font-bold hover:underline">
-              View All Services <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredServices.map((service: any) => (
-              <Link key={service._id} href={`/services/${service.slug}`} className="group block h-full">
-                <div className="bg-[#020C1B] rounded-2xl border border-[#1E2D3D] overflow-hidden hover:border-secondary/50 transition-colors h-full flex flex-col">
-                  <div className="relative h-48 w-full bg-[#0A192F]">
-                    {service.image && (
-                      <Image
-                        src={typeof service.image === 'object' ? service.image.secureUrl : service.image}
-                        alt={service.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    )}
-                    <div className="absolute top-4 left-4 bg-[#020C1B]/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5">
-                      {service.category === 'Immigration' ? <Globe className="h-3 w-3 text-secondary" /> : <BookOpen className="h-3 w-3 text-secondary" />}
-                      <span className="text-xs font-bold text-white tracking-wider uppercase">{service.category}</span>
-                    </div>
-                  </div>
-                  <div className="p-6 flex-grow flex flex-col">
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-secondary transition-colors line-clamp-2">{service.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3 flex-grow">{service.description}</p>
-                    <span className="text-secondary text-sm font-bold flex items-center gap-2 mt-auto">
-                      Learn More <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-          
-          <div className="mt-10 text-center md:hidden">
-            <Link href="/services" className="inline-flex items-center gap-2 text-secondary font-bold hover:underline">
-              View All Services <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Insights Section */}
-      <section className="py-24 bg-[#020C1B]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-black font-heading text-white mb-4">Latest Insights</h2>
-              <p className="text-gray-400 max-w-2xl">Stay updated with the latest news on immigration policies, study abroad tips, and language test strategies.</p>
-            </div>
-            <Link href="/blog" className="hidden md:flex items-center gap-2 text-secondary font-bold hover:underline">
-              View All Articles <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentBlogs.map((blog: any) => (
-              <Link key={blog._id} href={`/blog/${blog.slug}`} className="group block">
-                <div className="bg-[#0A192F] rounded-2xl border border-[#1E2D3D] overflow-hidden hover:border-secondary/50 transition-colors h-full flex flex-col">
-                  <div className="relative h-48 w-full bg-[#020C1B]">
-                    {blog.image && (
-                      <Image
-                        src={typeof blog.image === 'object' ? blog.image.secureUrl : blog.image}
-                        alt={blog.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    )}
-                  </div>
-                  <div className="p-6 flex-grow flex flex-col">
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {blog.tags?.slice(0, 2).map((tag: string) => (
-                        <span key={tag} className="text-[10px] uppercase tracking-widest font-bold text-secondary bg-secondary/10 px-2 py-1 rounded">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-3 group-hover:text-secondary transition-colors line-clamp-2">{blog.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">{blog.summary}</p>
-                    <div className="flex justify-between items-center mt-auto text-xs text-gray-500 font-medium">
-                      <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
-                      <span>{blog.readingTime || 5} min read</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center md:hidden">
-            <Link href="/blog" className="inline-flex items-center gap-2 text-secondary font-bold hover:underline">
-              View All Articles <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Featured Services Interactive Section */}
+      <FeaturedServices services={featuredServices} />
 
     </div>
   );
 }
+
