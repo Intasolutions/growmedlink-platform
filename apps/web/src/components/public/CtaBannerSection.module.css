@@ -1,0 +1,220 @@
+/* ── Section wrapper ─────────────────────────────────────── */
+.section {
+  background: #ffffff;
+  padding: 32px 40px;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.card {
+  display: flex;
+  max-width: 1160px;
+  margin: 0 auto;
+  min-height: 168px;
+  opacity: 0;
+  transform: translateY(35px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card.animateIn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ── Left: green panel ───────────────────────────────────── */
+.green {
+  flex: 0 0 63%;
+  background: #96CA45;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 28px 40px 0 0;
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+/* Agent image — sits at the bottom-left, bleeds above card top */
+.imgWrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 215px;
+  height: 120%;
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+.card.animateIn .imgWrap {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Text beside the image */
+.textArea {
+  margin-left: 225px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+.card.animateIn .textArea {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.text {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+  color: #1c1c1a;
+  margin: 0;
+}
+
+/* ── Right: dark panel ───────────────────────────────────── */
+.dark {
+  flex: 1;
+  background: #252525;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px 28px;
+  flex-wrap: wrap;
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+/* ── Download Brochure button ────────────────────────────── */
+.btnDl {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(15px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s,
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s,
+              background 0.22s ease,
+              border-color 0.22s ease;
+}
+.card.animateIn .btnDl {
+  opacity: 1;
+  transform: translateX(0);
+}
+.btnDl:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Contact Now! button ─────────────────────────────────── */
+.btnContact {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 24px;
+  background: #96CA45;
+  border: none;
+  border-radius: 8px;
+  color: #1c1c1a;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(15px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s,
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s,
+              background 0.22s ease,
+              box-shadow 0.22s ease;
+}
+.card.animateIn .btnContact {
+  opacity: 1;
+  transform: translateX(0);
+}
+.btnContact:hover {
+  background: #84b83c;
+  box-shadow: 0 4px 14px rgba(150, 202, 69, 0.38);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+/* Stack vertically at medium screens */
+@media (max-width: 960px) {
+  .section  { padding: 24px; }
+  .card     { flex-direction: column; }
+
+  .green    {
+    flex: none;
+    min-height: 200px;
+    padding: 28px 24px 0;
+    align-items: flex-start;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .imgWrap  { width: 170px; height: 110%; }
+  .textArea { margin-left: 185px; padding-bottom: 20px; }
+  .text     { font-size: 14px; }
+
+  .dark {
+    flex: none;
+    padding: 24px 20px;
+    gap: 14px;
+    justify-content: center;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .btnDl,
+  .btnContact { font-size: 13px; padding: 11px 16px; }
+}
+
+/* Mobile — image + text stack */
+@media (max-width: 540px) {
+  .section  { padding: 16px; }
+
+  .green    {
+    flex-direction: column;
+    padding: 20px 20px 0;
+    min-height: auto;
+    align-items: center;
+  }
+  .imgWrap  {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 140px;
+    height: 160px;
+    margin: 0 auto 8px;
+    align-self: center;
+  }
+  .textArea { margin-left: 0; padding-bottom: 16px; text-align: center; }
+  .text     { font-size: 13px; }
+  .dark     { padding: 18px 16px; gap: 10px; }
+}
+
+/* Small mobile — buttons stack full-width */
+@media (max-width: 400px) {
+  .dark        { flex-direction: column; align-items: stretch; }
+  .btnDl,
+  .btnContact  { justify-content: center; width: 100%; }
+}
