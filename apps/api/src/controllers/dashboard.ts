@@ -20,7 +20,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       recentLeads
     ] = await Promise.all([
       Enquiry.countDocuments(),
-      Enquiry.countDocuments({ status: ENQUIRY_STATUSES.NEW }),
+      Enquiry.countDocuments({ status: ENQUIRY_STATUSES.PENDING }),
       Enquiry.countDocuments({ status: ENQUIRY_STATUSES.RESOLVED }),
       Blog.countDocuments(),
       Blog.countDocuments({ status: 'published' }),

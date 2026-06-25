@@ -11,6 +11,8 @@ import FeaturedServices from '@/components/public/FeaturedServices';
 import ServicesCarouselSection from '@/components/public/ServicesCarouselSection';
 import WhySection from '@/components/public/WhySection';
 import ReviewsSection from '@/components/public/ReviewsSection';
+import LatestNewsSection from '@/components/public/LatestNewsSection';
+
 
 
 export const dynamic = 'force-dynamic';
@@ -163,6 +165,9 @@ export default async function Home() {
 
       {/* Student Reviews Section */}
       <ReviewsSection initialReviews={allReviews} />
+
+      {/* Latest News Section */}
+      <LatestNewsSection initialNews={allBlogs} />
     </div>
   );
 }
