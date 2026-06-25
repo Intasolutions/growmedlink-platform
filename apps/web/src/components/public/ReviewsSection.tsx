@@ -145,7 +145,7 @@ const STYLES = `
     color:#fff; letter-spacing:0.04em; margin-bottom:8px;
   }
   .rvs-section .rvs-community {
-    font-family:'Great Day Bold Personal Use','Brush Script MT',cursive;
+    font-family:'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive;
     font-size:19px; font-weight:400; line-height:18px; color:#96CA45;
   }
 
@@ -227,7 +227,7 @@ const STYLES = `
   /* Card meta */
   .rvs-section .rvs-name {
     position: absolute; left: 30px; top: 160px;
-    font-family:'Great Day Bold Personal Use','Brush Script MT',cursive;
+    font-family:'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive;
     font-size: 20px; font-weight: 400; line-height: 20px; color: #96CA45;
   }
   .rvs-section .rvs-role {

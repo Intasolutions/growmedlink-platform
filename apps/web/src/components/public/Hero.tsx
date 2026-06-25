@@ -12,10 +12,10 @@ interface Country {
 }
 
 const COUNTRIES: Country[] = [
-  { id: 'australia',      name: 'Australia',  mapSrc: '/australia-map.png',     percentage: 54 },
-  { id: 'india',          name: 'India',      mapSrc: '/india-map.png',         percentage: 28 },
-  { id: 'africa',         name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
-  { id: 'south-america',  name: 'S. America', mapSrc: '/south-america-map.png', percentage:  6 },
+  { id: 'australia',     name: 'Australia',  mapSrc: '/australia-map.png',     percentage: 54 },
+  { id: 'india',         name: 'India',      mapSrc: '/india-map.png',         percentage: 28 },
+  { id: 'africa',        name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
+  { id: 'south-america', name: 'S. America', mapSrc: '/south-america-map.png', percentage:  6 },
 ];
 
 /* Green CSS filter — tints a grayscale map to #96CA45 */
@@ -25,23 +25,32 @@ const GREEN_TINT =
 /* Auto-cycle interval in ms */
 const AUTO_CYCLE_MS = 3200;
 
-/* ─── Global keyframes injected once ──────────────────────────────────────── */
+/* ─── Global keyframes ─────────────────────────────────────────────────────
+   Key anti-jitter rules:
+   1. Sunburst spin keeps translate(-50%,-50%) in every keyframe so the
+      browser never has to recalculate paint during rotation.
+   2. arrowFloat uses ONLY translateY — no rotation inside the animation.
+      The static rotate(-20deg) lives on the element itself (not animated),
+      so there's no competing transform that would cause jitter.
+   3. heroPulse uses scale on the dot divs which are GPU-composited via
+      will-change:transform on their parent.
+*/
 const KEYFRAMES = `
-  @keyframes heroFadeUp {
-    from { opacity: 0; transform: translateY(28px); }
-    to   { opacity: 1; transform: translateY(0);    }
-  }
   @keyframes heroPulse {
     0%,100% { opacity: 0.55; transform: scale(1);    }
     50%     { opacity: 1;    transform: scale(1.25); }
   }
   @keyframes sunburstSpin {
-    from { transform: translate(-50%,-50%) rotate(0deg);   }
-    to   { transform: translate(-50%,-50%) rotate(360deg); }
+    0%   { transform: translate3d(-50%,-50%,0) rotate(0deg);   }
+    100% { transform: translate3d(-50%,-50%,0) rotate(360deg); }
   }
-  @keyframes arrowBounce {
-    0%,100% { transform: rotate(-20deg) translateY(0px);   }
-    50%     { transform: rotate(-20deg) translateY(-5px);  }
+  @keyframes arrowFloat {
+    0%,100% { transform: translate3d(0, 0px, 0);  }
+    50%     { transform: translate3d(0, -6px, 0); }
+  }
+  @keyframes heroReveal {
+    from { opacity: 0; transform: translate3d(0, 16px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0px, 0);    }
   }
 `;
 
@@ -54,7 +63,7 @@ function WaveDots() {
     { left: 305, top: 0  },
   ];
   return (
-    <div style={{ position: 'relative', width: '318px', height: '42px', flexShrink: 0 }}>
+    <div style={{ position: 'relative', width: '318px', height: '42px', flexShrink: 0, willChange: 'transform' }}>
       {dots.map((d, i) => (
         <div
           key={i}
@@ -67,6 +76,7 @@ function WaveDots() {
             borderRadius: '50%',
             background: '#96CA45',
             animation: `heroPulse ${1.4 + i * 0.12}s ease-in-out ${i * 0.08}s infinite`,
+            willChange: 'transform, opacity',
           }}
         />
       ))}
@@ -74,6 +84,7 @@ function WaveDots() {
   );
 }
 
+/* ─── CountryCard ─────────────────────────────────────────────────────────── */
 function CountryCard({
   country,
   isActive,
@@ -153,9 +164,10 @@ function CountryCard({
           'transform 0.25s cubic-bezier(.22,.68,0,1.2)',
         ].join(', '),
         transform: hovered && !isActive ? 'scale(1.05)' : 'scale(1)',
+        willChange: 'width, transform',
       }}
     >
-      {/* Active card */}
+      {/* Active card content */}
       <div
         style={{
           position: 'absolute', inset: 0,
@@ -206,7 +218,7 @@ function CountryCard({
         </div>
       </div>
 
-      {/* Inactive card */}
+      {/* Inactive card content */}
       <div
         style={{
           position: 'absolute', inset: 0,
@@ -258,19 +270,19 @@ function AutoCycleBar({ duration }: { duration: number }) {
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function Hero() {
-  const [activeIdx,    setActiveIdx   ] = useState(0);
-  const [heroVisible,  setHeroVisible ] = useState(false);
-  const [cycleKey,     setCycleKey    ] = useState(0);   // resets the progress bar
+  const [activeIdx,   setActiveIdx  ] = useState(0);
+  const [heroVisible, setHeroVisible] = useState(false);
+  const [cycleKey,    setCycleKey   ] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const autoTimer  = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* ── Entrance animation trigger ── */
+  /* Entrance animation */
   useEffect(() => {
     const t = setTimeout(() => setHeroVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
-  /* ── Auto-cycle logic ── */
+  /* Auto-cycle */
   const startAutoPlay = useCallback(() => {
     if (autoTimer.current) clearInterval(autoTimer.current);
     autoTimer.current = setInterval(() => {
@@ -287,14 +299,13 @@ export default function Hero() {
     return () => { if (autoTimer.current) clearInterval(autoTimer.current); };
   }, [startAutoPlay]);
 
-  /* Manual click: switch card and restart timer */
   const handleCardClick = (idx: number) => {
     setActiveIdx(idx);
     setCycleKey(k => k + 1);
     startAutoPlay();
   };
 
-  /* ── Stagger delay helper ── */
+  /* Staggered entrance helper */
   const fadeUp = (delay: number): React.CSSProperties => ({
     opacity: heroVisible ? 1 : 0,
     transform: heroVisible ? 'translateY(0)' : 'translateY(32px)',
@@ -304,13 +315,12 @@ export default function Hero() {
 
   return (
     <>
-      {/* Inject keyframes once */}
       <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
 
       <section
         ref={sectionRef}
-        className="relative w-full min-h-screen bg-black overflow-visible flex flex-col items-center pt-20 font-['Power_Grotesk'] text-white"
-        style={{ paddingBottom: '120px' }}
+        className="relative w-full bg-black overflow-visible flex flex-col items-center font-['Power_Grotesk'] text-white"
+        style={{ minHeight: '100svh', paddingTop: 'clamp(100px,14vh,160px)', paddingBottom: '140px' }}
       >
 
         {/* ── Background world map ── */}
@@ -326,25 +336,31 @@ export default function Hero() {
         </div>
 
         {/* ── Top centred content ── */}
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center mt-10 md:mt-16">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
 
-          {/* Sunburst — bigger, slowly rotating */}
-          <div className="relative inline-block">
+          {/* Sunburst halo — padded wrapper so it starts below the navbar (~72px + 28px gap) */}
+          <div className="relative inline-block" style={{ marginTop: 'clamp(36px, 8vh, 72px)' }}>
+            {/*
+              The sunburst is centered on the h1.
+              translate3d(-50%,-50%,0) is kept in EVERY keyframe to avoid
+              paint recalculation — this eliminates sub-pixel jitter.
+            */}
             <div
               className="absolute pointer-events-none z-[-1]"
               style={{
-                top: '50%',
+                top: '62%', /* Moved slightly lower for navbar safety */
                 left: '50%',
-                width: '260%',
-                height: '260%',
-                animation: 'sunburstSpin 60s linear infinite',
+                width: 'clamp(280px, min(85vw, 55vh), 620px)', /* Bounded size in both dimensions to guarantee visibility on all viewport aspect ratios */
+                height: 'clamp(280px, min(85vw, 55vh), 620px)',
+                animation: 'sunburstSpin 80s linear infinite',
+                willChange: 'transform',
               }}
             >
               <Image src="/sunburst-lines.png" alt="Sunburst" fill className="object-contain" priority />
             </div>
 
             <h1
-              className="text-6xl sm:text-7xl md:text-8xl lg:text-[96px] font-black tracking-tight leading-none mb-6"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-[96px] font-black tracking-tight leading-none mb-6"
               style={fadeUp(100)}
             >
               Start Your Journey.<span className="text-[#96CA45]">!</span>
@@ -367,17 +383,23 @@ export default function Hero() {
         </div>
 
         {/* ── Bottom split ── */}
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mt-auto pt-48 md:pt-64 lg:pt-80 flex flex-col lg:flex-row items-end justify-between gap-12">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-end justify-between gap-12"
+          style={{ marginTop: 'auto', paddingTop: 'clamp(80px,12vw,220px)' }}
+        >
 
           {/* ── Left: description + CTA + arrow callout ── */}
-          <div className="max-w-xs w-full relative z-20" style={{ paddingBottom: '120px' }}>
+          {/*
+            paddingBottom gives room for the absolutely-positioned arrow+text
+            so they don't get cropped by overflow:hidden on any ancestor.
+          */}
+          <div className="max-w-xs w-full relative z-20" style={{ paddingBottom: '130px' }}>
             <p
               className="text-white font-bold leading-snug mb-4"
               style={{
                 ...fadeUp(400),
                 fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-                fontSize: 'clamp(18px,2vw,28px)',
-                lineHeight: '33px',
+                fontSize: 'clamp(16px,2vw,26px)',
+                lineHeight: '1.4',
               }}
             >
               Connect with the people who love building great websites as much as you do.
@@ -387,16 +409,16 @@ export default function Hero() {
               style={{
                 ...fadeUp(520),
                 fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-                fontSize: 'clamp(14px,1.4vw,20px)',
-                lineHeight: '28px',
+                fontSize: 'clamp(13px,1.3vw,18px)',
+                lineHeight: '1.7',
               }}
             >
               Our Slack is full of creative devs and designers exchanging feedback, ideas, and
               inspiration. Everyone&apos;s here to make the internet a little better.
             </p>
 
-            {/* Button + arrow callout */}
-            <div className="relative" style={fadeUp(640)}>
+            {/* Button */}
+            <div style={fadeUp(640)}>
               <button
                 className="hover:brightness-95 active:brightness-90 transition-all"
                 style={{
@@ -416,60 +438,84 @@ export default function Hero() {
               >
                 Explore Courses
               </button>
+            </div>
 
-              {/* Arrow + handwritten text — absolutely positioned BELOW the button */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '60px',      /* sits below the 54px button */
-                  left: '60px',
-                  width: '300px',
-                  pointerEvents: 'none',
-                }}
-              >
-                {/* Bouncing curly arrow */}
+            {/*
+              Arrow callout — anti-jitter design:
+              ┌─ outer wrapper: position:absolute, holds float animation (translateY only)
+              │   └─ inner wrapper: rotate(-18deg) — STATIC, never animated
+              │       ├─ <Image> curly-arrow.png
+              │       └─ <span> handwritten text (its own static rotate(-5deg))
+              │
+              Nesting transforms at different levels and animating only the outermost
+              prevents sub-pixel jitter caused by competing transform recalculations.
+            */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '204px',   /* button top(~150px from section top of this div) + 54px height */
+                left: '60px',
+                width: '300px',
+                pointerEvents: 'none',
+                /* Combined reveal + float animations */
+                opacity: heroVisible ? 1 : 0,
+                animation: heroVisible
+                  ? `heroReveal 0.75s cubic-bezier(.22,.68,0,1.2) 760ms both,
+                     arrowFloat 2.6s ease-in-out 1.5s infinite`
+                  : 'none',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              {/* Static rotation wrapper — no animation here */}
+              <div style={{ transform: 'rotate(-18deg)', transformOrigin: 'top left', display: 'inline-block' }}>
                 <Image
                   src="/curly-arrow.png"
-                  alt="Arrow"
-                  width={100}
+                  alt="Arrow decoration"
+                  width={96}
                   height={60}
-                  style={{
-                    width: '96px',
-                    height: 'auto',
-                    animation: 'arrowBounce 2.4s ease-in-out infinite',
-                  }}
+                  style={{ width: '88px', height: 'auto', display: 'block' }}
                   onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
                 />
-
-                {/* Handwritten label */}
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '18px',
-                    left: '100px',
-                    fontFamily:
-                      "'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive",
-                    fontSize: '26px',
-                    lineHeight: '30px',
-                    color: '#96CA45',
-                    transform: 'rotate(-5deg)',
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Finally, your kind<br />of group chat
-                </span>
               </div>
+
+              {/* Handwritten label — also a sibling with its own static transform */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '14px',
+                  left: '94px',
+                  fontFamily:
+                    "'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive",
+                  fontSize: 'clamp(22px,2.2vw,28px)',
+                  lineHeight: '1.3',
+                  paddingBottom: '8px', /* Padded bottom to prevent descender clipping */
+                  color: '#96CA45',
+                  display: 'inline-block',
+                  transform: 'rotate(-4deg)',
+                  transformOrigin: 'left top',
+                  whiteSpace: 'nowrap',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                }}
+              >
+                Finally, your kind<br />of group chat
+              </span>
             </div>
           </div>
 
-          {/* ── Right: country cards + wave dots ── */}
+          {/* ── Right: country cards + controls ── */}
           <div
             className="flex flex-col items-end gap-3 w-full lg:w-auto"
-            style={{ ...fadeUp(560), paddingBottom: '8px' }}
+            style={{ ...fadeUp(560), paddingBottom: '8px', minWidth: 0 }}
           >
-            {/* Cards row */}
-            <div className="flex items-stretch" style={{ gap: 0 }}>
+            {/* Cards row — horizontally scrollable on small screens */}
+            <div
+              className="flex items-stretch"
+              style={{ gap: 0, overflowX: 'auto', maxWidth: '100%', paddingBottom: '2px' }}
+            >
               {COUNTRIES.map((country, idx) => (
                 <CountryCard
                   key={country.id}

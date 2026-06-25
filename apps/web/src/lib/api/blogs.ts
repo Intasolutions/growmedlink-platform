@@ -29,3 +29,24 @@ export async function getBlogBySlug(slug: string) {
   
   return data.data;
 }
+
+export async function getBlogsPaginated(params: { page?: number; limit?: number; search?: string; tag?: string }) {
+  const query = new URLSearchParams();
+  query.append('status', 'published');
+  if (params.page) query.append('page', String(params.page));
+  if (params.limit) query.append('limit', String(params.limit));
+  if (params.search) query.append('search', params.search);
+  if (params.tag) query.append('tag', params.tag);
+
+  const res = await fetch(`${API_BASE_URL}/api/blogs?${query.toString()}`, {
+    cache: 'no-store', // ensures searches/pages are fresh
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch blogs');
+
+  const data = await res.json();
+  return {
+    blogs: data.data || [],
+    pagination: data.pagination || { total: 0, page: 1, limit: 9, pages: 1 },
+  };
+}
