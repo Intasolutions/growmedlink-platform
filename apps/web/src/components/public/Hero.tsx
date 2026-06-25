@@ -74,7 +74,6 @@ function WaveDots() {
   );
 }
 
-/* ─── CountryCard ─────────────────────────────────────────────────────────── */
 function CountryCard({
   country,
   isActive,
