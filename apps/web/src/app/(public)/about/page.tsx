@@ -65,9 +65,9 @@ const ARCH_ITEMS = [
 const ARCH_COLORS = ['#1a3a1a','#2c1b0e','#0e1f2c','#2a1a0e','#1a2c1a','#0e2c2a','#2c1a2a','#1a1a2c','#2a2c1a','#2c0e1a','#0e2a2c','#2a0e2c','#1a2c2a'];
 
 const CORE_VALUES = [
-  { title:'Patient First',   desc:'Every course, resource and programme we build starts from a single question: how does this better equip our graduates to care for patients? Excellence in medicine is meaningless without compassion at its core.', bg:'linear-gradient(180deg,#155BA9 0%,#04356B 100%)', wide:true  },
-  { title:'Rigorous\nStandards',    desc:'', bg:'linear-gradient(180deg,#96CA45 0%,#477106 100%)', wide:false },
-  { title:'Global\nMindset',        desc:'', bg:'linear-gradient(180deg,#252525 0%,#000 100%)',     wide:false },
+  { title:'Patient First',   desc:'Every course, resource and programme we build starts from a single question: how does this better equip our graduates to care for patients? Excellence in medicine is meaningless without compassion at its core.', bg:'linear-gradient(180deg,#155BA9 0%,#04356B 100%)' },
+  { title:'Rigorous\nStandards',    desc:'We maintain uncompromising clinical and educational standards across all preparation tracks, ensuring our learners achieve top scores and practice with absolute clinical precision.', bg:'linear-gradient(180deg,#96CA45 0%,#477106 100%)' },
+  { title:'Global\nMindset',        desc:'We prepare healthcare professionals to excel in diverse environments worldwide, fostering cultural competency, resilience, and global medical knowledge.', bg:'linear-gradient(180deg,#252525 0%,#000 100%)' },
 ];
 
 
@@ -345,13 +345,190 @@ const STYLES = `
 .abt-vmq-dn { animation: abt-vmq-dn 24s linear infinite; }
 .abt-vmq-up:hover,.abt-vmq-dn:hover { animation-play-state: paused; }
 
-/* ── core value stagger ── */
+/* ── core value stagger & spotlight experience ── */
 .abt-cv-s {
   opacity: 0;
   transform: translateY(48px);
   transition: opacity 0.65s ease, transform 0.65s cubic-bezier(.22,.68,0,1.2);
 }
 .abt-cv-s.abt-in { opacity: 1; transform: translateY(0); }
+
+/* Icon spin+pulse animation on card activation */
+@keyframes abt-cv-icon-activate {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  30%  { transform: rotate(180deg) scale(1.18); }
+  60%  { transform: rotate(320deg) scale(0.92); }
+  80%  { transform: rotate(355deg) scale(1.06); }
+  100% { transform: rotate(360deg) scale(1);    }
+}
+@keyframes abt-cv-icon-idle {
+  0%,100% { transform: rotate(0deg)   scale(1);    }
+  50%     { transform: rotate(8deg)   scale(1.04); }
+}
+
+/* Spotlight row container */
+.abt-cv-row {
+  display: flex;
+  gap: 28px;
+  align-items: stretch;
+  width: 100%;
+  flex-flow: row nowrap;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.22, 1);
+}
+
+.abt-cv-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 11px;
+  padding: 38px 38px 33px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: flex-grow 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              flex-shrink 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              transform 0.32s cubic-bezier(.22,.68,0,1.2),
+              box-shadow 0.32s ease,
+              height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
+  will-change: flex-grow, flex-shrink, height, transform, box-shadow;
+  min-height: 352px;
+}
+
+.abt-cv-card.abt-cv-inactive {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0%;
+}
+
+.abt-cv-card.abt-cv-active {
+  flex-grow: 2.29;
+  flex-shrink: 1;
+  flex-basis: 0%;
+  box-shadow: 0 15px 36px rgba(0,0,0,0.18);
+}
+
+.abt-cv-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 5px solid rgba(255,255,255,0.9);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: margin-bottom 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              width 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
+  overflow: hidden;
+}
+.abt-cv-icon-wrap svg {
+  animation: abt-cv-icon-idle 4s ease-in-out infinite;
+  will-change: transform;
+}
+.abt-cv-card.abt-cv-active .abt-cv-icon-wrap {
+  margin-bottom: 30px;
+}
+.abt-cv-card.abt-cv-active .abt-cv-icon-wrap svg {
+  animation: abt-cv-icon-activate 0.75s cubic-bezier(0.34, 1.4, 0.64, 1) both,
+             abt-cv-icon-idle 4s ease-in-out 0.75s infinite;
+}
+
+.abt-cv-title {
+  font-family: 'Haffer XH Mono-TRIAL', 'Courier New', monospace;
+  font-size: 27px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 32px;
+  white-space: pre-line;
+  margin-bottom: 0;
+  transition: margin-bottom 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              font-size 0.8s cubic-bezier(0.25, 1, 0.22, 1),
+              line-height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
+}
+.abt-cv-card.abt-cv-active .abt-cv-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.abt-cv-desc-wrap {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.22, 1),
+              max-height 0.6s cubic-bezier(0.25, 1, 0.22, 1),
+              transform 0.5s cubic-bezier(0.25, 1, 0.22, 1),
+              margin-top 0.5s cubic-bezier(0.25, 1, 0.22, 1);
+  will-change: opacity, max-height, transform;
+}
+.abt-cv-card.abt-cv-active .abt-cv-desc-wrap {
+  opacity: 1;
+  max-height: 220px;
+  transform: translateY(0);
+  margin-top: 12px;
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.22, 1) 0.15s,
+              max-height 0.7s cubic-bezier(0.25, 1, 0.22, 1),
+              transform 0.6s cubic-bezier(0.25, 1, 0.22, 1) 0.15s,
+              margin-top 0.6s cubic-bezier(0.25, 1, 0.22, 1);
+}
+
+.abt-cv-desc {
+  font-family: 'Haffer XH-TRIAL', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 18px;
+  line-height: 169%;
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+  color: #fff;
+  max-width: 423px;
+  margin-top: 0;
+  transition: font-size 0.8s cubic-bezier(0.25, 1, 0.22, 1);
+}
+
+@media (max-width: 1023px) {
+  .abt-cv-row {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 18px !important;
+  }
+  .abt-cv-card {
+    width: 100% !important;
+    min-height: unset !important;
+    flex-grow: 1 !important;
+    flex-shrink: 0 !important;
+    flex-basis: auto !important;
+    padding: 27px 27px 24px !important;
+  }
+  .abt-cv-card.abt-cv-inactive {
+    height: 135px !important;
+  }
+  .abt-cv-card.abt-cv-active {
+    height: 285px !important;
+  }
+  .abt-cv-icon-wrap {
+    width: 45px;
+    height: 45px;
+    border-width: 4px;
+    margin-bottom: 12px;
+  }
+  .abt-cv-card.abt-cv-active .abt-cv-icon-wrap {
+    margin-bottom: 18px;
+  }
+  .abt-cv-title {
+    font-size: 21px;
+    line-height: 25px;
+  }
+  .abt-cv-desc {
+    font-size: 13px;
+  }
+}
+@media (max-width: 767px) {
+  .abt-cv-card.abt-cv-inactive {
+    height: 120px !important;
+  }
+  .abt-cv-card.abt-cv-active {
+    height: 315px !important;
+  }
+}
 
 /* ── team vertical scroll strip ── */
 @keyframes abt-team-up { from { transform:translateY(0); } to { transform:translateY(-50%); } }
@@ -481,15 +658,12 @@ const STYLES = `
   .abt-arch { height: 340px; }
   .abt-miss-grid { flex-direction: column !important; }
   .abt-bg-grid  { flex-direction: column !important; }
-  .abt-cv-row   { flex-wrap: wrap !important; }
   .abt-team-grid { flex-direction: column !important; }
   .abt-footer-grid { flex-direction: column !important; }
   .abt-footer-r  { display: none !important; }
 }
 @media (max-width: 1023px) {
   .abt-arch { height: 280px; }
-  .abt-cv-wide  { width: 100% !important; flex: unset !important; }
-  .abt-cv-narrow{ width: 100% !important; flex: unset !important; }
 }
 @media (max-width: 767px) {
   .abt-arch   { height: 220px; }
@@ -1425,52 +1599,101 @@ function CertificationSection() {
 function CoreValuesSection() {
   const secRef = useRef<HTMLDivElement>(null);
   const [vis, setVis] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickPaused, setClickPaused] = useState(false);
+  const [allowTransitionDelay, setAllowTransitionDelay] = useState(true);
+  const clickResumeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: 0.1 });
     if (secRef.current) obs.observe(secRef.current);
     return () => obs.disconnect();
   }, []);
 
+  // Clear transition delay after initial stagger completes
+  useEffect(() => {
+    if (vis) {
+      const t = setTimeout(() => {
+        setAllowTransitionDelay(false);
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [vis]);
+
+  // Spotlight rotation effect
+  useEffect(() => {
+    if (isHovered || clickPaused) return;
+
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % CORE_VALUES.length);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [isHovered, clickPaused]);
+
+  // Click card handler
+  const handleCardClick = (idx: number) => {
+    setActiveIdx(idx);
+    setClickPaused(true);
+    if (clickResumeTimerRef.current) clearTimeout(clickResumeTimerRef.current);
+    clickResumeTimerRef.current = setTimeout(() => {
+      setClickPaused(false);
+    }, 4000);
+  };
+
+  // Clean up click resume timer on unmount
+  useEffect(() => {
+    return () => {
+      if (clickResumeTimerRef.current) clearTimeout(clickResumeTimerRef.current);
+    };
+  }, []);
+
   return (
-    <section style={{ background:'#fff', padding:'80px 40px 96px' }} ref={secRef}>
+    <section style={{ background:'#fff', padding:'60px 30px 72px' }} ref={secRef}>
       <div style={{ maxWidth:1440, margin:'0 auto' }}>
 
-        <div className={`abt-rv${vis?' abt-in':''}`} style={{ textAlign:'center', marginBottom:56 }}>
+        <div className={`abt-rv${vis?' abt-in':''}`} style={{ textAlign:'center', marginBottom:42 }}>
           <p style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', maxWidth:1361, margin:'0 auto 24px' }}>
             Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec.
           </p>
           <h2 className="abt-sh" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(36px,4.7vw,68px)', color:DARK, textTransform:'uppercase', lineHeight:'81px' }}>
-            OUR CORE VALUES
+            OUR <span style={{ color:GREEN }}>CORE VALUES</span>
           </h2>
         </div>
 
-        {/* cards with staggered delay */}
-        <div className="abt-cv-row" style={{ display:'flex', gap:37, alignItems:'stretch' }}>
-          {CORE_VALUES.map((v_, i) => (
-            <div
-              key={i}
-              className={`abt-lift abt-cv-s${v_?.wide ? ' abt-cv-wide' : ' abt-cv-narrow'}${vis?' abt-in':''}`}
-              style={{
-                flex:v_.wide ? '2.29' : '1', minHeight:469, borderRadius:14,
-                background:v_.bg, padding:'50px 50px 44px',
-                display:'flex', flexDirection:'column', justifyContent:'space-between',
-                cursor:'pointer', transitionDelay:`${i*0.15}s`,
-              }}
-            >
-              <div>
-                <div style={{ width:80, height:80, borderRadius:'50%', border:'6.67px solid rgba(255,255,255,0.9)', marginBottom:40, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <svg width={36} height={36} viewBox="0 0 36 36" fill="none">
-                    <circle cx={18} cy={18} r={14} stroke="rgba(255,255,255,0.4)" strokeWidth={3}/>
-                    <path d="M18 4 A14 14 0 0 1 32 18" stroke="#fff" strokeWidth={3} strokeLinecap="round"/>
-                  </svg>
+        <div 
+          className="abt-cv-row"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {CORE_VALUES.map((v_, i) => {
+            const isActive = activeIdx === i;
+            return (
+              <div
+                key={i}
+                onClick={() => handleCardClick(i)}
+                className={`abt-cv-card abt-cv-s ${isActive ? 'abt-cv-active' : 'abt-cv-inactive'}${vis?' abt-in':''}`}
+                style={{
+                  background: v_.bg,
+                  transitionDelay: (allowTransitionDelay && vis) ? `${i * 0.15}s` : '0s',
+                }}
+              >
+                <div>
+                  <div className="abt-cv-icon-wrap">
+                    <svg width={27} height={27} viewBox="0 0 36 36" fill="none">
+                      <circle cx={18} cy={18} r={14} stroke="rgba(255,255,255,0.4)" strokeWidth={3}/>
+                      <path d="M18 4 A14 14 0 0 1 32 18" stroke="#fff" strokeWidth={3} strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <h3 className="abt-cv-title">{v_.title}</h3>
+                  <div className="abt-cv-desc-wrap">
+                    <p className="abt-cv-desc">{v_.desc}</p>
+                  </div>
                 </div>
-                <h3 style={{ fontFamily:FM, fontSize:36, fontWeight:500, color:'#fff', lineHeight:'43px', whiteSpace:'pre-line', marginBottom:v_.wide?20:0 }}>{v_.title}</h3>
-                {v_.wide && v_.desc && (
-                  <p style={{ fontFamily:FH, fontSize:24, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#fff', maxWidth:564, marginTop:16 }}>{v_.desc}</p>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
