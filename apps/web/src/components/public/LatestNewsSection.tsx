@@ -14,14 +14,7 @@ interface NewsItem {
   author: { name: string; role: string; avatar?: string };
 }
 
-/* ─── Sample data — replace with your API data ─── */
-const NEWS: NewsItem[] = [
-  { id:1, title:'NCLEX Exam Application Process',    excerpt:'Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit donec tristique.',     image:'/news/news-1.jpg', date:'12/12/2025', time:'10:00 AM', author:{ name:'Olivia Rhye',   role:'oliviarhye.com'   } },
-  { id:2, title:'OET Preparation: Complete Guide',   excerpt:'Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis sed neque.',       image:'/news/news-2.jpg', date:'10/12/2025', time:'2:30 PM',  author:{ name:'Sarah Chen',    role:'sarahchen.com'    } },
-  { id:3, title:'UK Nursing Registration 2025',      excerpt:'Sed neque etiam morbi a amet lacus phasellus ipsum nec. Lorem ipsum dolor sit amet consectetur purus in in fames sit ac.',               image:'/news/news-3.jpg', date:'08/12/2025', time:'11:15 AM', author:{ name:'James Wilson',  role:'jameswilson.com'  } },
-  { id:4, title:'Immigration Pathway: Step by Step', excerpt:'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit donec tristique placerat consectetur molestie est ornare.',     image:'/news/news-4.jpg', date:'06/12/2025', time:'9:00 AM',  author:{ name:'Maria Santos',  role:'mariasantos.com'  } },
-  { id:5, title:'Study Abroad: What to Expect',      excerpt:'Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec lorem ipsum.',      image:'/news/news-5.jpg', date:'04/12/2025', time:'3:45 PM',  author:{ name:'Tom Baker',     role:'tombaker.com'     } },
-];
+/* ─── Removed prefilled mock data ─── */
 
 const AUTO_MS    = 5500;
 const CARD_W     = 448;  /* center card width (px) — scales at smaller breakpoints */
@@ -287,7 +280,7 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
       .catch(() => {});
   }, [initialNews]);
 
-  const list = (blogs && blogs.length > 0 ? blogs : NEWS).map((item: any) => {
+  const list = (blogs && blogs.length > 0 ? blogs : []).map((item: any) => {
     if (item._id) {
       const imgUrl = item.image
         ? (typeof item.image === 'object' ? item.image.secureUrl : item.image)

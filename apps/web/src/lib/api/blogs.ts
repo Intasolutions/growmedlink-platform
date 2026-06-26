@@ -30,6 +30,18 @@ export async function getBlogBySlug(slug: string) {
   return data.data;
 }
 
+export async function getFeaturedBlog() {
+  const res = await fetch(`${API_BASE_URL}/api/blogs?status=published&featured=true&limit=1`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (data.data && data.data.length > 0) {
+    return data.data[0];
+  }
+  return null;
+}
+
 export async function getBlogsPaginated(params: { page?: number; limit?: number; search?: string; tag?: string }) {
   const query = new URLSearchParams();
   query.append('status', 'published');

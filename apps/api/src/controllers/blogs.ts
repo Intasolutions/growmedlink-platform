@@ -181,6 +181,10 @@ export const createBlog = async (req: Request, res: Response, next: NextFunction
       publishedAt: status === 'published' ? new Date() : null,
     });
 
+    if (blog.isFeatured) {
+      await Blog.updateMany({}, { isFeatured: false });
+    }
+
     await blog.save();
 
     const populated = await Blog.findById(blog._id)
@@ -249,6 +253,10 @@ export const updateBlog = async (req: Request, res: Response, next: NextFunction
       } else if (status !== 'published') {
         blog.publishedAt = null;
       }
+    }
+
+    if (validationResult.data.isFeatured === true) {
+      await Blog.updateMany({ _id: { $ne: id } }, { isFeatured: false });
     }
 
     await blog.save();

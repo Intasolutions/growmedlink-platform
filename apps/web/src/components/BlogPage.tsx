@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link  from 'next/link';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import FAQSection from '@/components/FAQSection';
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -48,6 +49,7 @@ interface BlogPost {
 }
 export interface BlogPageProps {
   blogs:         BlogPost[];
+  pagination?:   { page: number; limit: number; total: number; pages: number };
   heroImage?:    string | null;   // optional override for hero bg
   heroSubtitle?: string;
 }
@@ -55,10 +57,13 @@ export interface BlogPageProps {
 /* ══════════════════════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════════════════════ */
-function resolveImg(src?: string | { url: string } | null): string | null {
+function resolveImg(src?: any): string | null {
   if (!src) return null;
   if (typeof src === 'string') return src;
-  if (typeof src === 'object' && 'url' in src) return src.url;
+  if (typeof src === 'object') {
+    if (src.secureUrl) return src.secureUrl;
+    if (src.url) return src.url;
+  }
   return null;
 }
 function formatDate(d?: string): string {
@@ -311,7 +316,7 @@ function BlogCard({ blog, index }: { blog: BlogPost; index: number }) {
           {/* Slide-up overlay (starts at height:0, expands to 100% on card:hover via CSS) */}
           <div className="blg-overlay" style={{ background:overlayBg }}>
             <div className="blg-read-btn">
-              Read Blog
+              View Details
               <svg width={15} height={15} viewBox="0 0 24 24" fill="none">
                 <path d="M7 17L17 7M17 7H7M17 7V17"
                   stroke="#000" strokeWidth={2.2}
@@ -376,16 +381,11 @@ function BlogCard({ blog, index }: { blog: BlogPost; index: number }) {
               </div>
             ) : <div />}
 
-            {/* Date + reading time */}
+            {/* Date */}
             <div style={{ display:'flex', alignItems:'center', gap:6, flexShrink:0, marginLeft:8 }}>
               {blog.createdAt && (
                 <span style={{ fontFamily:FM, fontSize:11, fontWeight:500, color:dateC }}>
                   {formatDate(blog.createdAt)}
-                </span>
-              )}
-              {blog.readingTime && (
-                <span style={{ fontFamily:FM, fontSize:11, fontWeight:500, color:timeC }}>
-                  &nbsp;{blog.readingTime}
                 </span>
               )}
             </div>
@@ -438,9 +438,50 @@ function BlogGridSection({ blogs }: { blogs: BlogPost[] }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
+   PAGINATION
+══════════════════════════════════════════════════════════════════════ */
+function PaginationControls({ pagination }: { pagination?: { page: number; pages: number } }) {
+  if (!pagination || pagination.pages <= 1) return null;
+
+  const { page, pages } = pagination;
+  
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 40 }}>
+      {page > 1 ? (
+        <Link 
+          href={`/blog?page=${page - 1}`}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', color: '#111', borderRadius: 5, fontSize: 13, fontWeight: 600, fontFamily: FM, border: '1px solid #eaeaea', transition: 'border-color 0.2s' }}
+          className="hover:border-black"
+        >
+          <ArrowLeft size={16} /> Previous
+        </Link>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', color: 'rgba(0,0,0,0.3)', borderRadius: 5, fontSize: 13, fontWeight: 600, fontFamily: FM, border: '1px solid rgba(0,0,0,0.05)', cursor: 'not-allowed' }}>
+          <ArrowLeft size={16} /> Previous
+        </div>
+      )}
+
+      {page < pages ? (
+        <Link 
+          href={`/blog?page=${page + 1}`}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', color: '#111', borderRadius: 5, fontSize: 13, fontWeight: 600, fontFamily: FM, border: '1px solid #eaeaea', transition: 'border-color 0.2s' }}
+          className="hover:border-black"
+        >
+          Next <ArrowRight size={16} />
+        </Link>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', color: 'rgba(0,0,0,0.3)', borderRadius: 5, fontSize: 13, fontWeight: 600, fontFamily: FM, border: '1px solid rgba(0,0,0,0.05)', cursor: 'not-allowed' }}>
+          Next <ArrowRight size={16} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    ROOT EXPORT
 ══════════════════════════════════════════════════════════════════════ */
-export default function BlogPage({ blogs, heroImage, heroSubtitle }: BlogPageProps) {
+export default function BlogPage({ blogs, pagination, heroImage, heroSubtitle }: BlogPageProps) {
   /* Use first blog's image as hero bg if no explicit hero image supplied */
   const bgImg = heroImage ?? resolveImg(blogs?.[0]?.image);
 
@@ -449,6 +490,7 @@ export default function BlogPage({ blogs, heroImage, heroSubtitle }: BlogPagePro
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <HeroSection heroImage={bgImg} subtitle={heroSubtitle} />
       <BlogGridSection blogs={blogs} />
+      <PaginationControls pagination={pagination} />
       <FAQSection />
     </main>
   );
