@@ -212,10 +212,92 @@ const STYLES = `
   transition: transform 0.7s cubic-bezier(0.34,1.56,0.64,1) var(--bd,0s);
 }
 /* float animation on inner (separate element so it does not fight transition) */
-.abt-bkt-inner { animation: abt-bktfl var(--bfd,3.4s) ease-in-out infinite var(--bfdel,1.2s); }
+.abt-bkt-inner {
+  animation-name: abt-bktfl;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-duration: var(--bfd, 3.4s);
+  animation-delay: var(--bfdel, 1.2s);
+}
 @keyframes abt-bktfl {
   0%,100% { transform: translateY(0); }
   50%     { transform: translateY(-5px); }
+}
+
+/* ── horizontal marquee ── */
+@keyframes abt-mq-horizontal {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.abt-mq-h-wrap {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding: 16px 0;
+  margin-bottom: 48px;
+}
+.abt-mq-h-wrap::before, .abt-mq-h-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 150px;
+  z-index: 2;
+  pointer-events: none;
+}
+.abt-mq-h-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, #fff, transparent);
+}
+.abt-mq-h-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, #fff, transparent);
+}
+.abt-mq-h-track {
+  display: flex;
+  gap: 120px;
+  animation: abt-mq-horizontal 30s linear infinite;
+  white-space: nowrap;
+  width: max-content;
+  align-items: center;
+}
+.abt-mq-h-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── centerpiece animations ── */
+@keyframes abt-cp-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0px, 0);
+  }
+}
+@keyframes abt-cp-float {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0) rotate(-1.5deg);
+  }
+}
+.abt-cp-callout {
+  opacity: 0;
+  transform: scale(0.85) translate3d(0, 24px, 0);
+  will-change: transform, opacity;
+}
+.abt-cp-callout.abt-in {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0px, 0);
+  animation-name: abt-cp-reveal, abt-cp-float;
+  animation-duration: 0.75s, 3s;
+  animation-timing-function: cubic-bezier(.34,1.56,0.64,1), ease-in-out;
+  animation-delay: 0s, 0.75s;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: both, none;
 }
 
 /* heading char wave (same as why-section brand-wrap chars) */
@@ -711,7 +793,7 @@ const BG_BRACKETS = [
   { l:'18.6%', t:'36.3%', w:'45.4%', h:'45.1%', bd:'0.62s', bfd:'2.9s', bfdel:'1.35s' },
   { l:'0%',    t:'63.5%', w:'36.7%', h:'36.5%', bd:'0.79s', bfd:'3.7s', bfdel:'1.55s' },
 ];
-const BG_WORD = 'Background'.split('');
+const BG_WORD = 'BACKGROUND'.split('');
 
 function BackgroundSection() {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -741,52 +823,52 @@ function BackgroundSection() {
   const v = vis;
 
   return (
-    <section style={{ padding:'80px 40px', overflow:'hidden' }}>
+    <section style={{ background:'#fff', padding:'60px 30px', overflow:'hidden' }}>
       <div
         ref={cardRef}
         className={`abt-bg-card${v?' abt-bg-in':''}`}
-        style={{ background:'#F0F0F0', borderRadius:1000, position:'relative', maxWidth:1440, margin:'0 auto', padding:'110px 60px 110px', overflow:'hidden' }}
+        style={{ background:'#F0F0F0', borderRadius:1000, position:'relative', maxWidth:1080, margin:'0 auto', padding:'80px 0 80px 100px', overflow:'hidden' }}
       >
-        {/* ── HEADING: "OUR" slides up, "Background" chars wave, underline draws ── */}
-        <div style={{ textAlign:'center', marginBottom:64 }}>
-          <span className={`abt-word${v?' abt-in':''}`} style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(36px,4.7vw,68px)', color:DARK, lineHeight:'1.2' }}>
+        {/* ── HEADING: "OUR BACKGROUND" on a single line ── */}
+        <div style={{ textAlign:'center', marginBottom:48 }}>
+          <span className={`abt-word${v?' abt-in':''}`} style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(27px, 3.5vw, 51px)', color:DARK, lineHeight:'1.2', marginRight:12 }}>
             OUR
           </span>
-          <span style={{ display:'block', fontFamily:FH, fontWeight:400, fontSize:'clamp(36px,4.7vw,68px)', color:DARK, lineHeight:'1.2' }}>
+          <span style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(27px, 3.5vw, 51px)', color:GREEN, lineHeight:'1.2' }}>
             {BG_WORD.map((ch, i) => (
               <span key={i} className={`abt-char${v?' abt-in':''}`} style={{ transitionDelay:`${0.34 + i*0.045}s` }}>{ch}</span>
             ))}
-            <span className={`abt-uline${v?' abt-in':''}`} style={{ margin:'4px auto 0', maxWidth:'clamp(200px,30vw,340px)' }} />
           </span>
+          <span className={`abt-uline${v?' abt-in':''}`} style={{ margin:'4px auto 0', maxWidth:'clamp(150px,25vw,255px)' }} />
         </div>
 
         {/* ── CONTENT GRID ── */}
-        <div className="abt-bg-grid" style={{ display:'flex', gap:64, alignItems:'flex-start', position:'relative' }}>
+        <div className="abt-bg-grid" style={{ display:'flex', gap:48, alignItems:'center', position:'relative' }}>
 
           {/* left text — 2 paragraphs */}
           <div style={{ flex:1, minWidth:0 }}>
-            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:20, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', marginBottom:48 }}>
+            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525', marginBottom:36 }}>
               GrowMedLink was founded on the belief that geography should never limit a healthcare professional's ambition. Since 2017 we have helped more than 4 200 nurses and doctors pass international licensing exams and secure placements in top hospitals across the USA, UK, Canada, and Australia.
             </p>
-            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:20, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', transitionDelay:'0.15s' }}>
+            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525', transitionDelay:'0.15s' }}>
               Our faculty are active clinicians and internationally licensed educators who bring real-world experience into every session. We don't just teach syllabi — we teach clinical reasoning, cultural competency, and the resilience needed to thrive in a foreign healthcare system.
             </p>
           </div>
 
           {/* right — D-shaped image with wipe + Ken Burns + parallax */}
-          <div className="abt-bg-par-img" style={{ flexShrink:0, width:'min(751px,52%)', position:'relative' }}>
+          <div className="abt-bg-par-img" style={{ flexShrink:0, width:'min(563px,45%)', position:'relative' }}>
             <div
               className={`abt-bg-img-wrap${v?' abt-bg-in':''}`}
-              style={{ width:'100%', paddingBottom:'84%', borderRadius:'400px 0 0 400px', overflow:'hidden', position:'relative', background:'#bbb' }}
+              style={{ width:'100%', paddingBottom:'84%', borderRadius:'9999px 0 0 9999px', overflow:'hidden', position:'relative', background:'#bbb' }}
             >
               <div className="abt-bg-img-inner">
-                <Image src="/about/3.jpg" alt="Our Background" fill style={{ objectFit:'cover' }}
+                <Image src="/about/background-man.png" alt="Our Background" fill style={{ objectFit:'cover' }}
                   onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
               </div>
             </div>
 
-            {/* bracket stack — spring + float + parallax (3 separate elements as in WhySection) */}
-            <div className="abt-bg-par-bkt" style={{ position:'absolute', left:-100, bottom:-60, width:240, height:240, pointerEvents:'none' }}>
+            {/* bracket stack — spring + float (now at bottom-right corner of D-shape image) */}
+            <div style={{ position:'absolute', right: 80, bottom: -10, width:180, height:180, pointerEvents:'none' }}>
               {BG_BRACKETS.map((b, i) => (
                 <div key={i}
                   className={`abt-bkt-outer${v?' abt-bg-in':''}`}
@@ -809,86 +891,297 @@ function BackgroundSection() {
    §4  CERTIFICATIONS & AFFILIATIONS — vertical marquee (2 columns)
    + larger doctor photo below
 ══════════════════════════════════════════════════════════════════════════ */
-const DISPLAY_CERTS = [...CERTS, ...CERTS]; // doubled for seamless loop
-
-function CertCard({ c }: { c: typeof CERTS[0] }) {
+/* ── Horizontal Marquee Brand SVG Fallbacks ── */
+function LayersLogo() {
   return (
-    <div style={{ background:'#fff', borderRadius:12, padding:'16px 20px', marginBottom:16, boxShadow:'0 2px 12px rgba(0,0,0,0.07)', flexShrink:0, minWidth:220 }}>
-      <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
-        <div style={{ width:36, height:36, borderRadius:8, background:c.color, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-          <span style={{ fontFamily:FM, fontSize:10, fontWeight:700, color:'#fff' }}>{c.abbr}</span>
-        </div>
-        <span style={{ fontFamily:FM, fontSize:15, fontWeight:600, color:DARK }}>{c.name}</span>
-      </div>
-      <p style={{ fontFamily:FH, fontSize:13, color:'#666', lineHeight:'1.5' }}>{c.desc}</p>
+    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#9e77ed" />
+        <path d="M2 17L12 22L22 17M2 12L17 17L22 12" stroke="#9e77ed" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Layers</span>
+    </div>
+  );
+}
+
+function SisyphusLogo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#12b76a" stroke="#12b76a" strokeWidth={2} strokeLinejoin="round" />
+      </svg>
+      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Sisyphus</span>
+    </div>
+  );
+}
+
+function CircoolesLogo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <circle cx={9} cy={12} r={6} fill="#1570ef" fillOpacity={0.8} />
+        <circle cx={15} cy={12} r={6} fill="#155BA9" fillOpacity={0.8} />
+      </svg>
+      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Circooles</span>
+    </div>
+  );
+}
+
+function CatalogLogo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <circle cx={12} cy={12} r={10} stroke="#1570ef" strokeWidth={4} />
+        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22" fill="#1570ef" />
+      </svg>
+      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Catalog</span>
+    </div>
+  );
+}
+
+function QuotientLogo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <circle cx={11} cy={11} r={8} stroke="#7a5af8" strokeWidth={3} />
+        <path d="M16 16L22 22" stroke="#7a5af8" strokeWidth={4} strokeLinecap="round" />
+      </svg>
+      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Quotient</span>
+    </div>
+  );
+}
+
+const BRAND_LOGOS = [
+  { name: 'Layers',    src: '/about/logo-layers.png',    width: 110, height: 32 },
+  { name: 'Sisyphus',  src: '/about/logo-sisyphus.png',  width: 120, height: 32 },
+  { name: 'Circooles', src: '/about/logo-circooles.png', width: 120, height: 32 },
+  { name: 'Catalog',   src: '/about/logo-catalog.png',   width: 110, height: 32 },
+  { name: 'Quotient',  src: '/about/logo-quotient.png',  width: 125, height: 32 },
+];
+const MARQUEE_LOGOS = [...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS];
+
+function LogoRenderer({ name, src }: { name: string; src: string }) {
+  const [useFallback, setUseFallback] = useState(false);
+
+  if (useFallback) {
+    if (name === 'Layers') return <LayersLogo />;
+    if (name === 'Sisyphus') return <SisyphusLogo />;
+    if (name === 'Circooles') return <CircoolesLogo />;
+    if (name === 'Catalog') return <CatalogLogo />;
+    if (name === 'Quotient') return <QuotientLogo />;
+    return <span style={{ fontFamily:FH, fontSize:20, fontWeight:700 }}>{name}</span>;
+  }
+
+  return (
+    <div style={{ position:'relative', height:32, width: 140, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+      <Image
+        src={src}
+        alt={name}
+        fill
+        sizes="140px"
+        style={{ objectFit:'contain' }}
+        onError={() => setUseFallback(true)}
+      />
     </div>
   );
 }
 
 function CertificationSection() {
   const rh = useReveal();
+  const sunburstRef = useRef<HTMLDivElement>(null);
+  const calloutRef = useRef<HTMLDivElement>(null);
+  const [calloutIn, setCalloutIn] = useState(false);
+
+  /* Scroll handler for sunburst rotation */
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sunburstRef.current) {
+        const rotation = window.scrollY * 0.15;
+        sunburstRef.current.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  /* Trigger reveal for callout */
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        setCalloutIn(true);
+        obs.disconnect();
+      }
+    }, { threshold: 0.25 });
+    if (calloutRef.current) obs.observe(calloutRef.current);
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <section style={{ background:'#fff', padding:'80px 0 80px', overflow:'hidden' }}>
       <div style={{ maxWidth:1440, margin:'0 auto', padding:'0 40px' }}>
 
         {/* heading */}
-        <div ref={rh} className="abt-rv" style={{ marginBottom:56 }}>
-          <h2 className="abt-cert-h" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(28px,4.7vw,68px)', color:DARK, textTransform:'uppercase' }}>
-            Certifications &amp; affiliations
+        <div ref={rh} className="abt-rv" style={{ marginBottom:48, textAlign:'center' }}>
+          <h2 style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(28px,4.7vw,68px)', color:DARK, textTransform:'uppercase', letterSpacing:'-0.03em' }}>
+            CERTIFICATIONS <span style={{ color: GREEN }}>&amp; AFFILIATIONS</span>
           </h2>
         </div>
 
-        {/* VERTICAL marquee — 2 columns */}
-        <div style={{ display:'flex', gap:24, height:520, overflow:'hidden', position:'relative', marginBottom:72 }}>
-          {/* top/bottom fades */}
-          <div style={{ position:'absolute', top:0, left:0, right:0, height:80, background:'linear-gradient(to bottom,#fff,transparent)', zIndex:2, pointerEvents:'none' }} />
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:80, background:'linear-gradient(to top,#fff,transparent)', zIndex:2, pointerEvents:'none' }} />
+        {/* Horizontal Infinite Marquee */}
+        <div className="abt-mq-h-wrap">
+          <div className="abt-mq-h-track">
+            {MARQUEE_LOGOS.map((logo, i) => (
+              <LogoRenderer key={i} name={logo.name} src={logo.src} />
+            ))}
+          </div>
+        </div>
 
-          {/* col 1 — scrolls up */}
-          <div style={{ flex:1, overflow:'hidden' }}>
-            <div className="abt-vmq-up" style={{ display:'flex', flexDirection:'column' }}>
-              {DISPLAY_CERTS.map((c, i) => <CertCard key={i} c={c} />)}
-            </div>
+        {/* Description Paragraph */}
+        <div style={{ maxWidth:920, margin:'0 auto 60px', textAlign:'center' }}>
+          <p style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525' }}>
+            Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.Lorem Ipsum Dolor Sit Amet Consectetur.
+          </p>
+        </div>
+
+        {/* CENTERPIECE ROTATING SECTION */}
+        <div style={{ position:'relative', width:'100%', minHeight:540, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden', padding:'40px 0' }}>
+          {/* Crosshair lines */}
+          <div style={{ position:'absolute', top:'50%', left:0, right:0, height:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
+          <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
+
+          {/* Rotating sunburst */}
+          <div
+            ref={sunburstRef}
+            style={{
+              position:'absolute',
+              top:'50%',
+              left:'50%',
+              width:750,
+              height:750,
+              pointerEvents:'none',
+              zIndex:0,
+              opacity:0.35,
+              transform: 'translate(-50%, -50%)',
+              willChange:'transform',
+            }}
+          >
+            <Image src="/light-sunburst.png" alt="" fill style={{ objectFit:'contain' }} />
           </div>
 
-          {/* col 2 — scrolls down */}
-          <div style={{ flex:1, overflow:'hidden' }}>
-            <div className="abt-vmq-dn" style={{ display:'flex', flexDirection:'column' }}>
-              {DISPLAY_CERTS.map((c, i) => <CertCard key={i} c={c} />)}
+          {/* Centerpiece Image Card & Callout Container */}
+          <div ref={calloutRef} style={{ position:'relative', zIndex:10, width:'100%', maxWidth:700, display:'flex', justifyContent:'center', margin:'20px auto 48px' }}>
+            
+            {/* Faint watermarks */}
+            <div style={{
+              position: 'absolute',
+              bottom: '50%',
+              left: 'clamp(-220px, -15vw, -4px)',
+              fontFamily: FP,
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 4vw, 56px)',
+              color: '#E5E7EB',
+              letterSpacing: '0.25em',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+              opacity: 0.5,
+              zIndex: 0,
+              transform: 'translateY(50%)'
+            }}>
+              EXPLORE
+            </div>
+            
+            <div style={{
+              position: 'absolute',
+              bottom: '50%',
+              right: 'clamp(-200px, -14vw, -4px)',
+              fontFamily: FP,
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 4vw, 56px)',
+              color: '#E5E7EB',
+              letterSpacing: '0.25em',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+              opacity: 0.5,
+              zIndex: 0,
+              transform: 'translateY(50%)'
+            }}>
+              MORE !
+            </div>
+
+            {/* Centerpiece Image Card */}
+            <div style={{
+              position:'relative',
+              zIndex:10,
+              width:280,
+              height:180,
+              borderRadius:20,
+              overflow:'hidden',
+              background:'linear-gradient(135deg,#155BA9,#0a3d7a)',
+              boxShadow:'0 20px 48px rgba(0,0,0,0.18)',
+            }}>
+              <Image
+                src="/about/4.jpg"
+                alt="Trusted Partner"
+                fill
+                sizes="280px"
+                style={{ objectFit:'cover' }}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+              />
+            </div>
+
+            {/* Handwritten callout pointing to the photo */}
+            <div
+              className={`abt-cp-callout${calloutIn ? ' abt-in' : ''}`}
+              style={{
+                position:'absolute',
+                bottom:-65,
+                right:'clamp(2%, 8vw, 15%)',
+                width:260,
+                pointerEvents:'none',
+                zIndex:20,
+              }}
+            >
+              {/* Curly Arrow pointing up to the photo */}
+              <div style={{ transform: 'rotate(-10deg)', transformOrigin: 'top center', display: 'inline-block' }}>
+                <Image
+                  src="/red-curly-arrow.png"
+                  alt=""
+                  width={64}
+                  height={64}
+                  style={{ marginLeft: '40px', width: '56px', height: 'auto' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
+              </div>
+
+              <span
+                style={{
+                  display:'block',
+                  fontFamily: FS,
+                  fontSize: 'clamp(26px, 3vw, 32px)',
+                  color: RED,
+                  lineHeight: '34px',
+                  transform: 'rotate(-3deg)',
+                  transformOrigin: 'left top',
+                  whiteSpace: 'nowrap',
+                  marginLeft: '52px',
+                  marginTop: '2px',
+                }}
+              >
+                Your Trusted Partner
+              </span>
             </div>
           </div>
         </div>
 
-        {/* body text */}
-        <p style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', textAlign:'center', maxWidth:1106, margin:'0 auto 72px' }}>
-          Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
-        </p>
-
-        {/* SECTION BELOW CERTS: enlarged doctor photo + "Your Trusted Partner" */}
-        <div style={{ display:'flex', alignItems:'center', gap:48, flexWrap:'wrap' }}>
-          {/* enlarged image — was 134×76, now 280×380 */}
-          <div style={{ width:280, height:380, borderRadius:20, overflow:'hidden', background:'linear-gradient(135deg,#155BA9,#0a3d7a)', position:'relative', flexShrink:0, boxShadow:'0 16px 48px rgba(0,0,0,0.18)' }}>
-            <div style={{ position:'absolute', top:12, right:12, width:40, height:40, borderRadius:'50%', background:GREEN, zIndex:2 }} />
-            <Image src="/about/4.jpg" alt="Doctor" fill style={{ objectFit:'cover' }}
-              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
-          </div>
-
-          {/* body text + script */}
-          <div style={{ flex:1, minWidth:260 }}>
-            <p style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', marginBottom:24 }}>
-              Our certifications and affiliations represent years of relationship-building with the world's most trusted healthcare and medical education bodies. Each partnership strengthens the credibility and employability of every GrowMedLink graduate.
-            </p>
-            <div style={{ position:'relative', display:'inline-block' }}>
-              <svg width={120} height={86} viewBox="0 0 120 86" fill="none" style={{ position:'absolute', left:-130, top:10 }}>
-                <path d="M110 10 C88 30 58 45 30 60 C15 68 4 76 2 82" stroke={RED} strokeWidth={2} fill="none" strokeLinecap="round"/>
-                <path d="M2 66 L2 82 L18 82" stroke={RED} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span style={{ fontFamily:FS, fontSize:28, color:RED, lineHeight:'28px', display:'block' }}>Your Trusted Partner</span>
-            </div>
-          </div>
+        {/* Avatars at bottom */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginTop:48, position:'relative', zIndex:10 }}>
+          <Image src="/avatars-group.png" alt="Trusted Students" width={160} height={32} style={{ height:32, width:'auto' }} />
+          <span style={{ fontFamily:FP, fontSize:14, color:DARK, fontWeight:500 }}>1600 + Trusted Students</span>
         </div>
 
-        <div style={{ display:'flex', justifyContent:'flex-end', marginTop:48 }}><WaveDots /></div>
       </div>
     </section>
   );
