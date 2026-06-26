@@ -1,365 +1,32 @@
 'use client';
 
-import React, { useState, FormEvent, useEffect } from 'react';
+import React, { useState, useRef, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
-import { Turnstile } from '@marsidev/react-turnstile';
+import { Phone, Mail, MessageCircle } from 'lucide-react';
 import { submitEnquiry } from '@/lib/api/enquiries';
 import { ENQUIRY_TYPES } from '@intelligen/constants';
 
-/* ══════════════════════════════════════════════════════════════════════
-   CONSTANTS & STYLES
-══════════════════════════════════════════════════════════════════════ */
-const FONTS = {
-  heading: 'var(--font-inter), sans-serif',
-  mono:    'var(--font-geist-mono), monospace',
-  sans:    'var(--font-inter), sans-serif',
-};
+const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 
-const COLORS = {
-  primaryGreen: '#A3E635', // Match the vibrant green in design
-  darkBg: '#121212',
-  inputBg: '#1C1C1C',
-  inputBorder: '#333333',
-};
-
-const STYLES = `
-.contact-hero {
-  position: relative;
-  background-color: #0d0d0d;
-  color: #fff;
-  padding: 120px 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Neon Green radial glows */
-.contact-glow-left {
-  position: absolute;
-  top: 50%;
-  left: -20%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(163,230,53,0.15) 0%, rgba(0,0,0,0) 70%);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.contact-glow-right {
-  position: absolute;
-  top: 50%;
-  right: -20%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(163,230,53,0.15) 0%, rgba(0,0,0,0) 70%);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-/* Clock Dial Graphic behind Title */
-.contact-dial {
-  position: absolute;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg opacity='0.15'%3E%3Cpath d='M300 40V60' stroke='%23A3E635' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M300 540V560' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M560 300H540' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M60 300H40' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M483.848 116.152L469.706 130.294' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M130.294 469.706L116.152 483.848' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M483.848 483.848L469.706 469.706' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M130.294 130.294L116.152 116.152' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M431.135 68.8647L421.378 85.7663' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M178.622 514.234L168.865 531.135' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M531.135 168.865L514.234 178.622' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M85.7663 421.378L68.8647 431.135' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M531.135 431.135L514.234 421.378' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M85.7663 178.622L68.8647 168.865' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M431.135 531.135L421.378 514.234' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M178.622 85.7663L168.865 68.8647' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") no-repeat center center;
-  background-size: contain;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.contact-content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.contact-title {
-  font-family: ${FONTS.heading};
-  font-size: clamp(48px, 8vw, 84px);
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  margin-bottom: 24px;
-  position: relative;
-}
-
-.contact-subtitle {
-  font-family: ${FONTS.mono};
-  font-size: clamp(16px, 3vw, 24px);
-  color: ${COLORS.primaryGreen};
-  text-align: center;
-  margin-bottom: 60px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Arrow Decoration */
-.contact-arrow {
-  position: absolute;
-  top: -20px;
-  right: -120px;
-  width: 150px;
-  height: 80px;
-  pointer-events: none;
-}
-.contact-arrow svg {
-  width: 100%;
-  height: 100%;
-}
-.contact-arrow-text {
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-  color: ${COLORS.primaryGreen};
-  font-size: 18px;
-  transform: rotate(-10deg);
-  position: absolute;
-  top: -15px;
-  right: 0;
-}
-
-@media (max-width: 768px) {
-  .contact-arrow {
-    display: none;
+/* Same rotating halo / pulsing dots / floating arrow used on the Home hero */
+const KEYFRAMES = `
+  @keyframes contact-sunburst-spin {
+    0%   { transform: translate3d(-50%,-50%,0) rotate(0deg);   }
+    100% { transform: translate3d(-50%,-50%,0) rotate(360deg); }
   }
-}
-
-/* Form Styles */
-.contact-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.contact-row {
-  display: flex;
-  gap: 24px;
-  width: 100%;
-}
-
-@media (max-width: 640px) {
-  .contact-row {
-    flex-direction: column;
+  @keyframes contact-pulse {
+    0%,100% { opacity: 0.55; transform: scale(1);    }
+    50%     { opacity: 1;    transform: scale(1.25); }
   }
-}
-
-.contact-group {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 8px;
-}
-
-.contact-label {
-  font-family: ${FONTS.mono};
-  font-size: 13px;
-  color: ${COLORS.primaryGreen};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.contact-input, .contact-textarea {
-  width: 100%;
-  background-color: ${COLORS.inputBg};
-  border: 1px solid ${COLORS.inputBorder};
-  border-radius: 8px;
-  padding: 16px 20px;
-  color: #fff;
-  font-family: ${FONTS.sans};
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.contact-input:focus, .contact-textarea:focus {
-  border-color: ${COLORS.primaryGreen};
-}
-
-.contact-input::placeholder, .contact-textarea::placeholder {
-  color: #555;
-}
-
-.contact-textarea {
-  resize: vertical;
-  min-height: 140px;
-}
-
-.contact-submit {
-  align-self: flex-end;
-  background-color: ${COLORS.primaryGreen};
-  color: #000;
-  border: none;
-  border-radius: 4px;
-  padding: 16px 48px;
-  font-family: ${FONTS.sans};
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  margin-top: 12px;
-}
-.contact-submit:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-.contact-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Dots Decoration */
-.contact-dots {
-  position: absolute;
-  bottom: 40px;
-  left: 40px;
-  display: flex;
-  gap: 12px;
-}
-.contact-dot {
-  width: 6px;
-  height: 6px;
-  background-color: ${COLORS.primaryGreen};
-  border-radius: 50%;
-}
-
-/* Locations Section */
-.locations-section {
-  background-color: #fff;
-  padding: 100px 20px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.locations-title {
-  font-family: ${FONTS.heading};
-  font-size: clamp(36px, 5vw, 56px);
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 80px;
-}
-.locations-title span {
-  color: ${COLORS.primaryGreen};
-}
-
-.locations-list {
-  width: 100%;
-  max-width: 1000px;
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
-}
-
-.location-card {
-  display: flex;
-  gap: 40px;
-  align-items: stretch;
-  padding-bottom: 60px;
-  border-bottom: 1px solid #eaeaea;
-}
-
-@media (max-width: 800px) {
-  .location-card {
-    flex-direction: column;
+  @keyframes contact-arrow-float {
+    0%,100% { transform: translate3d(0, 0px, 0);  }
+    50%     { transform: translate3d(0, -6px, 0); }
   }
-}
-
-.location-image-wrapper {
-  flex: 1;
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  min-height: 240px;
-}
-
-.location-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.location-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.location-country {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.location-country-icon {
-  width: 24px;
-  height: 18px;
-  border-radius: 3px;
-  object-fit: cover;
-}
-.location-country-name {
-  color: ${COLORS.primaryGreen};
-  font-family: ${FONTS.heading};
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.location-address {
-  font-family: ${FONTS.sans};
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 32px;
-}
-
-.location-contacts {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.location-contact-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.location-contact-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background-color: ${COLORS.primaryGreen};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000;
-}
-
-.location-contact-text {
-  font-family: ${FONTS.sans};
-  font-size: 15px;
-  font-weight: 500;
-  color: #000;
-}
-
-.location-contact-item svg {
-  width: 20px;
-  height: 20px;
-}
-\`;
+  @keyframes contact-reveal {
+    from { opacity: 0; transform: translate3d(0, 16px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0px, 0);    }
+  }
+`;
 
 /* ══════════════════════════════════════════════════════════════════════
    DATA
@@ -369,33 +36,67 @@ const LOCATIONS = [
     id: 1,
     image: 'https://images.unsplash.com/photo-1587474260580-57521c7d23d9?auto=format&fit=crop&q=80&w=800',
     country: 'INDIA',
-    flag: 'https://flagcdn.com/in.svg',
-    address: 'Fabrex Nine Building, Event Glober 24/7 Spaces, 2427/B, Thodupuzha Kerala, India 685584',
+    address: "Peter's Nine Building, Event Global 247 Spaces, 27/217B, Thodupuzha, Kerala, India, 685584",
     phone: '+91 9898989898',
-    email: 'info@growmedlink.com',
+    email: 'info@gromedlink.com',
     whatsapp: '+91 9898989898',
   },
   {
     id: 2,
     image: 'https://images.unsplash.com/photo-1587474260580-57521c7d23d9?auto=format&fit=crop&q=80&w=800',
     country: 'INDIA',
-    flag: 'https://flagcdn.com/in.svg',
-    address: 'Fabrex Nine Building, Event Glober 24/7 Spaces, 2427/B, Thodupuzha Kerala, India 685584',
+    address: "Peter's Nine Building, Event Global 247 Spaces, 27/217B, Thodupuzha, Kerala, India, 685584",
     phone: '+91 9898989898',
-    email: 'info@growmedlink.com',
+    email: 'info@gromedlink.com',
     whatsapp: '+91 9898989898',
   },
   {
     id: 3,
     image: 'https://images.unsplash.com/photo-1587474260580-57521c7d23d9?auto=format&fit=crop&q=80&w=800',
     country: 'INDIA',
-    flag: 'https://flagcdn.com/in.svg',
-    address: 'Fabrex Nine Building, Event Glober 24/7 Spaces, 2427/B, Thodupuzha Kerala, India 685584',
+    address: "Peter's Nine Building, Event Global 247 Spaces, 27/217B, Thodupuzha, Kerala, India, 685584",
     phone: '+91 9898989898',
-    email: 'info@growmedlink.com',
+    email: 'info@gromedlink.com',
     whatsapp: '+91 9898989898',
   },
 ];
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <label className="text-sm font-light text-[#96CA45]">{children}</label>;
+}
+
+const inputClass =
+  'w-full bg-white/[0.04] rounded-lg px-5 h-[52px] text-sm text-white placeholder:text-white/40 outline-none focus:ring-1 focus:ring-[#96CA45] transition';
+
+/* ─── Wave dots — identical decoration to the Home hero, just reused ─── */
+function WaveDots() {
+  const dots = [
+    { left: 0, top: 29 }, { left: 31, top: 24 }, { left: 60, top: 29 },
+    { left: 93, top: 20 }, { left: 131, top: 29 }, { left: 157, top: 13 },
+    { left: 192, top: 29 }, { left: 226, top: 6 }, { left: 270, top: 29 },
+    { left: 305, top: 0 },
+  ];
+  return (
+    <div style={{ position: 'relative', width: '318px', height: '42px', willChange: 'transform' }}>
+      {dots.map((d, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: d.left,
+            top: d.top,
+            width: '13px',
+            height: '13px',
+            borderRadius: '50%',
+            background: '#96CA45',
+            animation: `contact-pulse ${1.4 + i * 0.12}s ease-in-out ${i * 0.08}s infinite`,
+            willChange: 'transform, opacity',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    ROOT EXPORT
@@ -409,30 +110,59 @@ export default function ContactPageClient() {
     subject: '',
     message: '',
   });
-  const [token, setToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // For hydration mismatch protection (Turnstile doesn't love SSR)
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Hero entrance animation
+  const [heroVisible, setHeroVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Locations scroll-reveal
+  const locationsRef = useRef<HTMLDivElement>(null);
+  const [locationsVisible, setLocationsVisible] = useState(false);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLocationsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (locationsRef.current) observer.observe(locationsRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const fadeUp = (delay: number): React.CSSProperties => ({
+    opacity: heroVisible ? 1 : 0,
+    transform: heroVisible ? 'translateY(0)' : 'translateY(28px)',
+    transition: `opacity 0.75s cubic-bezier(.22,.68,0,1.2) ${delay}ms,
+                 transform 0.75s cubic-bezier(.22,.68,0,1.2) ${delay}ms`,
+  });
+
+  const cardFadeUp = (delay: number): React.CSSProperties => ({
+    opacity: locationsVisible ? 1 : 0,
+    transform: locationsVisible ? 'translateY(0)' : 'translateY(36px)',
+    transition: `opacity 0.7s cubic-bezier(.22,.68,0,1.2) ${delay}ms,
+                 transform 0.7s cubic-bezier(.22,.68,0,1.2) ${delay}ms`,
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) {
-      setError('Please complete the verification.');
-      return;
-    }
 
     setIsSubmitting(true);
     setError(null);
 
-    const name = \`\${formData.firstName} \${formData.lastName}\`.trim();
+    const name = `${formData.firstName} ${formData.lastName}`.trim();
 
     try {
       await submitEnquiry({
@@ -444,7 +174,6 @@ export default function ContactPageClient() {
         type: ENQUIRY_TYPES.CONTACT_FORM,
         source: 'contact',
         pageUrl: typeof window !== 'undefined' ? window.location.href : '',
-        turnstileToken: token,
       });
       setSuccess(true);
       setFormData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' });
@@ -457,122 +186,209 @@ export default function ContactPageClient() {
 
   return (
     <main>
-      <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      
-      {/* ── HERO SECTION ── */}
-      <section className="contact-hero">
-        <div className="contact-glow-left" />
-        <div className="contact-glow-right" />
-        <div className="contact-dial" />
-        
-        <div className="contact-dots">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="contact-dot" style={{ opacity: 1 - i * 0.1 }} />
-          ))}
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
+
+      {/* ══════════════════════ HERO / FORM SECTION ══════════════════════ */}
+      <section className="relative overflow-hidden bg-[#141414] px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        {/* Decorative glows */}
+        <div className="pointer-events-none absolute -right-32 top-40 h-[380px] w-[450px] rounded-full bg-[#3a5f00]/35 blur-[100px]" />
+        <div className="pointer-events-none absolute -left-20 top-24 h-[380px] w-[450px] rotate-180 rounded-full bg-[#74b214]/20 blur-[100px]" />
+
+        {/* Green wave dots — reused from the Home hero, bottom-left, never overlaps content */}
+        <div className="pointer-events-none absolute bottom-6 left-4 hidden sm:block lg:left-8">
+          <WaveDots />
         </div>
 
-        <div className="contact-content">
-          <div style={{ position: 'relative' }}>
-            <h1 className="contact-title">
-              Contact Us<span style={{ color: COLORS.primaryGreen }}>.</span>
+        <div className="relative mx-auto max-w-4xl text-center">
+          <div className="relative inline-block">
+            {/* Rotating sunburst halo — same asset/animation as the Home/About/Services hero */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2"
+              style={{
+                width: 'clamp(280px, 70vw, 620px)',
+                height: 'clamp(280px, 70vw, 620px)',
+                opacity: 0.25,
+                animation: 'contact-sunburst-spin 80s linear infinite',
+                willChange: 'transform',
+              }}
+            >
+              <Image src="/sunburst-lines.png" alt="" fill style={{ objectFit: 'contain' }} priority />
+            </div>
+
+            <h1
+              className="relative z-10 text-5xl font-medium tracking-tight text-white sm:text-6xl lg:text-7xl"
+              style={fadeUp(100)}
+            >
+              Contact Us<span className="text-[#96CA45]">.</span>
             </h1>
-            <div className="contact-arrow">
-              <span className="contact-arrow-text">Say Hello To Us!</span>
-              <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 80 Q 40 20, 80 40" stroke={COLORS.primaryGreen} strokeWidth="3" fill="transparent" strokeLinecap="round" />
-                <path d="M70 30 L 82 41 L 65 48" stroke={COLORS.primaryGreen} strokeWidth="3" fill="transparent" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+
+            {/* Curly arrow + handwritten label — same asset & float/reveal animation as the Home hero,
+                pointing down toward the form */}
+            <div
+              className="pointer-events-none absolute top-10 hidden lg:block"
+              style={{
+                right: '-14rem',
+                width: '220px',
+                opacity: heroVisible ? 1 : 0,
+                animation: heroVisible
+                  ? 'contact-reveal 0.75s cubic-bezier(.22,.68,0,1.2) 700ms both, contact-arrow-float 2.6s ease-in-out 1.4s infinite'
+                  : 'none',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              <div style={{ transform: 'rotate(125deg) scaleX(-1)', transformOrigin: 'top left', display: 'inline-block' }}>
+                <Image
+                  src="/curly-arrow.png"
+                  alt=""
+                  width={96}
+                  height={60}
+                  style={{ width: '78px', height: 'auto', display: 'block' }}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
+              </div>
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-30px',
+                  left: '64px',
+                  fontFamily: FS,
+                  fontSize: 'clamp(20px,2vw,26px)',
+                  lineHeight: '1.3',
+                  paddingBottom: '8px',
+                  color: '#96CA45',
+                  display: 'inline-block',
+                  transform: 'rotate(-4deg)',
+                  transformOrigin: 'left top',
+                  whiteSpace: 'nowrap',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                }}
+              >
+                Get In Touch
+                <br />
+                With Us
+              </span>
             </div>
           </div>
-          
-          <p className="contact-subtitle">Tell Us What's on Your Mind?</p>
+
+          <p
+            className="mt-4 text-xl font-light text-[#96CA45] sm:text-2xl lg:text-[35px]"
+            style={fadeUp(220)}
+          >
+            Tell Us What&apos;s on Your Mind?
+          </p>
 
           {success ? (
-            <div style={{ 
-              background: 'rgba(163,230,53,0.1)', border: \`1px solid \${COLORS.primaryGreen}\`,
-              padding: '40px', borderRadius: '12px', textAlign: 'center', width: '100%' 
-            }}>
-              <h3 style={{ color: COLORS.primaryGreen, fontSize: '24px', marginBottom: '12px', fontFamily: FONTS.heading }}>Message Sent!</h3>
-              <p style={{ color: '#fff', fontSize: '16px' }}>Thank you for reaching out. We will get back to you shortly.</p>
-              <button 
+            <div className="mt-10 rounded-xl border border-[#96CA45] bg-[#96CA45]/10 p-10 text-center">
+              <h3 className="mb-3 text-2xl font-semibold text-[#96CA45]">Message Sent!</h3>
+              <p className="text-base text-white">Thank you for reaching out. We will get back to you shortly.</p>
+              <button
                 onClick={() => setSuccess(false)}
-                style={{
-                  marginTop: '24px', background: 'transparent', border: '1px solid #fff', 
-                  color: '#fff', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer'
-                }}
+                className="mt-6 rounded border border-white px-6 py-2.5 text-white transition hover:bg-white/10"
               >
                 Send Another
               </button>
             </div>
           ) : (
-            <form className="contact-form" onSubmit={handleSubmit}>
-              <div className="contact-row">
-                <div className="contact-group">
-                  <label className="contact-label">First Name*</label>
-                  <input 
-                    type="text" name="firstName" className="contact-input" placeholder="Enter"
-                    value={formData.firstName} onChange={handleChange} required 
+            <form onSubmit={handleSubmit} className="mt-10 flex flex-col gap-5 text-left" style={fadeUp(340)}>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-2.5">
+                  <FieldLabel>First Name*</FieldLabel>
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="Enter"
+                    className={inputClass}
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
-                <div className="contact-group">
-                  <label className="contact-label">Last Name*</label>
-                  <input 
-                    type="text" name="lastName" className="contact-input" placeholder="Enter"
-                    value={formData.lastName} onChange={handleChange} required 
-                  />
-                </div>
-              </div>
-
-              <div className="contact-row">
-                <div className="contact-group">
-                  <label className="contact-label">Email*</label>
-                  <input 
-                    type="email" name="email" className="contact-input" placeholder="Enter"
-                    value={formData.email} onChange={handleChange} required 
-                  />
-                </div>
-                <div className="contact-group">
-                  <label className="contact-label">Phone Number*</label>
-                  <input 
-                    type="tel" name="phone" className="contact-input" placeholder="Enter"
-                    value={formData.phone} onChange={handleChange} required 
+                <div className="flex flex-col gap-2.5">
+                  <FieldLabel>Last Name*</FieldLabel>
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Enter"
+                    className={inputClass}
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
               </div>
 
-              <div className="contact-group">
-                <label className="contact-label">Subject*</label>
-                <input 
-                  type="text" name="subject" className="contact-input" placeholder="Enter"
-                  value={formData.subject} onChange={handleChange} required 
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-2.5">
+                  <FieldLabel>Email*</FieldLabel>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter"
+                    className={inputClass}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-2.5">
+                  <FieldLabel>Phone Number*</FieldLabel>
+                  <div className="flex h-[52px] items-center gap-3 rounded-lg bg-white/[0.04] px-5">
+                    <span className="text-sm text-white">+91</span>
+                    <span className="h-6 w-px bg-[#96CA45]" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Enter"
+                      className="h-full flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                <FieldLabel>Subject*</FieldLabel>
+                <input
+                  type="text"
+                  name="subject"
+                  placeholder="Enter"
+                  className={inputClass}
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
                 />
               </div>
 
-              <div className="contact-group">
-                <label className="contact-label">Tell Us More...*</label>
-                <textarea 
-                  name="message" className="contact-textarea" placeholder="Enter"
-                  value={formData.message} onChange={handleChange} required 
+              <div className="flex flex-col gap-2.5">
+                <FieldLabel>Tell Us More*</FieldLabel>
+                <textarea
+                  name="message"
+                  placeholder="Enter"
+                  className="min-h-[120px] w-full resize-y rounded-lg bg-white/[0.04] px-5 py-4 text-sm text-white placeholder:text-white/40 outline-none focus:ring-1 focus:ring-[#96CA45]"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
                 />
               </div>
 
               {error && (
-                <div style={{ color: '#ff4444', fontSize: '14px', marginTop: '-8px' }}>
+                <div className="-mt-2 whitespace-pre-line rounded-md border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-400">
                   {error}
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
-                <div style={{ minHeight: '65px' }}>
-                  {mounted && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                    <Turnstile
-                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                      onSuccess={setToken}
-                      theme="dark"
-                    />
-                  )}
-                </div>
-                <button type="submit" className="contact-submit" disabled={isSubmitting}>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-md bg-[#96CA45] px-8 py-3 text-sm font-semibold text-black transition hover:opacity-90 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   {isSubmitting ? 'Submitting...' : 'Submit'}
                 </button>
               </div>
@@ -581,63 +397,66 @@ export default function ContactPageClient() {
         </div>
       </section>
 
-      {/* ── LOCATIONS SECTION ── */}
-      <section className="locations-section">
-        <h2 className="locations-title">
-          Our <span>Locations</span>
-        </h2>
+      {/* ══════════════════════ LOCATIONS SECTION ══════════════════════ */}
+      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl" ref={locationsRef}>
+          <h2
+            className="mb-14 text-4xl font-bold tracking-tight text-[#252525] sm:text-5xl lg:text-[56px]"
+            style={cardFadeUp(0)}
+          >
+            Our <span className="text-[#96CA45]">Locations</span>
+          </h2>
 
-        <div className="locations-list">
-          {LOCATIONS.map((loc) => (
-            <div key={loc.id} className="location-card">
-              <div className="location-image-wrapper">
-                <img src={loc.image} alt={loc.country} />
-              </div>
-              
-              <div className="location-info">
-                <div className="location-country">
-                  <img src={loc.flag} alt="Flag" className="location-country-icon" />
-                  <span className="location-country-name">{loc.country}</span>
+          <div className="flex flex-col gap-14">
+            {LOCATIONS.map((loc, i) => (
+              <div
+                key={loc.id}
+                className="flex flex-col gap-10 border-b border-[#B6B6B6] pb-10 last:border-0 lg:flex-row"
+                style={cardFadeUp(120 + i * 130)}
+              >
+                <div className="relative h-[220px] overflow-hidden rounded-2xl lg:h-[270px] lg:w-[45%]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={loc.image} alt={loc.country} className="h-full w-full object-cover" />
                 </div>
-                
-                <p className="location-address">{loc.address}</p>
-                
-                <div className="location-contacts">
-                  {loc.phone && (
-                    <div className="location-contact-item">
-                      <div className="location-contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
+
+                <div className="flex flex-1 flex-col justify-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl leading-none">🇮🇳</span>
+                    <span className="text-xl font-medium tracking-wide text-[#96CA45]">{loc.country}</span>
+                  </div>
+
+                  <p className="max-w-md text-base leading-relaxed text-[#252525]">{loc.address}</p>
+
+                  <div className="mt-2 flex flex-col gap-3">
+                    {loc.phone && (
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#96CA45] transition-transform hover:scale-110">
+                          <Phone className="h-5 w-5 text-[#252525]" />
+                        </div>
+                        <span className="text-base font-medium text-black">{loc.phone}</span>
                       </div>
-                      <span className="location-contact-text">{loc.phone}</span>
-                    </div>
-                  )}
-                  {loc.email && (
-                    <div className="location-contact-item">
-                      <div className="location-contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                          <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
+                    )}
+                    {loc.email && (
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#96CA45] transition-transform hover:scale-110">
+                          <Mail className="h-5 w-5 text-[#252525]" />
+                        </div>
+                        <span className="text-base font-medium text-black">{loc.email}</span>
                       </div>
-                      <span className="location-contact-text">{loc.email}</span>
-                    </div>
-                  )}
-                  {loc.whatsapp && (
-                    <div className="location-contact-item">
-                      <div className="location-contact-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                        </svg>
+                    )}
+                    {loc.whatsapp && (
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#96CA45] transition-transform hover:scale-110">
+                          <MessageCircle className="h-5 w-5 text-[#252525]" />
+                        </div>
+                        <span className="text-base font-medium text-black">{loc.whatsapp}</span>
                       </div>
-                      <span className="location-contact-text">{loc.whatsapp}</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
     </main>

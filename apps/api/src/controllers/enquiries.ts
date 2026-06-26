@@ -1,18 +1,12 @@
 import { Request, Response } from 'express';
 import { Enquiry } from '../models/Enquiry.js';
 import { EnquirySchema, EnquiryUpdateSchema } from '@intelligen/utils';
-import { verifyTurnstileToken } from '../utils/turnstile.js';
 import { sendNotificationEmailToAdmin, sendConfirmationEmailToUser } from '../utils/email.js';
 import { ENQUIRY_STATUSES } from '@intelligen/constants';
 
 export const createEnquiry = async (req: Request, res: Response): Promise<any> => {
   try {
     const validatedData = EnquirySchema.parse(req.body);
-
-    const isTokenValid = await verifyTurnstileToken(validatedData.turnstileToken);
-    if (!isTokenValid) {
-      return res.status(400).json({ success: false, message: 'Invalid Turnstile token' });
-    }
 
     const newEnquiry = await Enquiry.create(validatedData);
 

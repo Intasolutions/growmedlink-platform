@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Turnstile } from '@marsidev/react-turnstile';
 import { submitEnquiry } from '@/lib/api/enquiries';
 import { Loader2, CheckCircle, Lightbulb } from 'lucide-react';
 import { ENQUIRY_TYPES } from '@intelligen/constants';
@@ -15,17 +14,12 @@ export default function TalkToExpertPage() {
     destinationCountry: '',
     message: '',
   });
-  const [token, setToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) {
-      setError('Please complete the Turnstile verification.');
-      return;
-    }
 
     setIsSubmitting(true);
     setError(null);
@@ -36,7 +30,6 @@ export default function TalkToExpertPage() {
         type: ENQUIRY_TYPES.TALK_TO_EXPERT,
         source: 'talk-to-expert',
         pageUrl: window.location.href,
-        turnstileToken: token,
       });
       setSuccess(true);
     } catch (err: any) {
@@ -171,16 +164,11 @@ export default function TalkToExpertPage() {
                   </div>
                 </div>
 
-                {/* Security & Submission */}
-                <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
-                  <Turnstile
-                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                    onSuccess={(t) => setToken(t)}
-                    options={{ theme: 'dark' }}
-                  />
+                {/* Submission */}
+                <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-end gap-6">
                   <button
                     type="submit"
-                    disabled={isSubmitting || !token}
+                    disabled={isSubmitting}
                     className="w-full sm:w-auto bg-secondary text-[#020C1B] px-10 py-4 rounded-xl font-bold text-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
                   >
                     {isSubmitting && <Loader2 className="h-5 w-5 animate-spin" />}

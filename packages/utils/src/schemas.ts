@@ -76,7 +76,6 @@ export const EnquirySchema = z.object({
   message: z.string().min(10, 'Message must be at least 10 characters long'),
   source: z.string().optional(),
   pageUrl: z.string().optional(),
-  turnstileToken: z.string().min(1, 'Turnstile verification is required'),
 });
 
 export const EnquiryUpdateSchema = z.object({

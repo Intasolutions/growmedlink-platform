@@ -10,10 +10,14 @@ export async function submitEnquiry(payload: any) {
   });
   
   const data = await res.json();
-  
+
   if (!res.ok) {
-    throw new Error(data.message || (data.errors ? Object.values(data.errors)[0] as string : 'Failed to submit enquiry'));
+    if (data.errors) {
+      const messages = Object.values(data.errors as Record<string, string[]>).flat();
+      throw new Error(messages.join('\n') || 'Please check the form and try again.');
+    }
+    throw new Error(data.message || 'Failed to submit enquiry');
   }
-  
+
   return data;
 }
