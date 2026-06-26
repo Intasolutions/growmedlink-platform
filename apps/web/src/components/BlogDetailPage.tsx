@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link  from 'next/link';
 import FAQSection from '@/components/FAQSection';
 // Adjust this import path to match your project structure:
-import TiptapRenderer from '@/components/TiptapRenderer';
+import { TiptapRenderer } from '@/components/TiptapRenderer';
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -26,7 +26,7 @@ interface BlogAuthor {
 export interface BlogDetail {
   title:            string;
   summary?:         string;
-  content?:         string;
+  content?:         any;
   image?:           string | { url: string; secureUrl?: string } | null;
   slug:             string;
   createdAt?:       string;
@@ -122,9 +122,13 @@ const STYLES = `
 .bld-prose a { color:${GREEN}; text-decoration:underline; text-underline-offset:3px; }
 .bld-prose a:hover { opacity:0.78; }
 .bld-prose blockquote {
-  border-left:3px solid ${GREEN}; padding-left:1.4em;
+  border-left:3px solid #7F56D9; padding-left:1.4em;
   margin:2em 0; color:#555; font-style:italic;
 }
+.bld-conclusion-box {
+  background: #f9fafb; border-radius: 12px; padding: 32px; margin: 3em 0;
+}
+.bld-conclusion-box h2, .bld-conclusion-box h3 { margin-top: 0 !important; }
 .bld-prose ul,.bld-prose ol { padding-left:1.7em; margin:1.25em 0; }
 .bld-prose li { margin-bottom:0.55em; }
 .bld-prose pre {
@@ -156,7 +160,7 @@ const STYLES = `
   .bld-rv  { opacity:1 !important; transform:none !important; transition:none !important; }
   .bld-tag { transition:none !important; }
 }
-\`;
+`;
 
 /* ══════════════════════════════════════════════════════════════════════
    HOOK
@@ -216,21 +220,9 @@ function HeroSection({ blog }: { blog: BlogDetail }) {
       }}>
         <div style={{ maxWidth:920, margin:'0 auto' }}>
 
-          {/* Tags */}
-          {!!blog.tags?.length && (
-            <div style={{
-              display:'flex', flexWrap:'wrap', gap:8, marginBottom:18,
-              animation:'bld-fadein 0.8s ease 0.08s both',
-            }}>
-              {blog.tags.map((tag, i) => (
-                <span key={i} className="bld-tag">{tag}</span>
-              ))}
-            </div>
-          )}
-
           {/* Title */}
           <h1 className="bld-hero-title" style={{
-            fontFamily:FH, fontWeight:500, color:'#fff',
+            fontFamily:FH, fontWeight:500, color:'#fff', textAlign:'center',
             fontSize:'clamp(32px,5.8vw,84px)', lineHeight:'1.15',
             letterSpacing:'-0.03em',
             marginBottom:'clamp(12px,2vw,22px)',
@@ -242,53 +234,13 @@ function HeroSection({ blog }: { blog: BlogDetail }) {
           {/* Summary */}
           {blog.summary && (
             <p style={{
-              fontFamily:FH, fontSize:18, color:'rgba(255,255,255,0.86)',
-              lineHeight:'1.65', maxWidth:720, marginBottom:24,
+              fontFamily:FH, fontSize:18, color:'rgba(255,255,255,0.86)', textAlign:'center',
+              lineHeight:'1.65', maxWidth:720, margin:'0 auto', marginBottom:24,
               animation:'bld-fadein 0.9s ease 0.35s both',
             }}>
               {blog.summary}
             </p>
           )}
-
-          {/* Meta row: author · date · reading time */}
-          <div style={{
-            display:'flex', alignItems:'center', flexWrap:'wrap', gap:14,
-            animation:'bld-fadein 0.9s ease 0.5s both',
-          }}>
-            {/* Author (graceful: show nothing if absent) */}
-            {blog.author?.name && (
-              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <div style={{
-                  width:36, height:36, borderRadius:'50%', flexShrink:0,
-                  overflow:'hidden', border:'2px solid rgba(255,255,255,0.45)',
-                  background:'rgba(255,255,255,0.18)',
-                }}>
-                  {avatarImg && (
-                    <Image src={avatarImg} alt={blog.author.name ?? ''}
-                      width={36} height={36} style={{ objectFit:'cover' }} />
-                  )}
-                </div>
-                <div>
-                  <p style={{ fontFamily:FH, fontSize:13, fontWeight:600, color:'#fff', lineHeight:'17px' }}>
-                    {blog.author.name}
-                  </p>
-                  {blog.author.email && (
-                    <p style={{ fontFamily:FH, fontSize:11, color:'rgba(255,255,255,0.6)', lineHeight:'14px' }}>
-                      {blog.author.email}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {blog.author?.name && <span style={{ color:'rgba(255,255,255,0.28)', fontSize:18 }}>·</span>}
-
-            {blog.createdAt && (
-              <span style={{ fontFamily:FM, fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.76)' }}>
-                {formatDate(blog.createdAt)}
-              </span>
-            )}
-          </div>
         </div>
       </div>
     </section>
@@ -331,36 +283,39 @@ function ArticleContent({ blog }: { blog: BlogDetail }) {
             }
           </div>
 
-          {/* Tags repeated at article footer */}
-          {!!blog.tags?.length && (
-            <div style={{
-              marginTop:52, paddingTop:28,
-              borderTop:'1px solid #eaeaea',
-              display:'flex', flexWrap:'wrap', gap:8, alignItems:'center',
-            }}>
-              <span style={{
-                fontFamily:FM, fontSize:12, color:'#aaa', marginRight:6, flexShrink:0,
-              }}>
-                Tags:
-              </span>
-              {blog.tags.map((tag, i) => (
-                <span key={i} className="bld-tag">{tag}</span>
-              ))}
+          {/* Author and Share Footer */}
+          <div style={{ marginTop:56, paddingTop:28, borderTop:'1px solid #eaeaea', display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:20 }}>
+            {/* Left: Author Info */}
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              {blog.author?.avatar && (
+                <div style={{ width:48, height:48, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'#f0f0f0' }}>
+                  <Image src={resolveImg(blog.author.avatar) ?? ''} alt={blog.author.name ?? ''} width={48} height={48} style={{ objectFit:'cover' }} />
+                </div>
+              )}
+              {blog.author?.name && (
+                <div>
+                  <p style={{ fontFamily:FM, fontSize:14, fontWeight:600, color:'#000', marginBottom:2 }}>{blog.author.name}</p>
+                  <p style={{ fontFamily:FH, fontSize:13, color:'#666' }}>{blog.author.email ?? 'Author'}</p>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Navigation footer */}
-          <div style={{ marginTop:56, paddingTop:28, borderTop:'1px solid #eaeaea' }}>
-            <Link href="/blog" className="bld-back"
-              style={{ display:'inline-flex', alignItems:'center', gap:8,
-                fontFamily:FM, fontSize:13, fontWeight:500, color:DARK }}>
-              <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                <path d="M19 12H5M5 12L12 19M5 12L12 5"
-                  stroke="currentColor" strokeWidth={2}
-                  strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              All Articles
-            </Link>
+            {/* Right: Share Buttons */}
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <button style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 12px', border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', fontFamily:FH, fontSize:14, fontWeight:500, cursor:'pointer' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                Copy link
+              </button>
+              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+              </button>
+              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              </button>
+              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
