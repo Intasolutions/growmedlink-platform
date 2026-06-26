@@ -5,6 +5,14 @@ import { softDeletePlugin, SoftDeleteDocument } from './plugins/softDelete.js';
 
 export interface ServiceDocument extends Omit<IService, 'deletedAt' | '_id'>, SoftDeleteDocument, Document {}
 
+const featureSchema = new Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true }
+  },
+  { _id: false }
+);
+
 const serviceSchema = new Schema(
   {
     title: {
@@ -37,6 +45,14 @@ const serviceSchema = new Schema(
       required: [true, 'Rich text content structure is required'],
       default: {},
     },
+    features: {
+      type: [featureSchema],
+      default: [],
+      validate: [
+        function (val: any[]) { return val.length <= 6; },
+        '{PATH} exceeds the limit of 6'
+      ]
+    },
     image: {
       type: Schema.Types.ObjectId,
       ref: 'Media',
@@ -45,11 +61,12 @@ const serviceSchema = new Schema(
     secondaryImage: {
       type: Schema.Types.ObjectId,
       ref: 'Media',
+      required: [true, 'Secondary image is required'],
     },
     secondaryHeading: {
       type: String,
+      required: [true, 'Secondary heading is required'],
       trim: true,
-      default: '',
     },
     metaTitle: {
       type: String,

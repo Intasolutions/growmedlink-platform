@@ -28,6 +28,11 @@ export interface IMedia {
   createdAt: string;
 }
 
+export interface IServiceFeature {
+  title: string;
+  description: string;
+}
+
 export interface IService {
   _id: string;
   title: string;
@@ -35,9 +40,10 @@ export interface IService {
   category: ServiceCategory;
   description: string;
   content: Record<string, any>; // Tiptap JSON content object
+  features?: IServiceFeature[]; // Up to 6 features
   image: string | IMedia; // Media ID or full object reference
-  secondaryImage?: string | IMedia; // Secondary optional image
-  secondaryHeading?: string; // Optional secondary heading
+  secondaryImage: string | IMedia; // Secondary optional image
+  secondaryHeading: string; // Optional secondary heading
   metaTitle: string;
   metaDescription: string;
   keywords: string[];

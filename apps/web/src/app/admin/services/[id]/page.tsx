@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react';
 import MediaSelectorModal from '../../../../components/MediaSelectorModal';
 import { IMedia, IService } from '@intelligen/types';
 
@@ -25,6 +25,9 @@ export default function EditServicePage({ params }: EditServiceProps) {
   const [description, setDescription] = useState('');
   const [contentText, setContentText] = useState('');
   const [selectedImage, setSelectedImage] = useState<IMedia | null>(null);
+  const [secondaryHeading, setSecondaryHeading] = useState('');
+  const [secondaryImage, setSecondaryImage] = useState<IMedia | null>(null);
+  const [features, setFeatures] = useState<{title: string, description: string}[]>([]);
   const [isFeatured, setIsFeatured] = useState(false);
 
   // SEO states
@@ -39,7 +42,7 @@ export default function EditServicePage({ params }: EditServiceProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const [isMediaOpen, setIsMediaOpen] = useState(false);
+  const [mediaTarget, setMediaTarget] = useState<'primary' | 'secondary' | null>(null);
 
   // Fetch service details on load
   useEffect(() => {
@@ -59,6 +62,9 @@ export default function EditServicePage({ params }: EditServiceProps) {
           setDescription(service.description);
           setContentText(service.content?.text || '');
           setSelectedImage(service.image as IMedia);
+          setSecondaryHeading(service.secondaryHeading || '');
+          setSecondaryImage((service.secondaryImage as IMedia) || null);
+          setFeatures(service.features || []);
           setIsFeatured(service.isFeatured);
           setMetaTitle(service.metaTitle || '');
           setMetaDescription(service.metaDescription || '');
@@ -116,6 +122,9 @@ export default function EditServicePage({ params }: EditServiceProps) {
       description,
       content: { text: contentText },
       image: selectedImage._id,
+      secondaryImage: secondaryImage?._id || '',
+      secondaryHeading: secondaryHeading || '',
+      features,
       metaTitle: metaTitle || title,
       metaDescription: metaDescription || description,
       keywords,
@@ -315,7 +324,7 @@ export default function EditServicePage({ params }: EditServiceProps) {
                 />
                 <button
                   type="button"
-                  onClick={() => setIsMediaOpen(true)}
+                  onClick={() => setMediaTarget('primary')}
                   className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
                 >
                   Change Image
@@ -324,7 +333,7 @@ export default function EditServicePage({ params }: EditServiceProps) {
             ) : (
               <button
                 type="button"
-                onClick={() => setIsMediaOpen(true)}
+                onClick={() => setMediaTarget('primary')}
                 className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
               >
                 <ImageIcon className="h-8 w-8 text-gray-500 animate-pulse" />
@@ -333,6 +342,58 @@ export default function EditServicePage({ params }: EditServiceProps) {
             )}
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
+            )}
+          </div>
+
+          {/* Secondary Heading */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest">
+              Secondary Heading
+            </label>
+            <input
+              type="text"
+              value={secondaryHeading}
+              onChange={e => setSecondaryHeading(e.target.value)}
+              placeholder="e.g. What Sets Us Apart"
+              className="w-full px-4 py-3 bg-[#020C1B]/80 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-secondary transition-all text-sm"
+            />
+            {fieldErrors.secondaryHeading && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.secondaryHeading[0]}</p>
+            )}
+          </div>
+
+          {/* Secondary Image Upload Reference */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
+              Secondary Image
+            </label>
+            {secondaryImage ? (
+              <div className="relative group max-w-sm rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#020C1B]">
+                <img
+                  src={secondaryImage.secureUrl}
+                  alt={secondaryImage.filename}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaTarget('secondary')}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
+                >
+                  Change Secondary Image
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setMediaTarget('secondary')}
+                className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
+              >
+                <ImageIcon className="h-8 w-8 text-gray-500" />
+                <span className="text-xs font-semibold tracking-wider uppercase">Select Secondary Image</span>
+              </button>
+            )}
+            {fieldErrors.secondaryImage && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.secondaryImage[0]}</p>
             )}
           </div>
 
@@ -350,6 +411,80 @@ export default function EditServicePage({ params }: EditServiceProps) {
                 <p className="text-xs text-gray-400 font-light mt-0.5">Highlight this item on the landing pages and featured slides.</p>
               </div>
             </label>
+          </div>
+        </div>
+
+        {/* Features Configuration */}
+        <div className="bg-[#0A192F]/20 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <h2 className="text-lg font-bold text-white tracking-wide">Key Features (Max 6)</h2>
+            <button
+              type="button"
+              onClick={() => features.length < 6 && setFeatures([...features, { title: '', description: '' }])}
+              disabled={features.length >= 6}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Feature
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {features.map((feature, idx) => (
+              <div key={idx} className="relative bg-[#020C1B]/50 border border-white/5 rounded-xl p-4">
+                <button
+                  type="button"
+                  onClick={() => setFeatures(features.filter((_, i) => i !== idx))}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-8">
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Feature Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={feature.title}
+                      onChange={e => {
+                        const newF = [...features];
+                        newF[idx].title = e.target.value;
+                        setFeatures(newF);
+                      }}
+                      placeholder="e.g. Free Consultation"
+                      className="w-full px-3 py-2 bg-[#020C1B]/80 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-secondary transition-all text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Feature Description
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={feature.description}
+                      onChange={e => {
+                        const newF = [...features];
+                        newF[idx].description = e.target.value;
+                        setFeatures(newF);
+                      }}
+                      placeholder="e.g. Talk with our experts for free..."
+                      className="w-full px-3 py-2 bg-[#020C1B]/80 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-secondary transition-all text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {features.length === 0 && (
+              <div className="text-center py-6 border border-dashed border-white/10 rounded-xl text-gray-500 text-sm">
+                No features added yet. You can add up to 6 key features.
+              </div>
+            )}
+            {fieldErrors.features && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.features[0]}</p>
+            )}
           </div>
         </div>
 
@@ -477,10 +612,14 @@ export default function EditServicePage({ params }: EditServiceProps) {
 
       {/* Media Selector Modal */}
       <MediaSelectorModal
-        isOpen={isMediaOpen}
-        onClose={() => setIsMediaOpen(false)}
-        selectedId={selectedImage?._id}
-        onSelect={setSelectedImage}
+        isOpen={mediaTarget !== null}
+        onClose={() => setMediaTarget(null)}
+        selectedId={mediaTarget === 'primary' ? selectedImage?._id : mediaTarget === 'secondary' ? secondaryImage?._id : undefined}
+        onSelect={(img) => {
+          if (mediaTarget === 'primary') setSelectedImage(img);
+          else if (mediaTarget === 'secondary') setSecondaryImage(img);
+          setMediaTarget(null);
+        }}
       />
     </div>
   );

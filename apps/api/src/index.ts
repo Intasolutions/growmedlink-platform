@@ -68,6 +68,15 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Intelligen API is running smoothly' });
 });
 
+// Global Error Handler to always return JSON instead of HTML
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('[Global Error Handler]', err);
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ success: false, message: err.message, errors: err.errors });
+  }
+  res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`[server] API Server is running on port ${PORT}`);

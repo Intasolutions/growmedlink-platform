@@ -24,15 +24,21 @@ export const UserUpdateSchema = z.object({
   role: z.enum([ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.EDITOR]).optional(),
 });
 
+export const ServiceFeatureSchema = z.object({
+  title: z.string().min(1, 'Feature title is required').max(100),
+  description: z.string().min(1, 'Feature description is required').max(500),
+});
+
 export const ServiceSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. canada-student-visa)'),
   category: z.enum([SERVICE_CATEGORIES.IMMIGRATION, SERVICE_CATEGORIES.LANGUAGE]),
   description: z.string().min(10, 'Short description must be at least 10 characters long'),
   content: z.record(z.any(), { message: 'Content must be a valid Tiptap JSON object' }),
+  features: z.array(ServiceFeatureSchema).max(6, 'Maximum 6 features allowed').optional(),
   image: z.string().min(1, 'Please select an image from media library'), // ObjectId of Media
-  secondaryImage: z.string().optional().or(z.literal('')),
-  secondaryHeading: z.string().optional().or(z.literal('')),
+  secondaryImage: z.string().min(1, 'Please select a secondary image'),
+  secondaryHeading: z.string().min(3, 'Secondary heading must be at least 3 characters'),
   metaTitle: z.string().min(5, 'Meta title must be at least 5 characters long').max(70),
   metaDescription: z.string().min(10, 'Meta description must be at least 10 characters').max(160),
   keywords: z.array(z.string()),

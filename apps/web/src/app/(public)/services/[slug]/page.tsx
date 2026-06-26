@@ -1,11 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getServiceBySlug } from '@/lib/api/services';
+import { getServiceBySlug, getServices } from '@/lib/api/services';
 import { TiptapRenderer } from '@/components/TiptapRenderer';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { IMedia } from '@intelligen/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   if (!service) {
     notFound();
   }
+
+  const relatedServicesAll = await getServices(service.category);
+  const relatedServices = relatedServicesAll
+    .filter((s: any) => s._id !== service._id)
+    .slice(0, 2);
 
   const imageUrl = typeof service.image === 'object' ? service.image.secureUrl : service.image;
 
@@ -75,6 +81,38 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               <div className="bg-[#0A192F] border border-[#1E2D3D] rounded-3xl p-8 md:p-12 shadow-2xl">
                 <TiptapRenderer content={service.content} />
               </div>
+
+              {/* Secondary Section & Features */}
+              {(service.secondaryHeading || service.secondaryImage || (service.features && service.features.length > 0)) && (
+                <div className="mt-12 bg-[#020C1B]/80 border border-[#1E2D3D] rounded-3xl p-8 md:p-12">
+                  {service.secondaryHeading && (
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
+                      {service.secondaryHeading}
+                    </h2>
+                  )}
+                  {service.secondaryImage && (
+                    <div className="mb-10 rounded-2xl overflow-hidden border border-white/5 shadow-lg">
+                      <Image
+                        src={(service.secondaryImage as IMedia).secureUrl}
+                        alt={(service.secondaryImage as IMedia).filename || service.secondaryHeading || 'Service image'}
+                        width={800}
+                        height={400}
+                        className="w-full h-auto object-cover max-h-[400px]"
+                      />
+                    </div>
+                  )}
+                  {service.features && service.features.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+                      {service.features.map((feature: any, idx: number) => (
+                        <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-secondary/30 transition-colors">
+                          <h4 className="text-lg font-bold text-white mb-2">{feature.title}</h4>
+                          <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Sidebar CTA */}
@@ -105,6 +143,36 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </section>
+
+      {/* Related Services */}
+      {relatedServices.length > 0 && (
+        <section className="py-16 bg-[#020C1B] border-t border-white/5">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-white mb-10 text-center">Related Services</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {relatedServices.map((rs: any) => (
+                <Link key={rs._id} href={`/services/${rs.slug}`} className="group block">
+                  <div className="bg-[#0A192F] border border-[#1E2D3D] rounded-3xl overflow-hidden hover:border-secondary/50 transition-all duration-300">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image
+                        src={typeof rs.image === 'object' ? rs.image.secureUrl : rs.image}
+                        alt={rs.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-secondary transition-colors">{rs.title}</h3>
+                      <p className="text-sm text-gray-400 line-clamp-2">{rs.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
