@@ -133,11 +133,11 @@ export default function FAQSection({
   );
 
   return (
-    <section style={{ background, padding: '52px 0 58px', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ background, padding: 'clamp(40px, 8vw, 80px) 0', position: 'relative', overflow: 'hidden' }}>
       {/* Scoped styles injected once per mount */}
       <style dangerouslySetInnerHTML={{ __html: FAQ_STYLES }} />
 
-      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 26px', position: 'relative' }}>
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 clamp(20px, 5vw, 60px)', position: 'relative' }}>
 
         {/* Wave dots – left */}
         <div style={{ position: 'absolute', left: 26, top: 48, pointerEvents: 'none' }}>
@@ -148,7 +148,7 @@ export default function FAQSection({
         <div ref={rh} className="faq-rv" style={{ textAlign: 'center', marginBottom: 36 }}>
           <h2 style={{
             fontFamily: FH, fontWeight: 400, letterSpacing: '-0.03em',
-            fontSize: 'clamp(23px,3.6vw,52px)', color: '#fff',
+            fontSize: 'clamp(24px,4vw,48px)', color: '#fff',
             lineHeight: '1.19', maxWidth: 455, margin: '0 auto',
           }}>
             {headingNode}
