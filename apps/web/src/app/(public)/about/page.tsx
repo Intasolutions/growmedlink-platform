@@ -399,6 +399,83 @@ const STYLES = `
 /* pill section */
 .abt-pill { border-radius: 1000px; overflow: hidden; }
 
+/* ── MissionVision Responsive Grid & Container ── */
+.abt-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+@media (max-width: 1024px) {
+  .abt-container {
+    padding: 0 40px;
+  }
+}
+@media (max-width: 768px) {
+  .abt-container {
+    padding: 0 24px;
+  }
+}
+
+.abt-mv-container {
+  display: flex;
+  gap: 8%;
+  align-items: stretch;
+  position: relative;
+}
+.abt-mv-left {
+  flex: 1.1;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+}
+.abt-mv-right {
+  flex: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+}
+.abt-mv-avatars {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 208px;
+  height: 128px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .abt-mv-container {
+    flex-direction: column;
+    gap: 60px;
+    align-items: center;
+  }
+  .abt-mv-left {
+    width: 100%;
+    max-width: 600px;
+  }
+  .abt-mv-right {
+    width: 100%;
+    max-width: 460px;
+    justify-content: center;
+  }
+  .abt-mv-avatars {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 32px auto;
+    height: 112px;
+    width: 192px;
+  }
+  .abt-mv-divider-v, .abt-mv-divider-h {
+    display: none !important;
+  }
+}
+
 /* ── responsive ── */
 @media (max-width: 1199px) {
   .abt-arch { height: 340px; }
@@ -711,70 +788,225 @@ function HeroSection() {
 function MissionVision() {
   const secRef = useRef<HTMLDivElement>(null);
   const [vis, setVis] = useState(false);
+
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: 0.08 });
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        setVis(true);
+        obs.disconnect();
+      }
+    }, { threshold: 0.08 });
     if (secRef.current) obs.observe(secRef.current);
     return () => obs.disconnect();
   }, []);
+
   const v = vis;
 
   return (
-    <section style={{ background:'#fff', position:'relative', overflow:'hidden' }} ref={secRef}>
+    <section
+      ref={secRef}
+      style={{
+        background: '#fff',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '80px 0 96px'
+      }}
+    >
       {/* centre dividers */}
-      <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'#D9D9D9', transform:'translateX(-50%)', pointerEvents:'none' }} />
-      <div style={{ position:'absolute', left:0, right:0, top:255, height:1, background:'#D9D9D9' }} />
+      <div className="abt-mv-divider-v" style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: '#E5E7EB', transform: 'translateX(-50%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div className="abt-mv-divider-h" style={{ position: 'absolute', left: 0, right: 0, top: '48%', height: 1, background: '#E5E7EB', pointerEvents: 'none', zIndex: 0 }} />
 
-      <div style={{ maxWidth:1440, margin:'0 auto', padding:'72px 40px 80px' }}>
-        {/* MISSION ROW */}
-        <div className="abt-miss-grid" style={{ display:'flex', gap:40, alignItems:'flex-start', marginBottom:60 }}>
+      <div className="abt-container" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="abt-mv-container">
 
-          {/* left */}
-          <div style={{ flex:1, maxWidth:560 }}>
-            <h2 className={`abt-sh abt-ms${v?' abt-in':''}`} style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(40px,6vw,86px)', letterSpacing:'-0.03em', color:DARK, lineHeight:'1.19', marginBottom:36 }}>
-              OUR MISSION
-            </h2>
-            <div className={`abt-ms abt-d1${v?' abt-in':''}`} style={{ position:'relative', width:296, height:168, marginBottom:32 }}>
-              <div style={{ position:'absolute', left:0, top:0, width:168, height:168, borderRadius:'50%', overflow:'hidden', background:'#c5c5c5', zIndex:2 }}>
-                <Image src="/about/1.jpg" alt="" fill style={{ objectFit:'cover' }} onError={e => { (e.currentTarget as HTMLImageElement).style.background='#aaa'; }} />
-              </div>
-              <div style={{ position:'absolute', left:128, top:0, width:168, height:168, borderRadius:14, overflow:'hidden', background:'#b8b8b8', zIndex:1 }}>
-                <Image src="/about/2.jpg" alt="" fill style={{ objectFit:'cover' }} onError={e => { (e.currentTarget as HTMLImageElement).style.background='#999'; }} />
-              </div>
+          {/* Left Column - Text Content */}
+          <div className="abt-mv-left">
+            
+            {/* OUR MISSION */}
+            <div style={{ marginBottom: '64px' }}>
+              <h2
+                className={`abt-sh abt-ms${v ? ' abt-in' : ''}`}
+                style={{
+                  fontFamily: FH,
+                  fontWeight: 400,
+                  fontSize: 'clamp(28px, 4vw, 54px)',
+                  letterSpacing: '-0.03em',
+                  color: DARK,
+                  lineHeight: '1.2',
+                  marginBottom: '24px'
+                }}
+              >
+                OUR <span style={{ color: GREEN, fontWeight: 700 }}>MISSION</span>
+              </h2>
+              <p
+                className={`abt-ms abt-d1${v ? ' abt-in' : ''}`}
+                style={{
+                  fontFamily: FH,
+                  fontSize: 'clamp(14px, 1.5vw, 16px)',
+                  lineHeight: '1.7',
+                  color: '#252525',
+                  maxWidth: '416px'
+                }}
+              >
+                T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
+              </p>
             </div>
-            <p className={`abt-ms abt-d2${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000' }}>
-              Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec.
-            </p>
+
+            {/* See How Its Work! Callout */}
+            <div
+              className={`abt-ms abt-d2${v ? ' abt-in' : ''}`}
+              style={{
+                position: 'relative',
+                height: '64px',
+                margin: '16px 0 48px 32px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              {/* Curly arrow pointing down-left from text to OUR VISION */}
+              <div style={{ position: 'absolute', left: '-36px', top: '5px' }}>
+                <Image
+                  src="/red-curly-arrow.png"
+                  alt=""
+                  width={50}
+                  height={50}
+                  style={{ transform: 'scaleX(-1) rotate(-35deg)', width: '40px', height: 'auto' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
+              </div>
+              <span
+                style={{
+                  fontFamily: FS,
+                  fontSize: '26px',
+                  color: RED,
+                  whiteSpace: 'nowrap',
+                  marginLeft: '16px',
+                  transform: 'rotate(-3deg)',
+                  display: 'inline-block'
+                }}
+              >
+                See How Its Work!
+              </span>
+            </div>
+
+            {/* OUR VISION */}
+            <div>
+              <h2
+                className={`abt-sh abt-ms abt-d3${v ? ' abt-in' : ''}`}
+                style={{
+                  fontFamily: FH,
+                  fontWeight: 400,
+                  fontSize: 'clamp(28px, 4vw, 54px)',
+                  letterSpacing: '-0.03em',
+                  color: DARK,
+                  lineHeight: '1.2',
+                  marginBottom: '24px'
+                }}
+              >
+                OUR <span style={{ color: BLUE, fontWeight: 700 }}>VISION</span>
+              </h2>
+              <p
+                className={`abt-ms abt-d4${v ? ' abt-in' : ''}`}
+                style={{
+                  fontFamily: FH,
+                  fontSize: 'clamp(14px, 1.5vw, 16px)',
+                  lineHeight: '1.7',
+                  color: '#252525',
+                  maxWidth: '416px'
+                }}
+              >
+                T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
+              </p>
+            </div>
+
           </div>
 
-          {/* right — image wipe */}
-          <div className={`abt-ms-img${v?' abt-in':''}`} style={{ width:369, height:516, flexShrink:0, marginLeft:'auto', background:'#888' }}>
-            <div className="abt-ms-img-inner">
-              <Image src="/about/14.jpg" alt="" fill style={{ objectFit:'cover', borderRadius:7 }} onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
+          {/* Right Column - Large Simulation Image */}
+          <div className="abt-mv-right">
+            
+            {/* Simulation image container with reveal and Ken Burns animations */}
+            <div
+              className={`abt-ms-img${v ? ' abt-in' : ''}`}
+              style={{
+                width: '100%',
+                maxWidth: '368px',
+                height: 'clamp(320px, 36vw, 464px)',
+                position: 'relative',
+                boxShadow: '0 20px 48px rgba(0,0,0,0.12)',
+                borderRadius: 24,
+                overflow: 'hidden'
+              }}
+            >
+              <div className="abt-ms-img-inner" style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <Image
+                  src="/about/14.jpg"
+                  alt="Our Mission & Vision"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                />
+              </div>
             </div>
-            <div style={{ position:'absolute', bottom:0, left:0, right:0, height:1, background:`rgba(150,202,69,0.8)`, zIndex:10 }} />
+
+            {/* Green Dots Wave at bottom-right corner */}
+            <div style={{ position: 'absolute', bottom: '-40px', right: '-40px', zIndex: 0 }}>
+              <WaveDots />
+            </div>
+
           </div>
-        </div>
 
-        {/* "See How Its Work!" callout */}
-        <div style={{ position:'relative', height:72, marginBottom:56 }}>
-          <svg width={82} height={77} viewBox="0 0 82 77" fill="none" style={{ position:'absolute', left:420, top:4, transform:'matrix(0.97,0.26,0.26,-0.97,0,0)' }}>
-            <path d="M5 72 C20 50 40 35 55 20 C65 10 73 4 77 2" stroke={RED} strokeWidth={2} fill="none" strokeLinecap="round"/>
-            <path d="M65 2 L77 2 L77 14" stroke={RED} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span style={{ position:'absolute', left:542, top:22, fontFamily:FS, fontSize:28, color:RED, lineHeight:'28px' }}>See How Its Work!</span>
-        </div>
+          {/* Central Overlapping Avatars (circle + rounded rect) */}
+          <div
+            className={`abt-mv-avatars abt-ms abt-d2${v ? ' abt-in' : ''}`}
+          >
+            {/* Circle Avatar (Left) */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '5px solid #fff',
+                boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
+                background: '#e0e0e0'
+              }}
+            >
+              <Image
+                src="/about/1.jpg"
+                alt=""
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
 
-        {/* VISION */}
-        <div style={{ maxWidth:560, marginBottom:80 }}>
-          <h2 className={`abt-sh abt-ms abt-d3${v?' abt-in':''}`} style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(40px,6vw,86px)', letterSpacing:'-0.03em', color:DARK, lineHeight:'1.19', marginBottom:32 }}>
-            OUR VISION
-          </h2>
-          <p className={`abt-ms abt-d4${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000' }}>
-            Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec.
-          </p>
-        </div>
+            {/* Rounded Rect Avatar (Right, overlaps circle) */}
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                bottom: 0,
+                width: '96px',
+                height: '96px',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                border: '5px solid #fff',
+                boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
+                background: '#dcdcdc'
+              }}
+            >
+              <Image
+                src="/about/2.jpg"
+                alt=""
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+          </div>
 
-        <div style={{ display:'flex', justifyContent:'flex-end' }}><WaveDots /></div>
+        </div>
       </div>
     </section>
   );
