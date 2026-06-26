@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import FAQSection from '@/components/FAQSection';
 
 const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
@@ -13,12 +14,12 @@ const BLUE  = '#155BA9';
 const RED   = '#AF1515';
 
 const TEAM = [
-  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. Dr. Mitchell shapes our medical curriculum and ensures every program meets the highest international standards.' },
-  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', grad:['#96CA45','#4a7a10'], bio:'With dual specialisations in medical education and health policy, Dr. Patel leads the design of our flagship NCLEX and PLAB preparation tracks, maintaining a 91 % first-attempt pass rate among our graduates.' },
-  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', grad:['#6938EF','#3d1d9e'], bio:'Priya brings a decade of student mentorship experience from top nursing colleges. She oversees every touchpoint of the learner journey — from onboarding to post-placement support.' },
-  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', grad:['#F79009','#a55c00'], bio:'A serial edtech entrepreneur, James architected our adaptive learning platform that personalises study plans in real-time, reducing average preparation time by 30 %.' },
-  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our simulation labs, delivering the case-based learning sessions that consistently receive top learner feedback.' },
-  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', grad:['#EE46BC','#8a1460'], bio:'Ananya manages our global partnerships with hospitals and licensing bodies across 14 countries, ensuring our graduates have clear pathways to work in the USA, UK, Canada, and Australia.' },
+  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', photo:'/about/1.jpg',  grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. Dr. Mitchell shapes our medical curriculum and ensures every program meets the highest international standards.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', photo:'/about/2.jpg',  grad:['#96CA45','#4a7a10'], bio:'With dual specialisations in medical education and health policy, Dr. Patel leads the design of our flagship NCLEX and PLAB preparation tracks, maintaining a 91% first-attempt pass rate among our graduates.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', photo:'/about/3.jpg',  grad:['#6938EF','#3d1d9e'], bio:'Priya brings a decade of student mentorship experience from top nursing colleges. She oversees every touchpoint of the learner journey — from onboarding to post-placement support.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', photo:'/about/4.jpg',  grad:['#F79009','#a55c00'], bio:'A serial edtech entrepreneur, James architected our adaptive learning platform that personalises study plans in real-time, reducing average preparation time by 30%.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', photo:'/about/5.jpg',  grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our simulation labs, delivering the case-based learning sessions that consistently receive top learner feedback.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', photo:'/about/6.jpg',  grad:['#EE46BC','#8a1460'], bio:'Ananya manages our global partnerships with hospitals and licensing bodies across 14 countries, ensuring our graduates have clear pathways to work in the USA, UK, Canada, and Australia.', social:{ ig:'#', fb:'#', tw:'#' } },
 ];
 
 const CERTS = [
@@ -32,16 +33,7 @@ const CERTS = [
   { name:'AIIMS Tie-up',   abbr:'AIIMS', color:'#F04438', desc:'AIIMS Delhi Research Partnership' },
 ];
 
-const FAQS = [
-  { q:'When does the next batch launch?',                 a:'A new batch opens on the 1st of every month. Registration is available 30 days before the start date. Visit our Courses page for batch-specific dates and seat availability for each programme track.' },
-  { q:'How long is the NCLEX preparation programme?',    a:'Our comprehensive NCLEX prep runs for 6 months with a flexible self-paced schedule. We also offer an intensive 3-month fast-track for candidates with a strong nursing foundation who are ready to accelerate.' },
-  { q:'Are there any prerequisites for enrolment?',      a:'Most programmes require a recognised nursing or medical degree. A few foundational bridge courses accept final-year students. Detailed eligibility criteria are listed on each course detail page.' },
-  { q:'What certifications do I receive on completion?', a:'You receive a GrowMedLink Certificate of Completion, co-branded with our institutional partners. Completion also makes you eligible to sit official licensing exams including NCLEX-RN, PLAB, and USMLE Steps.' },
-  { q:'Is financial assistance or EMI available?',       a:'Yes — we offer merit-based scholarships, income-linked bursaries, and zero-cost EMI plans across 3, 6, and 12 months. Early-bird enrolees save up to 20 %. Reach our admissions team to explore what suits you best.' },
-  { q:'Are classes live or pre-recorded?',               a:'We blend both: live faculty sessions run three times a week, and all sessions are recorded for lifetime access. You also get downloadable notes, mock tests, and 24/7 doubt resolution via our learner forum.' },
-  { q:'What is the student success rate?',               a:'89 % of GrowMedLink graduates pass their licensing exams on the first attempt — well above the global average. Our structured study plan, personalised feedback, and mentor-led case clinics make a measurable difference.' },
-  { q:'Do you provide placement support?',               a:'Yes. Our dedicated placement cell maintains active partnerships with hospitals and staffing agencies across the USA, UK, Canada, and Australia. Most of our graduates secure placements within 90 days of passing their exam.' },
-];
+
 
 const QUICK_LINKS = ['Home', 'About', 'Products', 'Blog', 'Enroll', 'Talk to An Expert'];
 const OTHER_LINKS = ['GrowMedLink', 'Privacy Policy', 'Contact Us'];
@@ -530,10 +522,146 @@ const STYLES = `
   }
 }
 
-/* ── team vertical scroll strip ── */
+/* ── team vertical scroll strip (kept for reduced-motion) ── */
 @keyframes abt-team-up { from { transform:translateY(0); } to { transform:translateY(-50%); } }
 .abt-team-strip { animation: abt-team-up 32s linear infinite; }
 .abt-team-strip.abt-paused { animation-play-state: paused; }
+
+/* ── Faces Behind the Brand — premium carousel ── */
+
+/* sizes: center=176, +/-1=124, +/-2=80 */
+.abt-tc-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  padding: 16px 0 0;
+}
+
+/* The orbit row */
+.abt-tc-orbit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  height: 208px;
+  width: 100%;
+  max-width: 736px;
+  margin: 0 auto;
+}
+
+/* Each slot in the carousel */
+.abt-tc-slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.72s cubic-bezier(0.25,1,0.22,1),
+              transform 0.72s cubic-bezier(0.25,1,0.22,1),
+              opacity 0.55s ease,
+              z-index 0.72s step-end;
+  will-change: left, transform, opacity;
+  cursor: pointer;
+}
+
+/* Avatar circle shell */
+.abt-tc-img {
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  transition: width 0.72s cubic-bezier(0.25,1,0.22,1),
+              height 0.72s cubic-bezier(0.25,1,0.22,1),
+              box-shadow 0.72s ease,
+              border-color 0.55s ease;
+  will-change: width, height, box-shadow;
+}
+
+/* Active ring */
+.abt-tc-img-active {
+  border: 3px solid #96CA45;
+  box-shadow: 0 0 0 5px rgba(150,202,69,0.18), 0 12px 38px rgba(0,0,0,0.16);
+}
+.abt-tc-img-inactive {
+  border: 2px solid rgba(150,202,69,0.25);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.10);
+}
+
+/* Detail panel below orbit */
+.abt-tc-detail {
+  text-align: center;
+  margin-top: 29px;
+  width: 100%;
+  max-width: 496px;
+}
+
+/* Name fade/slide transition container */
+.abt-tc-fade-enter {
+  animation: abt-tc-fadein 0.45s cubic-bezier(0.25,1,0.22,1) both;
+}
+@keyframes abt-tc-fadein {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0);    }
+}
+
+/* Dot progress indicators */
+.abt-tc-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.abt-tc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #D0D5DD;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease, width 0.35s ease;
+}
+.abt-tc-dot.abt-tc-dot-active {
+  background: #96CA45;
+  width: 19px;
+  border-radius: 4px;
+}
+
+/* Social icon buttons */
+.abt-tc-social {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.abt-tc-soc-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #D0D5DD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  background: transparent;
+  text-decoration: none;
+}
+.abt-tc-soc-btn:hover {
+  border-color: #96CA45;
+  background: rgba(150,202,69,0.10);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .abt-tc-orbit { height: 168px; max-width: 560px; }
+}
+@media (max-width: 640px) {
+  .abt-tc-orbit { height: 144px; max-width: 100%; }
+  .abt-tc-detail { padding: 0 16px; }
+}
 
 /* ── FAQ premium accordion ── */
 .abt-faq-body {
@@ -541,10 +669,10 @@ const STYLES = `
   overflow: hidden;
   transition: max-height 0.52s cubic-bezier(.22,.68,0,1.2), padding 0.35s ease;
 }
-.abt-faq-body.abt-open { max-height: 320px; }
+.abt-faq-body.abt-open { max-height: 210px; }
 
 .abt-faq-icon {
-  width: 26px; height: 26px;
+  width: 18px; height: 18px;
   border: 1.5px solid rgba(255,255,255,0.3);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -1662,7 +1790,7 @@ function CoreValuesSection() {
           </h2>
         </div>
 
-        <div 
+        <div
           className="abt-cv-row"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -1701,193 +1829,202 @@ function CoreValuesSection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   §6  FACES BEHIND THE BRAND — vertical scroll strip + detail panel
-   Clicking a team member cross-fades the right panel.
+   §6  FACES BEHIND THE BRAND — premium circular carousel
 ══════════════════════════════════════════════════════════════════════════ */
-const TEAM_DISPLAY = [...TEAM, ...TEAM]; // doubled for seamless loop
+
+/* Slot sizes (px) per distance from center */
+const SLOT_SIZES   = [176, 124, 80];   // index 0 = center, 1 = ±1, 2 = ±2  (–20%)
+const SLOT_OPACITY = [1, 0.82, 0.55];
+// Horizontal centres relative to orbit midpoint (px)
+const SLOT_X = [0, 184, 328]; // ±distance for rank 1, rank 2  (–20%)
 
 function TeamSection() {
   const rh = useReveal();
-  const [selIdx, setSelIdx] = useState(0);
-  const [dispIdx, setDispIdx] = useState(0);
-  const [fade, setFade] = useState(true);
-  const [paused, setPaused] = useState(false);
+  const n = TEAM.length;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [displayIdx, setDisplayIdx] = useState(0);
+  const [textKey, setTextKey] = useState(0);   // forces re-mount for fade animation
+  const [isPaused, setIsPaused] = useState(false);
+  const resumeTimer = useRef<NodeJS.Timeout | null>(null);
+  const orbitRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (rawIdx: number) => {
-    const idx = rawIdx % TEAM.length;
-    setFade(false);
-    setPaused(true);
-    setTimeout(() => { setDispIdx(idx); setFade(true); }, 280);
-    setSelIdx(idx);
+  /* Auto-rotate */
+  useEffect(() => {
+    if (isPaused) return;
+    const t = setInterval(() => {
+      setActiveIdx(prev => (prev + 1) % n);
+    }, 4000);
+    return () => clearInterval(t);
+  }, [isPaused, n]);
+
+  /* When activeIdx changes, update displayIdx after brief delay for text */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDisplayIdx(activeIdx);
+      setTextKey(k => k + 1);
+    }, 200);
+    return () => clearTimeout(t);
+  }, [activeIdx]);
+
+  const handleClick = (idx: number) => {
+    if (idx === activeIdx) return;
+    setActiveIdx(idx);
+    setIsPaused(true);
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setIsPaused(false), 5000);
   };
 
-  const member = TEAM[dispIdx];
+  useEffect(() => () => { if (resumeTimer.current) clearTimeout(resumeTimer.current); }, []);
+
+  const member = TEAM[displayIdx];
+  // Split name into first + rest for two-color treatment
+  const nameParts = member.name.replace(/^(Dr\.|Ms\.|Mr\.)\s*/, '').split(' ');
+  const nameFirst = nameParts.slice(0, -1).join(' ') || nameParts[0];
+  const nameLast  = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
 
   return (
-    <section style={{ background:'#fff', padding:'80px 40px 96px' }}>
-      <div style={{ maxWidth:1440, margin:'0 auto', textAlign:'center' }}>
+    <section style={{ background:'#fff', padding:'64px 32px 77px' }}>
+      <div style={{ maxWidth:896, margin:'0 auto', textAlign:'center' }}>
 
-        <div ref={rh} className="abt-rv" style={{ marginBottom:56 }}>
-          <h2 className="abt-sh" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(32px,4.7vw,68px)', color:DARK, lineHeight:'81px', marginBottom:16 }}>
+        {/* Heading */}
+        <div ref={rh} className="abt-rv" style={{ marginBottom:38 }}>
+          <h2 className="abt-sh" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(26px,3.8vw,54px)', color:DARK, marginBottom:16 }}>
             The Faces <span style={{ color:GREEN }}>Behind The Brand</span>
           </h2>
-          <p style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', maxWidth:1106, margin:'0 auto' }}>
-            Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
+          <p style={{ fontFamily:FH, fontSize:'clamp(11px,1.0vw,14px)', lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#444', maxWidth:688, margin:'0 auto' }}>
+            T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique
+            Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum
+            Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
           </p>
         </div>
 
-        <div className="abt-team-grid" style={{ display:'flex', gap:48, alignItems:'flex-start', textAlign:'left' }}>
+        {/* Carousel orbit */}
+        <div
+          className="abt-tc-wrap"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => {
+            if (resumeTimer.current) clearTimeout(resumeTimer.current);
+            resumeTimer.current = setTimeout(() => setIsPaused(false), 1200);
+          }}
+        >
+          <div className="abt-tc-orbit" ref={orbitRef}>
+            {TEAM.map((m, i) => {
+              // Compute signed distance from active (wraps around)
+              let dist = ((i - activeIdx) % n + n) % n;
+              if (dist > n / 2) dist -= n; // range: -n/2 .. n/2
+              const absDist = Math.abs(dist);
+              const rank = Math.min(absDist, SLOT_SIZES.length - 1);
+              const size = SLOT_SIZES[rank];
+              const opacity = absDist >= SLOT_SIZES.length ? 0 : SLOT_OPACITY[rank];
+              const xOffset = dist === 0 ? 0 : (dist > 0 ? 1 : -1) * (SLOT_X[Math.min(absDist, SLOT_X.length - 1)]);
+              const zIndex = 10 - absDist * 2;
+              const isCenter = dist === 0;
 
-          {/* LEFT — vertical scroll strip */}
-          <div style={{ width:300, height:580, position:'relative', overflow:'hidden', flexShrink:0 }}>
-            {/* top/bottom fades */}
-            <div style={{ position:'absolute', top:0, left:0, right:0, height:80, background:'linear-gradient(to bottom,#fff,transparent)', zIndex:2, pointerEvents:'none' }} />
-            <div style={{ position:'absolute', bottom:0, left:0, right:0, height:80, background:'linear-gradient(to top,#fff,transparent)', zIndex:2, pointerEvents:'none' }} />
-
-            <div
-              className={`abt-team-strip${paused?' abt-paused':''}`}
-              onMouseEnter={() => setPaused(true)}
-              onMouseLeave={() => { if (paused && selIdx === dispIdx) setPaused(false); setPaused(false); }}
-            >
-              {TEAM_DISPLAY.map((m, i) => {
-                const realIdx = i % TEAM.length;
-                const isActive = realIdx === selIdx;
-                return (
-                  <div
-                    key={i}
-                    onClick={() => handleSelect(i)}
-                    style={{
-                      display:'flex', alignItems:'center', gap:14, padding:'14px 16px',
-                      borderRadius:14, marginBottom:12, cursor:'pointer',
-                      background: isActive ? '#f0f8e8' : '#f8f8f8',
-                      border:`2px solid ${isActive ? GREEN : 'transparent'}`,
-                      transition:'all 0.25s ease',
-                    }}
-                  >
-                    {/* avatar */}
-                    <div style={{
-                      width:60, height:60, borderRadius:'50%', flexShrink:0,
-                      background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`,
-                      display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
-                      border:`2px solid ${isActive ? GREEN : '#e0e0e0'}`,
-                    }}>
-                      <span style={{ fontFamily:FM, fontSize:16, fontWeight:700, color:'#fff' }}>{m.initials}</span>
-                    </div>
-                    <div>
-                      <p style={{ fontFamily:FM, fontSize:14, fontWeight:600, color:DARK, lineHeight:'1.3' }}>{m.name}</p>
-                      <p style={{ fontFamily:FH, fontSize:12, color:'#888', lineHeight:'1.4', marginTop:2 }}>{m.role}</p>
-                    </div>
-                    {isActive && <div style={{ marginLeft:'auto', width:8, height:8, borderRadius:'50%', background:GREEN, flexShrink:0 }} />}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* RIGHT — detail panel, cross-fades between members */}
-          <div style={{ flex:1, opacity:fade?1:0, transform:fade?'translateY(0)':'translateY(14px)', transition:'opacity 0.3s ease, transform 0.3s ease', padding:'32px 40px', background:'#f8f8f8', borderRadius:24, minHeight:580, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center' }}>
-
-            {/* large avatar */}
-            <div style={{
-              width:200, height:200, borderRadius:'50%', overflow:'hidden',
-              background:`linear-gradient(135deg,${member.grad[0]},${member.grad[1]})`,
-              border:`6px solid ${GREEN}`,
-              display:'flex', alignItems:'center', justifyContent:'center',
-              marginBottom:28, boxShadow:'0 12px 40px rgba(0,0,0,0.14)', flexShrink:0,
-            }}>
-              <span style={{ fontFamily:FM, fontSize:48, fontWeight:700, color:'#fff' }}>{member.initials}</span>
-            </div>
-
-            <p style={{ fontFamily:FH, fontSize:34, fontWeight:500, lineHeight:'1.3', color:'#000', marginBottom:8 }}>{member.name}</p>
-            <p style={{ fontFamily:FH, fontSize:20, fontWeight:500, color:'#9F9F9F', marginBottom:20 }}>{member.role}</p>
-            <p style={{ fontFamily:FH, fontSize:17, lineHeight:'1.65', color:'#333', maxWidth:560, marginBottom:28 }}>{member.bio}</p>
-
-            {/* social icons */}
-            <div style={{ display:'flex', gap:8, justifyContent:'center' }}>
-              {['i','fb','tw'].map((_, i) => (
-                <div key={i} style={{
-                  width:44, height:44, background:'rgba(0,0,0,0.07)', borderRadius:i===1?4:'50%',
-                  display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', transition:'background 0.2s',
-                }}
-                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background=`rgba(150,202,69,0.18)`}
-                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background='rgba(0,0,0,0.07)'}
+              return (
+                <div
+                  key={i}
+                  className="abt-tc-slot"
+                  onClick={() => handleClick(i)}
+                  style={{
+                    left: `calc(50% + ${xOffset}px)`,
+                    transform: `translateX(-50%)`,
+                    opacity,
+                    zIndex: absDist >= SLOT_SIZES.length ? -1 : zIndex,
+                    pointerEvents: opacity === 0 ? 'none' : 'auto',
+                  }}
                 >
-                  <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                    {i===0 && <><rect x={2} y={2} width={20} height={20} rx={5}/><circle cx={12} cy={12} r={4}/><circle cx={17.5} cy={6.5} r={0.1} strokeWidth={3}/></>}
-                    {i===1 && <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>}
-                    {i===2 && <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>}
-                  </svg>
+                  <div
+                    className={`abt-tc-img ${isCenter ? 'abt-tc-img-active' : 'abt-tc-img-inactive'}`}
+                    style={{ width: size, height: size }}
+                  >
+                    <Image
+                      src={m.photo}
+                      alt={m.name}
+                      fill
+                      sizes={`${SLOT_SIZES[0]}px`}
+                      style={{
+                        objectFit: 'cover',
+                        filter: isCenter ? 'none' : 'grayscale(60%)',
+                        transition: 'filter 0.72s ease',
+                      }}
+                      onError={e => {
+                        // fallback gradient with initials
+                        const el = e.currentTarget as HTMLImageElement;
+                        el.style.opacity = '0';
+                      }}
+                    />
+                    {/* Initials fallback overlay */}
+                    <div style={{
+                      position:'absolute', inset:0,
+                      background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      zIndex:-1,
+                    }}>
+                      <span style={{ fontFamily:FM, fontSize: size * 0.22, fontWeight:700, color:'#fff' }}>{m.initials}</span>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* Detail panel — re-keyed on textKey so React remounts it for fade-in animation */}
+          <div className="abt-tc-detail" style={{ animation:'abt-tc-fadein 0.45s cubic-bezier(0.25,1,0.22,1) both', animationDelay:'0s' }} data-key={textKey}>
+            {/* Name */}
+            <p style={{ fontFamily:FH, fontWeight:700, fontSize:'clamp(22px,2.5vw,36px)', color:DARK, lineHeight:'1.25', marginBottom:6 }}>
+              {nameFirst}{nameLast ? <span> <span style={{ color:GREEN }}>{nameLast}</span></span> : null}
+            </p>
+            {/* Role */}
+            <p style={{ fontFamily:FH, fontSize:'clamp(13px,1.1vw,16px)', color:'#9F9F9F', fontWeight:400, letterSpacing:'0.03em', marginBottom:18, textTransform:'uppercase' }}>
+              {member.role}
+            </p>
+            {/* Bio */}
+            <p style={{ fontFamily:FH, fontSize:'clamp(13px,1.1vw,16px)', lineHeight:'1.7', color:'#444', maxWidth:580, margin:'0 auto 0', textAlign:'center' }}>
+              {member.bio}
+            </p>
+
+            {/* Social icons */}
+            <div className="abt-tc-social">
+              {/* Instagram */}
+              <a href={member.social.ig} className="abt-tc-soc-btn" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x={2} y={2} width={20} height={20} rx={5}/><circle cx={12} cy={12} r={4}/><circle cx={17.5} cy={6.5} r={0.1} strokeWidth={3}/>
+                </svg>
+              </a>
+              {/* Facebook */}
+              <a href={member.social.fb} className="abt-tc-soc-btn" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              </a>
+              {/* X / Twitter */}
+              <a href={member.social.tw} className="abt-tc-soc-btn" aria-label="X" target="_blank" rel="noopener noreferrer">
+                <svg width={18} height={18} viewBox="0 0 24 24" fill={DARK}>
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
             </div>
           </div>
+
+          {/* Progress dots */}
+          <div className="abt-tc-dots">
+            {TEAM.map((_, i) => (
+              <div
+                key={i}
+                className={`abt-tc-dot${activeIdx === i ? ' abt-tc-dot-active' : ''}`}
+                onClick={() => handleClick(i)}
+              />
+            ))}
+          </div>
         </div>
+
       </div>
     </section>
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   §7  FAQ — premium accordion with 8 real questions
-══════════════════════════════════════════════════════════════════════════ */
-function FAQSection() {
-  const [open, setOpen] = useState<number|null>(null);
-  const rh = useReveal();
-  return (
-    <section style={{ background:DARK, padding:'80px 0 90px', position:'relative', overflow:'hidden' }}>
-      <div style={{ maxWidth:1440, margin:'0 auto', padding:'0 40px', position:'relative' }}>
 
-        {/* wave dots left */}
-        <div style={{ position:'absolute', left:40, top:72, pointerEvents:'none' }}><WaveDots flip /></div>
 
-        {/* heading */}
-        <div ref={rh} className="abt-rv" style={{ textAlign:'center', marginBottom:56 }}>
-          <h2 style={{ fontFamily:FH, fontWeight:400, letterSpacing:'-0.03em', fontSize:'clamp(36px,5.5vw,80px)', color:'#fff', lineHeight:'1.19', maxWidth:701, margin:'0 auto' }}>
-            Got questions?<br/>We&apos;ve got answers.
-          </h2>
-        </div>
-
-        {/* "We even answered without ChatGPT ;)" */}
-        <div style={{ position:'absolute', right:40, top:0, width:280 }}>
-          <span style={{ fontFamily:FS, fontSize:28, color:GREEN, lineHeight:'28px', display:'block' }}>
-            We even answered<br/>without ChatGPT ;)
-          </span>
-          <svg width={82} height={82} viewBox="0 0 82 82" fill="none" style={{ marginTop:12, transform:'rotate(-87.56deg)' }}>
-            <path d="M10 10 C28 28 44 48 58 64 C65 72 70 76 78 78" stroke={GREEN} strokeWidth={2} fill="none" strokeLinecap="round"/>
-            <path d="M62 78 L78 78 L78 62" stroke={GREEN} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-
-        {/* accordion */}
-        <div style={{ maxWidth:1068, margin:'0 auto' }}>
-          {FAQS.map((f, i) => (
-            <div key={i} style={{ borderTop:'1px solid #3E3E3E', borderBottom:i===FAQS.length-1?'1px solid #3E3E3E':'none', marginTop:-1 }}>
-              <button
-                style={{ width:'100%', minHeight:97, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 44px', background:'none', border:'none', cursor:'pointer', textAlign:'left', gap:24 }}
-                onClick={() => setOpen(open===i?null:i)}
-              >
-                <span style={{ fontFamily:FH, fontSize:'clamp(16px,1.8vw,24px)', fontWeight:400, letterSpacing:'-0.03em', color:'#fff', flex:1 }}>
-                  {f.q}
-                </span>
-                <div className={`abt-faq-icon${open===i?' abt-open':''}`}>
-                  <svg width={14} height={14} viewBox="0 0 14 14">
-                    <line x1={7} y1={2} x2={7} y2={12} stroke="#fff" strokeWidth={1.8} strokeLinecap="round"/>
-                    <line x1={2} y1={7} x2={12} y2={7} stroke="#fff" strokeWidth={1.8} strokeLinecap="round"/>
-                  </svg>
-                </div>
-              </button>
-              <div className={`abt-faq-body${open===i?' abt-open':''}`}>
-                <p style={{ fontFamily:FH, fontSize:17, color:'rgba(255,255,255,0.72)', lineHeight:'170%', padding:'0 44px 28px', paddingRight:80 }}>
-                  {f.a}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════════════════
    ROOT PAGE EXPORT
