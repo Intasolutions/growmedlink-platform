@@ -539,89 +539,58 @@ function WhatSetsUsApart() {
   }, []);
 
   return (
-    <section ref={secRef} style={{ background:'#fff', padding:'80px 28px', overflow:'hidden' }}>
-      <div style={{ maxWidth:1440, margin:'0 auto' }}>
-        <div style={{ display:'flex', gap:'clamp(40px, 6vw, 80px)', alignItems:'center', flexWrap:'wrap' }}>
+    <section ref={secRef} style={{ background:'#fff', padding:'64px 22px', overflow:'hidden' }}>
+      <style>{`
+        .wsa-offset { margin-left: 0; }
+        @media(min-width: 900px) {
+          .wsa-offset { margin-left: -32%; }
+        }
+      `}</style>
+      <div style={{ maxWidth:1150, margin:'0 auto' }}>
+        <div style={{ display:'flex', gap:'clamp(32px, 5vw, 64px)', alignItems:'center', flexWrap:'wrap' }}>
           
-          {/* ── LEFT: Image Collage ── */}
-          <div style={{ flex: '1 1 500px', position:'relative', maxWidth: 640 }}>
+          {/* ── LEFT: Image ── */}
+          <div style={{ flex: '1 1 400px', position:'relative', maxWidth: 512, width: '100%' }}>
             <div style={{
-              display:'flex', flexDirection:'column', gap: 20,
               opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(30px)',
-              transition: 'all 0.8s ease-out',
+              transition: 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
             }}>
-              {/* Top large rectangle */}
               <div style={{
-                position:'relative', width:'100%', paddingTop:'65%', borderRadius: 24, overflow:'hidden',
+                position:'relative', width:'100%', paddingTop:'100%',
                 transition: 'transform 0.4s ease', cursor:'pointer'
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                <Image src="/service/teenager-photo.jpg" alt="What Sets Us Apart" fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit:'cover' }} />
+                <Image src="/service/what-sets-us-apart.png" alt="What Sets Us Apart" fill quality={100} sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit:'contain' }} priority />
               </div>
-              
-              {/* Bottom row: two rectangles */}
-              <div style={{ display:'flex', gap: 20 }}>
-                <div style={{
-                  position:'relative', flex:1, paddingTop:'65%', borderRadius: 24, overflow:'hidden',
-                  transition: 'transform 0.4s ease', cursor:'pointer'
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                  <Image src="/service/teenager-photo.jpg" alt="What Sets Us Apart" fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit:'cover' }} />
-                </div>
-                <div style={{
-                  position:'relative', flex:1, paddingTop:'65%', borderRadius: 24, overflow:'hidden',
-                  transition: 'transform 0.4s ease', cursor:'pointer'
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                  <Image src="/service/teenager-photo.jpg" alt="What Sets Us Apart" fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit:'cover' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Overlapping Atom Icon */}
-            <div style={{
-              position:'absolute', top:'50%', left:'50%', width: 80, height: 80,
-              marginTop: -10, marginLeft: -40, zIndex: 10,
-              opacity: vis ? 1 : 0, transform: vis ? 'scale(1) rotate(0deg)' : 'scale(0.2) rotate(-10deg)',
-              transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s',
-            }}>
-              <svg width={80} height={80} viewBox="0 0 66 66" fill="none">
-                <circle cx={33} cy={33} r={33} fill="#fff" />
-                <ellipse cx={33} cy={33} rx={24} ry={9} stroke={GREEN} strokeWidth={3.5} fill="none" />
-                <ellipse cx={33} cy={33} rx={24} ry={9} stroke={GREEN} strokeWidth={3.5} fill="none" transform="rotate(60 33 33)" />
-                <ellipse cx={33} cy={33} rx={24} ry={9} stroke={GREEN} strokeWidth={3.5} fill="none" transform="rotate(120 33 33)" />
-                <circle cx={33} cy={33} r={4} fill={GREEN} />
-              </svg>
             </div>
           </div>
 
           {/* ── RIGHT: Content ── */}
-          <div style={{ flex: '1 1 400px', display:'flex', flexDirection:'column', alignItems:'flex-start' }}>
+          <div style={{ flex: '1 1 320px', display:'flex', flexDirection:'column', alignItems:'flex-start', minWidth: 280 }}>
             
             {/* Loading Ring Icon */}
             <div style={{
-              width: 48, height: 48, marginBottom: 24,
+              width: 38, height: 38, marginBottom: 20,
               opacity: vis ? 1 : 0, transform: vis ? 'scale(1)' : 'scale(0)',
               transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s'
             }}>
-              <svg width={48} height={48} viewBox="0 0 80 80" fill="none">
+              <svg width={38} height={38} viewBox="0 0 80 80" fill="none">
                 <circle cx={40} cy={40} r={32} stroke="rgba(150,202,69,0.25)" strokeWidth={6.67} />
                 <path d="M40 8 A32 32 0 0 1 72 40" stroke={GREEN} strokeWidth={6.67} strokeLinecap="round" />
               </svg>
             </div>
 
             {/* Heading */}
-            <div style={{
-              marginBottom: 24,
-              opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'all 0.6s ease-out 0.4s'
+            <div className="wsa-offset" style={{
+              marginBottom: 20,
+              opacity: vis ? 1 : 0, transform: vis ? 'translateX(0)' : 'translateX(20px)',
+              transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s',
+              position: 'relative', zIndex: 10
             }}>
               <h2 style={{
                 fontFamily: FH, fontWeight: 400,
-                fontSize: 'clamp(32px, 3.5vw, 48px)',
+                fontSize: 'clamp(26px, 2.8vw, 38px)',
                 color: DARK, lineHeight: '1.2', display: 'flex', flexWrap: 'wrap', gap: '0.25em'
               }}>
                 <span>What Sets</span>
@@ -630,10 +599,12 @@ function WhatSetsUsApart() {
             </div>
 
             {/* Top Paragraph */}
-            <p style={{
-              fontFamily: FH, fontSize: 'clamp(16px, 1.5vw, 18px)', lineHeight: '160%',
-              color: '#222', maxWidth: 600, marginBottom: 32,
-              opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.55s'
+            <p className="wsa-offset" style={{
+              fontFamily: FH, fontSize: 'clamp(14px, 1.2vw, 15px)', lineHeight: '160%',
+              color: '#222', maxWidth: 480, marginBottom: 26,
+              opacity: vis ? 1 : 0, transform: vis ? 'translateX(0)' : 'translateX(20px)',
+              transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.55s',
+              position: 'relative', zIndex: 10
             }}>
               Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur
               scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est
@@ -643,11 +614,11 @@ function WhatSetsUsApart() {
 
             {/* Atom Icon (right) */}
             <div style={{
-              marginBottom: 32,
+              marginBottom: 26,
               opacity: vis ? 1 : 0, transform: vis ? 'scale(1) rotate(18.5deg)' : 'scale(0.3) rotate(-15deg)',
               transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s'
             }}>
-              <svg width={44} height={44} viewBox="0 0 66 66" fill="none">
+              <svg width={35} height={35} viewBox="0 0 66 66" fill="none">
                 <ellipse cx={33} cy={33} rx={30} ry={12} stroke={GREEN} strokeWidth={4.5} fill="none" />
                 <ellipse cx={33} cy={33} rx={30} ry={12} stroke={GREEN} strokeWidth={4.5} fill="none" transform="rotate(60 33 33)" />
                 <ellipse cx={33} cy={33} rx={30} ry={12} stroke={GREEN} strokeWidth={4.5} fill="none" transform="rotate(120 33 33)" />
@@ -657,9 +628,10 @@ function WhatSetsUsApart() {
 
             {/* Bottom Paragraph */}
             <p style={{
-              fontFamily: FH, fontSize: 'clamp(16px, 1.5vw, 18px)', lineHeight: '160%',
-              color: '#222', maxWidth: 600, marginBottom: 40,
-              opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.85s'
+              fontFamily: FH, fontSize: 'clamp(14px, 1.2vw, 15px)', lineHeight: '160%',
+              color: '#222', maxWidth: 480, marginBottom: 32,
+              opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s'
             }}>
               Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur
               scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est
@@ -670,12 +642,12 @@ function WhatSetsUsApart() {
             {/* CTA Button */}
             <div style={{
               opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'all 0.6s ease-out 1s'
+              transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1s'
             }}>
               <button style={{
-                padding: '16px 32px', background: GREEN, borderRadius: 8,
+                padding: '13px 26px', background: GREEN, borderRadius: 8,
                 border: 'none', cursor: 'pointer', fontFamily: FM,
-                fontSize: 16, fontWeight: 600, color: '#000',
+                fontSize: 13, fontWeight: 600, color: '#000',
                 transition: 'all 0.3s ease'
               }}
               onMouseEnter={e => {

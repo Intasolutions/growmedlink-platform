@@ -31,6 +31,8 @@ export const ServiceSchema = z.object({
   description: z.string().min(10, 'Short description must be at least 10 characters long'),
   content: z.record(z.any(), { message: 'Content must be a valid Tiptap JSON object' }),
   image: z.string().min(1, 'Please select an image from media library'), // ObjectId of Media
+  secondaryImage: z.string().optional().or(z.literal('')),
+  secondaryHeading: z.string().optional().or(z.literal('')),
   metaTitle: z.string().min(5, 'Meta title must be at least 5 characters long').max(70),
   metaDescription: z.string().min(10, 'Meta description must be at least 10 characters').max(160),
   keywords: z.array(z.string()),

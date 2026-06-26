@@ -36,6 +36,8 @@ export interface IService {
   description: string;
   content: Record<string, any>; // Tiptap JSON content object
   image: string | IMedia; // Media ID or full object reference
+  secondaryImage?: string | IMedia; // Secondary optional image
+  secondaryHeading?: string; // Optional secondary heading
   metaTitle: string;
   metaDescription: string;
   keywords: string[];

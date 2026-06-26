@@ -42,6 +42,15 @@ const serviceSchema = new Schema(
       ref: 'Media',
       required: [true, 'Service image reference is required'],
     },
+    secondaryImage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Media',
+    },
+    secondaryHeading: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     metaTitle: {
       type: String,
       required: [true, 'SEO meta title is required'],

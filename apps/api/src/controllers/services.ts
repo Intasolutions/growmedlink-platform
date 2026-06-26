@@ -19,7 +19,7 @@ export const listServices = async (req: Request, res: Response, next: NextFuncti
 
     // Soft-deleted documents are automatically excluded by mongoose middleware plugin
     const services = await Service.find(filter)
-      .populate('image')
+      .populate(['image', 'secondaryImage'])
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -37,7 +37,7 @@ export const listServices = async (req: Request, res: Response, next: NextFuncti
 export const getServiceBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { slug } = req.params;
-    const service = await Service.findOne({ slug }).populate('image');
+    const service = await Service.findOne({ slug }).populate(['image', 'secondaryImage']);
     
     if (!service) {
       res.status(404).json({
@@ -62,7 +62,7 @@ export const getServiceBySlug = async (req: Request, res: Response, next: NextFu
 export const getServiceById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const service = await Service.findById(id).populate('image');
+    const service = await Service.findById(id).populate(['image', 'secondaryImage']);
     
     if (!service) {
       res.status(404).json({
@@ -110,7 +110,7 @@ export const createService = async (req: Request, res: Response, next: NextFunct
     const service = new Service(validationResult.data);
     await service.save();
 
-    const populated = await Service.findById(service._id).populate('image');
+    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage']);
 
     res.status(201).json({
       success: true,
@@ -161,7 +161,7 @@ export const updateService = async (req: Request, res: Response, next: NextFunct
     Object.assign(service, validationResult.data);
     await service.save();
 
-    const populated = await Service.findById(service._id).populate('image');
+    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage']);
 
     res.status(200).json({
       success: true,
