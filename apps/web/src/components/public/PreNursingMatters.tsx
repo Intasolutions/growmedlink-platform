@@ -25,16 +25,28 @@ export default function PreNursingMatters() {
   const calloutRef   = useRef<HTMLDivElement>(null);
   const [calloutIn, setCalloutIn] = useState(false);
 
-  /* Parallax sunburst on scroll */
+  /* Parallax sunburst on scroll — rAF-throttled so the style write happens
+     at most once per rendered frame instead of once per raw scroll event
+     (raw scroll events can fire far more often than 60fps and otherwise
+     flood the main thread, which is what causes visible jitter/vibration
+     across the page's other running animations). */
   useEffect(() => {
-    const handleScroll = () => {
+    let ticking = false;
+    const applyTransform = () => {
+      ticking = false;
       if (sunburstRef.current) {
         const rotation = window.scrollY * 0.2;
         sunburstRef.current.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
       }
     };
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(applyTransform);
+      }
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    applyTransform();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

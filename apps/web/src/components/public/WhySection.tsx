@@ -32,20 +32,31 @@ export default function WhySection() {
     return () => observer.disconnect();
   }, []);
 
-  // Scroll parallax — sets --par CSS custom property on card
+  // Scroll parallax — sets --par CSS custom property on card.
+  // rAF-throttled so the layout read + style write happens at most once per
+  // rendered frame instead of once per raw scroll event (otherwise this
+  // floods the main thread and causes visible jitter/vibration page-wide).
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
+    let ticking = false;
     const update = () => {
+      ticking = false;
       const r = card.getBoundingClientRect();
       card.style.setProperty('--par', String(r.top + r.height / 2 - window.innerHeight / 2));
     };
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
+    const onScrollOrResize = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
     update();
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
     };
   }, []);
 
