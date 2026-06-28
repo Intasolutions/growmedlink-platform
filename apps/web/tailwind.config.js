@@ -16,12 +16,12 @@ module.exports = {
           foreground: "#F8FAFC",
         },
         secondary: {
-          DEFAULT: "#D97706", // Premium Gold / Amber 600
-          dark: "#B45309",
+          DEFAULT: "#96CA45", // Public site brand green
+          dark: "#7AAE2F",
           foreground: "#020C1B",
         },
         accent: {
-          DEFAULT: "#3B82F6", // Indigo / Blue accents
+          DEFAULT: "#155BA9", // Public site brand blue
           foreground: "#FFFFFF",
         },
         background: "#F8FAFC",

@@ -1,6 +1,6 @@
 import React from 'react';
 import { getPage } from '@/lib/api/pages';
-import { TiptapRenderer } from '@/components/TiptapRenderer';
+import LegalPageClient from '@/components/public/LegalPageClient';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -26,19 +26,11 @@ export default async function PrivacyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020C1B]">
-      <section className="bg-[#0A192F] py-20 border-b border-[#1E2D3D]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-black font-heading text-white">{page.title}</h1>
-        </div>
-      </section>
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#0A192F] border border-[#1E2D3D] rounded-3xl p-8 md:p-12 shadow-2xl">
-            <TiptapRenderer content={page.content} />
-          </div>
-        </div>
-      </section>
-    </div>
+    <LegalPageClient
+      title={page.title}
+      subtitle="Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec."
+      heroImage="/privacy-policy.jpg"
+      content={page.content}
+    />
   );
 }

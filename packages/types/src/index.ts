@@ -1,6 +1,6 @@
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR';
 export type EnquiryStatus = 'Pending' | 'In Progress' | 'Resolved';
-export type EnquiryType = 'Contact Form' | 'Talk to Expert';
+export type EnquiryType = 'Contact Form';
 export type ServiceCategory = 'Immigration' | 'Language';
 
 export interface IUser {
@@ -56,6 +56,27 @@ export interface IService {
   updatedAt: string;
 }
 
+export interface IProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  image: string | IMedia; // Media ID or full object reference
+  details: Record<string, any>; // Tiptap JSON content object
+  fees: string;
+  duration: string;
+  otherDetails?: Record<string, any>; // Tiptap JSON content object
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  canonicalUrl: string;
+  ogImage: string;
+  isFeatured: boolean;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IBlog {
   _id: string;
   title: string;
@@ -87,8 +108,6 @@ export interface IEnquiry {
   phone: string;
   type: EnquiryType;
   subject?: string;
-  serviceOfInterest?: string;
-  destinationCountry?: string;
   message: string;
   status: EnquiryStatus;
   notes?: string;

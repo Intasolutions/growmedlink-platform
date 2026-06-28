@@ -47,6 +47,22 @@ export const ServiceSchema = z.object({
   isFeatured: z.boolean().default(false),
 });
 
+export const ProductSchema = z.object({
+  name: z.string().min(3, 'Product name must be at least 3 characters long'),
+  slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. ielts-coaching-package)'),
+  image: z.string().min(1, 'Please select an image from media library'), // ObjectId of Media
+  details: z.record(z.any(), { message: 'Details must be a valid Tiptap JSON object' }),
+  fees: z.string().min(1, 'Fees is required'),
+  duration: z.string().min(1, 'Duration is required'),
+  otherDetails: z.record(z.any()).optional(),
+  metaTitle: z.string().min(5, 'Meta title must be at least 5 characters long').max(70),
+  metaDescription: z.string().min(10, 'Meta description must be at least 10 characters').max(160),
+  keywords: z.array(z.string()),
+  canonicalUrl: z.string().url('Please enter a valid canonical URL').optional().or(z.literal('')),
+  ogImage: z.string().url('Please enter a valid Open Graph image URL').optional().or(z.literal('')),
+  isFeatured: z.boolean().default(false),
+});
+
 export const CreateBlogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long').max(200, 'Title cannot exceed 200 characters'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe and lowercase (e.g. study-abroad-guide)'),
@@ -69,10 +85,8 @@ export const EnquirySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().regex(phoneRegex, 'Please enter a valid phone number (e.g., +1234567890)'),
-  type: z.enum([ENQUIRY_TYPES.CONTACT_FORM, ENQUIRY_TYPES.TALK_TO_EXPERT]),
+  type: z.enum([ENQUIRY_TYPES.CONTACT_FORM]),
   subject: z.string().min(3, 'Subject must be at least 3 characters long').optional().or(z.literal('')),
-  serviceOfInterest: z.string().optional().or(z.literal('')),
-  destinationCountry: z.string().optional().or(z.literal('')),
   message: z.string().min(10, 'Message must be at least 10 characters long'),
   source: z.string().optional(),
   pageUrl: z.string().optional(),

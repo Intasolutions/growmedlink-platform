@@ -163,26 +163,12 @@ export default function EnquiryDetailsPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
 
-            {(enquiry.subject || enquiry.serviceOfInterest || enquiry.destinationCountry) && (
+            {enquiry.subject && (
               <div className="bg-[#020C1B] p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mt-4">
-                {enquiry.subject && (
-                  <div>
-                    <div className="text-xs font-bold text-gray-500 uppercase">Subject</div>
-                    <div className="text-white mt-1">{enquiry.subject}</div>
-                  </div>
-                )}
-                {enquiry.serviceOfInterest && (
-                  <div>
-                    <div className="text-xs font-bold text-gray-500 uppercase">Service</div>
-                    <div className="text-white mt-1">{enquiry.serviceOfInterest}</div>
-                  </div>
-                )}
-                {enquiry.destinationCountry && (
-                  <div>
-                    <div className="text-xs font-bold text-gray-500 uppercase">Destination</div>
-                    <div className="text-white mt-1">{enquiry.destinationCountry}</div>
-                  </div>
-                )}
+                <div>
+                  <div className="text-xs font-bold text-gray-500 uppercase">Subject</div>
+                  <div className="text-white mt-1">{enquiry.subject}</div>
+                </div>
               </div>
             )}
 

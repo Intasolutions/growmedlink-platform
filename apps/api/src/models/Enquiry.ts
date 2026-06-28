@@ -29,14 +29,6 @@ const enquirySchema = new Schema<IEnquiry>(
       type: String,
       trim: true,
     },
-    serviceOfInterest: {
-      type: String,
-      trim: true,
-    },
-    destinationCountry: {
-      type: String,
-      trim: true,
-    },
     message: {
       type: String,
       required: [true, 'Message is required'],

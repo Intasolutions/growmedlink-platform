@@ -132,7 +132,6 @@ export default function AdminEnquiriesPage() {
             >
               <option value="" className="bg-[#0A192F]">All Types</option>
               <option value="Contact Form" className="bg-[#0A192F]">Contact Form</option>
-              <option value="Talk to Expert" className="bg-[#0A192F]">Talk to Expert</option>
             </select>
           </div>
         </div>

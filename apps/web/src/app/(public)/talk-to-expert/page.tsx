@@ -1,185 +1,218 @@
 'use client';
 
-import React, { useState } from 'react';
-import { submitEnquiry } from '@/lib/api/enquiries';
-import { Loader2, CheckCircle, Lightbulb } from 'lucide-react';
-import { ENQUIRY_TYPES } from '@intelligen/constants';
+import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { Phone, Mail, MessageCircle } from 'lucide-react';
+import FAQSection from '@/components/FAQSection';
+import TeamCarousel, { TeamMember } from '@/components/public/TeamCarousel';
+
+/* A focused roster of people you can actually book a call with — deliberately
+   a different, smaller set from About's full leadership carousel. */
+const EXPERTS: TeamMember[] = [
+  { name: 'Bruce Wayne', role: 'General Manager', initials: 'BW', photo: '/about/7.jpg', grad: ['#155BA9', '#0a3d7a'], bio: 'Bruce leads our consultation team, helping students map out the right licensing and immigration pathway before they commit to a programme.', social: { ig: '#', fb: '#', tw: '#' } },
+  { name: 'Clara Singh', role: 'Senior Immigration Advisor', initials: 'CS', photo: '/about/8.jpg', grad: ['#96CA45', '#4a7a10'], bio: 'Clara has guided over 600 nurses through visa and registration processes across the UK, Canada, and Australia.', social: { ig: '#', fb: '#', tw: '#' } },
+  { name: 'Daniel Fernandez', role: 'NCLEX Strategy Lead', initials: 'DF', photo: '/about/9.jpg', grad: ['#6938EF', '#3d1d9e'], bio: 'Daniel works one-on-one with candidates to build a personalised study and exam-attempt strategy ahead of their NCLEX-RN.', social: { ig: '#', fb: '#', tw: '#' } },
+];
+
+const GREEN = '#96CA45';
+const DARK = '#252525';
+const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
+const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
+
+const KEYFRAMES = `
+  @keyframes tte-sunburst-spin {
+    0%   { transform: translate3d(-50%,-50%,0) rotate(0deg);   }
+    100% { transform: translate3d(-50%,-50%,0) rotate(360deg); }
+  }
+  @keyframes tte-pulse {
+    0%,100% { opacity: 0.55; transform: scale(1);    }
+    50%     { opacity: 1;    transform: scale(1.25); }
+  }
+  @keyframes tte-reveal {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0px, 0);  }
+  }
+  @keyframes tte-card-in {
+    from { opacity: 0; transform: translate3d(0, 32px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0px, 0);  }
+  }
+`;
+
+function WaveDots() {
+  const dots = [
+    { left: 0, top: 29 }, { left: 31, top: 24 }, { left: 60, top: 29 },
+    { left: 93, top: 20 }, { left: 131, top: 29 }, { left: 157, top: 13 },
+    { left: 192, top: 29 }, { left: 226, top: 6 }, { left: 270, top: 29 },
+    { left: 305, top: 0 },
+  ];
+  return (
+    <div style={{ position: 'relative', width: '318px', height: '42px', willChange: 'transform' }}>
+      {dots.map((d, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: d.left,
+            top: d.top,
+            width: '13px',
+            height: '13px',
+            borderRadius: '50%',
+            background: GREEN,
+            animation: `tte-pulse ${1.4 + i * 0.12}s ease-in-out ${i * 0.08}s infinite`,
+            willChange: 'transform, opacity',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+const CONTACTS = [
+  { icon: Phone, label: '+91 9898989898', href: 'tel:+919898989898', bg: GREEN, iconBg: DARK, iconColor: GREEN, text: DARK },
+  { icon: Mail, label: 'info@gromedlink.com', href: 'mailto:info@gromedlink.com', bg: DARK, iconBg: GREEN, iconColor: DARK, text: '#fff' },
+  { icon: MessageCircle, label: '+91 9898989898', href: 'https://wa.me/919898989898', bg: GREEN, iconBg: DARK, iconColor: GREEN, text: DARK },
+];
+
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return { ref, visible };
+}
 
 export default function TalkToExpertPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    serviceOfInterest: '',
-    destinationCountry: '',
-    message: '',
+  const [heroVisible, setHeroVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  const cardsReveal = useReveal();
+
+  const fadeUp = (delay: number): React.CSSProperties => ({
+    opacity: heroVisible ? 1 : 0,
+    transform: heroVisible ? 'translateY(0)' : 'translateY(28px)',
+    transition: `opacity 0.8s cubic-bezier(.22,.68,0,1.2) ${delay}ms, transform 0.8s cubic-bezier(.22,.68,0,1.2) ${delay}ms`,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      await submitEnquiry({
-        ...formData,
-        type: ENQUIRY_TYPES.TALK_TO_EXPERT,
-        source: 'talk-to-expert',
-        pageUrl: window.location.href,
-      });
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-[#020C1B]">
-      {/* Header */}
-      <section className="bg-gradient-to-b from-[#0A192F] to-[#020C1B] py-24 border-b border-[#1E2D3D]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-sm font-bold tracking-widest uppercase mb-8">
-            <Lightbulb className="h-4 w-4" /> Priority Consultation
-          </span>
-          <h1 className="text-4xl md:text-6xl font-black font-heading text-white mb-6 leading-tight">
-            Talk to an Expert
+    <main>
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
+
+      {/* ══════════════════════ HERO ══════════════════════ */}
+      <section className="relative overflow-hidden bg-[#141414] px-4 pb-16 pt-20 sm:px-6 lg:px-8 lg:pb-20 lg:pt-24">
+        {/* Decorative glows */}
+        <div className="pointer-events-none absolute -left-32 bottom-0 h-[380px] w-[450px] rounded-full bg-[#3a5f00]/35 blur-[100px]" />
+        <div className="pointer-events-none absolute -left-10 bottom-20 h-[260px] w-[330px] rounded-full bg-[#96CA45]/30 blur-[70px]" />
+
+        {/* Green wave dots */}
+        <div className="pointer-events-none absolute bottom-6 left-4 hidden sm:block lg:left-8">
+          <WaveDots />
+        </div>
+
+        <div className="relative mx-auto max-w-3xl text-center">
+          {/* Rotating sunburst halo — same asset/animation as the Home/About/Services hero */}
+          <div className="relative mx-auto" style={{ width: 'clamp(260px, 42vw, 420px)', height: 'clamp(260px, 42vw, 420px)' }}>
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2"
+              style={{
+                width: '100%',
+                height: '100%',
+                opacity: 0.6,
+                animation: 'tte-sunburst-spin 80s linear infinite',
+                willChange: 'transform',
+              }}
+            >
+              <Image src="/sunburst-lines.png" alt="" fill style={{ objectFit: 'contain' }} priority />
+            </div>
+
+            {/* Photo cutout — transparent background, sits on top of the halo */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: '78%', height: '78%' }}>
+              <Image
+                src="/talk-to-expert.png"
+                alt="Talk to an expert"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+          </div>
+
+          <h1
+            className="mt-8 text-5xl font-medium tracking-tight text-white sm:text-6xl lg:text-7xl"
+            style={fadeUp(120)}
+          >
+            Talk To an Expert
           </h1>
-          <p className="text-xl text-gray-400 font-light leading-relaxed max-w-2xl mx-auto">
-            Book a dedicated consultation session with our senior immigration and education advisors to map out your global pathway.
+
+          <p
+            className="mt-4 text-xl font-light text-[#96CA45] sm:text-2xl lg:text-[35px]"
+            style={fadeUp(260)}
+          >
+            Tell Us What&apos;s on Your Mind?
+          </p>
+
+          <p
+            className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base"
+            style={fadeUp(380)}
+          >
+            Mi tincidunt elit, id quisque ligula ac diam, amet. Vel etiam suspendisse morbi eleifend
+            faucibus eget vestibulum felis. Dictum quis montes, sit sit. Tellus aliquam enim urna,
+            etiam. Mauris posuere vulputate arcu amet, vitae nisi, tellus tincidunt. At feugiat
+            sapien varius id.
           </p>
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="py-16 -mt-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#0A192F] border border-[#1E2D3D] rounded-3xl p-8 md:p-12 shadow-2xl relative z-10">
-            {success ? (
-              <div className="text-center py-16">
-                <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" />
-                <h3 className="text-3xl font-black text-white mb-4">Request Received!</h3>
-                <p className="text-gray-400 text-lg max-w-md mx-auto">
-                  Your consultation request has been placed in our priority queue. An expert will contact you within 24 hours.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {error && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm font-medium">
-                    {error}
-                  </div>
-                )}
-
-                {/* Personal Details */}
-                <div>
-                  <h3 className="text-lg font-bold text-white border-b border-white/5 pb-4 mb-6">Personal Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
-                      <input
-                        required
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Phone Number</label>
-                      <input
-                        required
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
-                      <input
-                        required
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Consultation Details */}
-                <div>
-                  <h3 className="text-lg font-bold text-white border-b border-white/5 pb-4 mb-6">Consultation Needs</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Service of Interest</label>
-                      <select
-                        required
-                        value={formData.serviceOfInterest}
-                        onChange={(e) => setFormData({ ...formData, serviceOfInterest: e.target.value })}
-                        className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors"
-                      >
-                        <option value="">Select a service...</option>
-                        <option value="Student Visa">Student Visa</option>
-                        <option value="Skilled Migration">Skilled Migration</option>
-                        <option value="Visitor Visa">Visitor Visa</option>
-                        <option value="IELTS Coaching">IELTS Coaching</option>
-                        <option value="PTE Coaching">PTE Coaching</option>
-                        <option value="OET Coaching">OET Coaching</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Destination Country</label>
-                      <select
-                        value={formData.destinationCountry}
-                        onChange={(e) => setFormData({ ...formData, destinationCountry: e.target.value })}
-                        className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors"
-                      >
-                        <option value="">Not sure yet / N/A</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Canada">Canada</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="New Zealand">New Zealand</option>
-                        <option value="United States">United States</option>
-                        <option value="Europe">Europe</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Brief Background / Questions</label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Please briefly explain your current situation and what you'd like to discuss..."
-                      className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-secondary transition-colors resize-none"
-                    ></textarea>
-                  </div>
-                </div>
-
-                {/* Submission */}
-                <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-end gap-6">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto bg-secondary text-[#020C1B] px-10 py-4 rounded-xl font-bold text-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
-                  >
-                    {isSubmitting && <Loader2 className="h-5 w-5 animate-spin" />}
-                    Request Consultation
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+      {/* ══════════════════════ QUICK CONTACT CARDS ══════════════════════ */}
+      <section ref={cardsReveal.ref} className="bg-white px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-3">
+          {CONTACTS.map((c, i) => {
+            const Icon = c.icon;
+            return (
+              <a
+                key={i}
+                href={c.href}
+                className="flex items-center justify-center gap-4 rounded-2xl px-6 py-6 transition-transform hover:-translate-y-1"
+                style={{
+                  background: c.bg,
+                  opacity: cardsReveal.visible ? 1 : 0,
+                  animation: cardsReveal.visible ? `tte-card-in 0.6s cubic-bezier(.22,.68,0,1.2) ${i * 0.12}s both` : 'none',
+                }}
+              >
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: c.iconBg }}
+                >
+                  <Icon className="h-6 w-6" style={{ color: c.iconColor }} />
+                </span>
+                <span className="text-lg font-medium" style={{ color: c.text, fontFamily: FH }}>
+                  {c.label}
+                </span>
+              </a>
+            );
+          })}
         </div>
       </section>
-    </div>
+
+      {/* ══════════════════════ MEET OUR EXPERTS ══════════════════════ */}
+      <TeamCarousel
+        team={EXPERTS}
+        heading={<>Meet <span style={{ color: GREEN }}>Our Experts</span></>}
+        description="T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec."
+      />
+
+      {/* ══════════════════════ FAQ ══════════════════════ */}
+      <FAQSection />
+    </main>
   );
 }

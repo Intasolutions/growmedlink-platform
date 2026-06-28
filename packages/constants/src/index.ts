@@ -16,7 +16,6 @@ export type EnquiryStatusValue = typeof ENQUIRY_STATUSES[keyof typeof ENQUIRY_ST
 
 export const ENQUIRY_TYPES = {
   CONTACT_FORM: 'Contact Form',
-  TALK_TO_EXPERT: 'Talk to Expert',
 } as const;
 
 export type EnquiryTypeValue = typeof ENQUIRY_TYPES[keyof typeof ENQUIRY_TYPES];
