@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -8,6 +8,110 @@ import { Menu, X, GraduationCap } from 'lucide-react';
 
 interface NavbarProps {
   settings: any;
+}
+
+const LOGO_VARIANTS = [
+  { src: '/Logo/logo_1.png', width: 270, height: 60 }, // full lockup
+  { src: '/Logo/logo_2.png', width: 90, height: 84 },  // icon only
+  { src: '/Logo/logo_3.png', width: 240, height: 66 }, // wordmark only
+];
+
+const LOGO_INTERVAL_MS = 3200;
+const LOGO_TRANSITION_MS = 650;
+
+function LogoCarousel() {
+  const [index, setIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState<number | null>(null);
+  const [direction, setDirection] = useState<1 | -1>(1);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDirection((prevDir) => (prevDir === 1 ? -1 : 1));
+      setNextIndex((index + 1) % LOGO_VARIANTS.length);
+    }, LOGO_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [index]);
+
+  useEffect(() => {
+    if (nextIndex === null) return;
+    const t = setTimeout(() => {
+      setIndex(nextIndex);
+      setNextIndex(null);
+    }, LOGO_TRANSITION_MS);
+    return () => clearTimeout(t);
+  }, [nextIndex]);
+
+  const current = LOGO_VARIANTS[index];
+  const incoming = nextIndex !== null ? LOGO_VARIANTS[nextIndex] : null;
+  const sign = direction === 1 ? 1 : -1;
+
+  return (
+    <div
+      className="relative overflow-hidden"
+      style={{ width: 130, height: 52 }}
+    >
+      {/* Outgoing logo */}
+      <div
+        key={`out-${index}`}
+        className="absolute inset-0 flex items-center justify-center"
+        style={
+          incoming
+            ? {
+                animation: `navbar-logo-out-${direction === 1 ? 'right' : 'left'} ${LOGO_TRANSITION_MS}ms cubic-bezier(.55,0,.1,1) forwards`,
+              }
+            : undefined
+        }
+      >
+        <Image
+          src={current.src}
+          alt="GrowMedLink"
+          width={current.width}
+          height={current.height}
+          className="h-12 w-auto object-contain md:h-[52px]"
+          priority
+        />
+      </div>
+
+      {/* Incoming logo */}
+      {incoming && (
+        <div
+          key={`in-${nextIndex}`}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            animation: `navbar-logo-in-${direction === 1 ? 'left' : 'right'} ${LOGO_TRANSITION_MS}ms cubic-bezier(.16,1,.3,1) both`,
+          }}
+        >
+          <Image
+            src={incoming.src}
+            alt="GrowMedLink"
+            width={incoming.width}
+            height={incoming.height}
+            className="h-12 w-auto object-contain md:h-[52px]"
+            priority
+          />
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes navbar-logo-in-left {
+          from { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
+          to   { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
+        }
+        @keyframes navbar-logo-in-right {
+          from { opacity: 0; transform: translateX(130%) scale(0.85); filter: blur(2px); }
+          to   { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
+        }
+        @keyframes navbar-logo-out-right {
+          from { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
+          to   { opacity: 0; transform: translateX(130%) scale(0.85); filter: blur(2px); }
+        }
+        @keyframes navbar-logo-out-left {
+          from { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
+          to   { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
+        }
+      `}</style>
+    </div>
+  );
 }
 
 export default function Navbar({ settings }: NavbarProps) {
@@ -26,7 +130,7 @@ export default function Navbar({ settings }: NavbarProps) {
   return (
     <header className="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-full max-w-[680px] transition-all">
       {/* Floating Pill Container */}
-      <div className="h-[60px] md:h-[60px] w-full rounded-full bg-[rgba(37,37,37,1)] overflow-hidden shadow-2xl flex items-center justify-between py-2 pl-4 md:pl-7 pr-2 box-border border border-white/10">
+      <div className="h-[68px] md:h-[76px] w-full rounded-full bg-[rgba(37,37,37,1)] overflow-hidden shadow-2xl flex items-center justify-between py-2 pl-4 md:pl-7 pr-2 box-border border border-white/10">
         
         {/* Left: Menu Toggle */}
         <div className="flex flex-col items-start justify-center h-full">
@@ -42,23 +146,7 @@ export default function Navbar({ settings }: NavbarProps) {
         {/* Center: Logo */}
         <div className="flex flex-col items-center justify-center h-full">
           <Link href="/" className="flex items-center justify-center gap-2.5">
-            {settings?.logo ? (
-              <Image
-                src={typeof settings.logo === 'object' ? settings.logo.secureUrl : settings.logo}
-                alt={settings.companyName || 'Intelligen'}
-                width={150}
-                height={35}
-                className="h-8 w-auto object-contain"
-              />
-            ) : (
-              <Image
-                src="/logo.png"
-                alt="GrowMedLink"
-                width={180}
-                height={40}
-                className="h-8 w-auto object-contain"
-              />
-            )}
+            <LogoCarousel />
           </Link>
         </div>
 
