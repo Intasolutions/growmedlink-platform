@@ -58,7 +58,7 @@ const AUTO_CYCLE_MS = 3200;
    - After onComplete: set copy B to settle color (green or white),
      snap reel back to -1em.
 ──────────────────────────────────────────────────────── */
-const LETTERS = 'Journey'.split('');
+const LETTERS = 'Starts'.split('');
 const COL_SPIN  = '#3B82F6';
 const COL_GREEN = '#97C93D';
 const COL_WHITE = '#FFFFFF';
@@ -69,31 +69,21 @@ function SlotWord() {
   const running  = useRef(false);
   const tlRef    = useRef<gsap.core.Timeline | null>(null);
 
-  /*
-    Reel = 3 rows of the same char stacked: [A][B][C]
-    Reel height = 3 × row-height.
+  /* yPercent values — % of reel height (3 rows), so 1 row = 33.33% */
+  const REST = -(100 / 3);   /* row B centred in clip */
+  const UP   = 0;            /* row A in clip (roll up)   */
+  const DOWN = -(200 / 3);   /* row C in clip (roll down) */
 
-    yPercent is relative to the REEL's own height (3 rows), so:
-      -33.33% → row B (index 1) is centred in the 1-row clip  ← REST
-        0%    → row A (index 0) is in the clip                ← roll-up destination
-      -66.67% → row C (index 2) is in the clip                ← roll-down destination
-
-    After each animation completes, snap back to -33.33% silently.
-  */
-  const REST = -100 / 3;        /* -33.333...% */
-  const UP   = 0;
-  const DOWN = -(200 / 3);      /* -66.666...% */
-
-  const play = useCallback((hoverIn: boolean) => {
+  /* Always stays green after first hover — hover-out also settles green */
+  const play = useCallback((_hoverIn: boolean) => {
     if (running.current) return;
     running.current = true;
-    const settle = hoverIn ? COL_GREEN : COL_WHITE;
 
     if (tlRef.current) tlRef.current.kill();
-
     const tl = gsap.timeline({
       onComplete: () => {
-        midRefs.current.forEach(el => el && gsap.set(el, { color: settle }));
+        /* Both hover-in and hover-out settle on green */
+        midRefs.current.forEach(el => el && gsap.set(el, { color: COL_GREEN }));
         reelRefs.current.forEach(el => el && gsap.set(el, { yPercent: REST }));
         running.current = false;
       },
@@ -105,15 +95,25 @@ function SlotWord() {
       const mid  = midRefs.current[i];
       if (!reel || !mid) return;
 
+      /* Alternate direction: even = up, odd = down */
       const target  = i % 2 === 0 ? UP : DOWN;
-      const stagger = i * 0.05;
+      const stagger = i * 0.048;
 
+      /* Flash blue while rolling */
       tl.set(mid, { color: COL_SPIN }, stagger);
-      tl.to(reel, { yPercent: target, duration: 0.6, ease: 'expo.out' }, stagger);
+      tl.to(reel, {
+        yPercent: target,
+        duration: 0.65,
+        ease: 'back.out(1.4)',   /* smooth overshoot — mechanical snap feel */
+      }, stagger);
     });
   }, [REST]);
 
-  useEffect(() => () => { tlRef.current?.kill(); }, []);
+  /* Trigger green spin once on mount so word starts green */
+  useEffect(() => {
+    const id = setTimeout(() => play(true), 120);
+    return () => { clearTimeout(id); tlRef.current?.kill(); };
+  }, [play]);
 
   return (
     <span
@@ -123,7 +123,6 @@ function SlotWord() {
                cursor: 'default', userSelect: 'none' }}
     >
       {LETTERS.map((ch, i) => (
-        /* Clip: 1em tall, hides the rows above and below */
         <span
           key={i}
           style={{
@@ -134,7 +133,6 @@ function SlotWord() {
             verticalAlign: 'baseline',
           }}
         >
-          {/* Reel starts at REST so row B is visible */}
           <span
             ref={el => { reelRefs.current[i] = el; }}
             style={{
@@ -502,7 +500,7 @@ export default function Hero() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                {'Start Your '}<SlotWord />{'.'}<span style={{ color: '#96CA45' }}>{'!'}</span>
+                {'Your Global Nursing Career '}<SlotWord />{' Here.'}<span style={{ color: '#96CA45' }}>{'!'}</span>
               </h1>
 
               {/* Avatars — directly below heading, full original color, responsive */}
