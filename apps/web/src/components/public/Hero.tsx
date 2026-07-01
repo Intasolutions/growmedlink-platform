@@ -23,87 +23,116 @@ const COUNTRIES: Country[] = [
 const GREEN_TINT = 'brightness(0) saturate(100%) invert(68%) sepia(60%) saturate(500%) hue-rotate(40deg) brightness(110%)';
 const AUTO_CYCLE_MS = 3200;
 
-const JOURNEY = 'Journey'.split('');
 
-/* ══════════════════════════════════════════════════════════
-   SlotWord — real vertical reel per letter.
+/* ─── SlotWord ────────────────────────────────────────────
+   "Journey" stays on ONE line, same baseline, always.
 
-   Structure per letter:
-     <span clip [overflow:hidden, display:inline-block]>
-       <span reel [3 rows: green / white / green]>
-         <span>J</span>  ← row 0, green  (hover-in reveals this)
-         <span>J</span>  ← row 1, white  (visible at rest)
-         <span>J</span>  ← row 2, green  (hover-out reveals this)
+   Per-letter structure:
+     <span clip  [display:inline-block, overflow:hidden, height:1em]>
+       <span reel [contains 2 copies of the letter]>
+         <span top  [letter copy]>   ← sits ABOVE the clip at rest
+         <span bot  [letter copy]>   ← visible at rest (y = -1em)
        </span>
      </span>
 
-   Clip height = 1 row. GSAP moves reel y:
-     rest      → y = -rowH   (row 1 visible)
-     hover-in  → y = 0       (row 0 green visible, scrolled UP)
-     hover-out → y = -2*rowH (row 2 green visible, scrolled DOWN)
-                 then instant snap back to -rowH for next hover
-══════════════════════════════════════════════════════════ */
-function SlotWord() {
-  const clipRefs   = useRef<(HTMLSpanElement | null)[]>([]);
-  const reelRefs   = useRef<(HTMLSpanElement | null)[]>([]);
-  const gsapCtxRef = useRef<gsap.Context | null>(null);
-  const isHovered  = useRef(false);
-  const rowH       = useRef(0);
+   At rest: reel y = -1em → bottom copy is visible (white).
 
-  /* After first paint: read one clip's height, set all reels to y=-rowH */
+   Roll UP (odd letters, i=0,2,4,6):
+     reel travels from -1em → 0  (bottom exits down, top enters from above)
+
+   Roll DOWN (even letters, i=1,3,5):
+     reel travels from -1em → -2em (bottom exits up, top enters from below)
+     then snaps back to -1em invisibly.
+
+   Wait — simpler to keep both reels moving the same way but
+   flip which copy is "incoming":
+
+   Actually use the simplest correct approach:
+   - 3 copies in the reel: [copy A][copy B][copy C]
+   - Rest: reel y = -1em (copy B visible)
+   - Roll up   (odd):  animate y from -1em → 0       (copy A slides in from above)
+   - Roll down (even): animate y from -1em → -2em     (copy C slides in from below)
+   - Both: after onComplete, snap reel back to y=-1em for next hover.
+   - Copy B is always white at rest.
+   - Copies A and C are blue (spin color) — they flash through during travel.
+   - After onComplete: set copy B to settle color (green or white),
+     snap reel back to -1em.
+──────────────────────────────────────────────────────── */
+const LETTERS   = 'Journey'.split('');
+const COL_SPIN  = '#3B82F6';
+const COL_GREEN = '#97C93D';
+const COL_WHITE = '#ffffff';
+
+function SlotWord() {
+  const clipRefs  = useRef<(HTMLSpanElement | null)[]>([]);
+  const reelRefs  = useRef<(HTMLSpanElement | null)[]>([]);
+  const midRefs   = useRef<(HTMLSpanElement | null)[]>([]);
+  const tlRef     = useRef<gsap.core.Timeline | null>(null);
+  const isRunning = useRef(false);
+  const isHovered = useRef(false);
+  const rowPx     = useRef(0);
+
+  /* Measure ONE clip after mount to get the pixel height of 1 row */
   useEffect(() => {
     const clip = clipRefs.current[0];
     if (!clip) return;
     const h = clip.getBoundingClientRect().height;
-    rowH.current = h;
-    reelRefs.current.forEach(reel => {
-      if (reel) gsap.set(reel, { y: -h });
-    });
+    rowPx.current = h;
+    /* Place every reel so copy B (index 1) is in view: y = -h */
+    reelRefs.current.forEach(r => { if (r) gsap.set(r, { y: -h }); });
   }, []);
 
-  const animate = useCallback((toGreen: boolean) => {
-    const h = rowH.current;
+  const roll = useCallback((toGreen: boolean) => {
+    if (isRunning.current) return;
+    const h = rowPx.current;
     if (!h) return;
-    if (gsapCtxRef.current) gsapCtxRef.current.revert();
-    gsapCtxRef.current = gsap.context(() => {
-      JOURNEY.forEach((_, i) => {
-        const reel = reelRefs.current[i];
-        if (!reel) return;
-        const delay = i * 0.06;
-        if (toGreen) {
-          gsap.to(reel, { y: 0, duration: 0.32, ease: 'back.out(1.6)', delay });
-        } else {
-          gsap.to(reel, {
-            y: -h * 2, duration: 0.32, ease: 'back.out(1.6)', delay,
-            onComplete: () => gsap.set(reel, { y: -h }),
-          });
-        }
-      });
+    isRunning.current = true;
+
+    if (tlRef.current) tlRef.current.kill();
+    const tl = gsap.timeline({ onComplete: () => { isRunning.current = false; } });
+    tlRef.current = tl;
+
+    const settle = toGreen ? COL_GREEN : COL_WHITE;
+
+    LETTERS.forEach((_, i) => {
+      const reel = reelRefs.current[i];
+      const mid  = midRefs.current[i];
+      if (!reel || !mid) return;
+
+      const goUp    = i % 2 === 0;
+      const targetY = goUp ? 0 : -(h * 2);   /* 0 = copy A; -2h = copy C */
+      const at      = i * 0.05;              /* stagger time in timeline */
+
+      tl.set(mid, { color: COL_SPIN }, at);
+      tl.to(reel, { y: targetY, duration: 0.55, ease: 'power3.out' }, at);
+      /* After landing: restore mid color, snap reel back to rest for next hover */
+      tl.set(mid, { color: settle }, at + 0.55);
+      tl.set(reel, { y: -h }, at + 0.55);
     });
   }, []);
 
   const handleEnter = useCallback(() => {
     if (isHovered.current) return;
     isHovered.current = true;
-    animate(true);
-  }, [animate]);
+    roll(true);
+  }, [roll]);
 
   const handleLeave = useCallback(() => {
     isHovered.current = false;
-    animate(false);
-  }, [animate]);
+    roll(false);
+  }, [roll]);
 
-  useEffect(() => () => { gsapCtxRef.current?.revert(); }, []);
+  useEffect(() => () => { tlRef.current?.kill(); }, []);
 
   return (
     <span
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
-      style={{ display: 'inline', cursor: 'default', userSelect: 'none',
-               letterSpacing: 'inherit' }}
+      style={{ display: 'inline', letterSpacing: 'inherit',
+               cursor: 'default', userSelect: 'none' }}
     >
-      {JOURNEY.map((char, i) => (
-        /* Clip: inline-block so it sits in the text flow, overflow hidden clips the reel */
+      {LETTERS.map((char, i) => (
+        /* Clip: exactly 1 row tall, hides the reel above/below */
         <span
           key={i}
           ref={el => { clipRefs.current[i] = el; }}
@@ -114,14 +143,22 @@ function SlotWord() {
             lineHeight: 'inherit',
           }}
         >
-          {/* Reel: 3 identical letters stacked, GSAP scrolls it */}
+          {/* Reel: 3 copies stacked. GSAP moves y in pixels. */}
           <span
             ref={el => { reelRefs.current[i] = el; }}
             style={{ display: 'block', willChange: 'transform' }}
           >
-            <span style={{ display: 'block', color: '#96CA45', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
-            <span style={{ display: 'block', color: '#ffffff', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
-            <span style={{ display: 'block', color: '#96CA45', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            {/* Copy A — enters from above on roll-up */}
+            <span style={{ display: 'block', color: COL_SPIN,
+                           lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            {/* Copy B — visible at rest, this is the "real" letter */}
+            <span
+              ref={el => { midRefs.current[i] = el; }}
+              style={{ display: 'block', color: COL_WHITE,
+                       lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            {/* Copy C — enters from below on roll-down */}
+            <span style={{ display: 'block', color: COL_SPIN,
+                           lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
           </span>
         </span>
       ))}
@@ -445,7 +482,7 @@ export default function Hero() {
           {/* ── ROW 1: Heading + avatars ── */}
           <div
             className="flex flex-col items-center text-center"
-            style={{ paddingTop: 'clamp(90px,12vh,140px)' }}
+            style={{ paddingTop: 'clamp(160px,18vh,220px)' }}
           >
             {/* Sunburst + H1 + Avatars */}
             <div className="relative inline-flex flex-col items-center justify-center">
@@ -469,7 +506,7 @@ export default function Hero() {
                 ref={h1Ref}
                 className="font-black tracking-tight"
                 style={{
-                  fontSize: 'clamp(28px,5.8vw,96px)',
+                  fontSize: 'clamp(36px,7vw,112px)',
                   lineHeight: 1.05,
                   opacity: 0,
                   padding: 'clamp(12px,2.5vw,28px) clamp(6px,1.5vw,12px) clamp(4px,1vw,8px)',
