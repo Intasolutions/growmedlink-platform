@@ -17,128 +17,91 @@ const COUNTRIES: Country[] = [
   { id: 'australia',     name: 'Australia',  mapSrc: '/australia-map.png',     percentage: 54 },
   { id: 'india',         name: 'India',      mapSrc: '/india-map.png',         percentage: 28 },
   { id: 'africa',        name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
-  { id: 'south-america', name: 'S. America', mapSrc: '/south-america-map.png', percentage:  6 },
+  { id: 'south-america', name: 'S. America', mapSrc: '/south-america-map.png', percentage:  25 },
 ];
 
 const GREEN_TINT = 'brightness(0) saturate(100%) invert(68%) sepia(60%) saturate(500%) hue-rotate(40deg) brightness(110%)';
 const AUTO_CYCLE_MS = 3200;
 
 const JOURNEY = 'Journey'.split('');
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 /* ══════════════════════════════════════════════════════════
-   SlotWord — slot-machine on hover.
-   Each letter has an overflow:hidden clip window (1em tall).
-   Inside sits a reel <span> whose children are the real char
-   repeated above/below dummy chars — GSAP tweens the reel's
-   translateY in discrete pixel steps (one line-height each)
-   so only one character shows at a time, no layout shift.
+   SlotWord — "Journey" with per-letter scramble on hover.
+
+   Each letter span keeps its exact width at all times (no
+   layout shift). On hover, a setInterval rapidly swaps each
+   letter's textContent through random chars, then settles on
+   the real letter in green. On leave, same scramble settles
+   back to white. No DOM reel, no clip windows, no gaps.
 ══════════════════════════════════════════════════════════ */
 function SlotWord() {
-  const clipRefs  = useRef<(HTMLSpanElement | null)[]>([]);
-  const reelRefs  = useRef<(HTMLSpanElement | null)[]>([]);
-  const tlRef     = useRef<gsap.core.Timeline | null>(null);
+  const spanRefs  = useRef<(HTMLSpanElement | null)[]>([]);
+  const timers    = useRef<ReturnType<typeof setInterval>[]>([]);
   const isHovered = useRef(false);
 
-  const runSlot = useCallback((toGreen: boolean) => {
-    if (tlRef.current) tlRef.current.kill();
-    tlRef.current = gsap.timeline();
+  const scramble = useCallback((toGreen: boolean) => {
+    /* Clear any running intervals */
+    timers.current.forEach(t => clearInterval(t));
+    timers.current = [];
 
-    JOURNEY.forEach((_char, i) => {
-      const clip = clipRefs.current[i];
-      const reel = reelRefs.current[i];
-      if (!clip || !reel) return;
+    JOURNEY.forEach((finalChar, i) => {
+      const el = spanRefs.current[i];
+      if (!el) return;
 
-      /* One slot row height = clip element height in px */
-      const lineH = clip.getBoundingClientRect().height || 24;
-      /* Total rows in reel = DUMMY_ROWS dummy + 1 real */
-      const totalRows = 21; /* DUMMY_ROWS(20) + 1 real char at bottom */
-      /* Steps to animate: vary per letter for stagger feel */
-      const steps   = 8 + i * 2;
-      const stepDur = 0.12; /* seconds per step — readable speed */
-      const delay   = i * 0.07;
+      const startDelay = i * 55;           /* stagger: each letter starts 55ms later */
+      const totalTicks = 7 + i * 2;        /* later letters spin longer */
+      let tick = 0;
 
-      /* Start reel at top (y = 0 → showing first dummy char) */
-      gsap.set(reel, { y: 0 });
-
-      /* Move DOWN by (totalRows - 1) rows to land on the real char at bottom.
-         Use steps() easing so each tick is a discrete jump — true slot feel. */
-      const targetY = (totalRows - 1) * lineH;
-
-      tlRef.current!.to(reel, {
-        y: targetY,
-        duration: steps * stepDur,
-        ease: `steps(${steps})`,
-        delay,
-        onComplete: () => {
-          /* Colour the real char, then snap reel back to top silently */
-          const real = reel.querySelector<HTMLSpanElement>('.slot-real');
-          if (real) real.style.color = toGreen ? '#96CA45' : '#ffffff';
-          gsap.set(reel, { y: 0 });
-        },
-      }, delay);
+      setTimeout(() => {
+        const iv = setInterval(() => {
+          tick++;
+          if (tick < totalTicks) {
+            /* Show a random char — same case as the real char */
+            const pool = finalChar === finalChar.toUpperCase() ? SCRAMBLE_CHARS.slice(0, 26) : SCRAMBLE_CHARS.slice(26);
+            el.textContent = pool[Math.floor(Math.random() * pool.length)];
+            el.style.color = '#96CA45';
+          } else {
+            /* Settle on real char with target colour */
+            el.textContent = finalChar;
+            el.style.color = toGreen ? '#96CA45' : '#ffffff';
+            clearInterval(iv);
+          }
+        }, 65); /* 65ms per tick — fast enough to feel like slot, slow enough to read */
+        timers.current[i] = iv;
+      }, startDelay);
     });
   }, []);
 
   const handleEnter = useCallback(() => {
     if (isHovered.current) return;
     isHovered.current = true;
-    runSlot(true);
-  }, [runSlot]);
+    scramble(true);
+  }, [scramble]);
 
   const handleLeave = useCallback(() => {
     isHovered.current = false;
-    runSlot(false);
-  }, [runSlot]);
+    scramble(false);
+  }, [scramble]);
 
-  /* Build a reel of (steps_max + 1) chars above the real one so there's
-     always content to scroll through regardless of step count.
-     The real char sits at position 0 (top). Dummy chars above scroll into
-     view as the reel moves up, then reel resets to 0 instantly. */
-  /* Dummy chars sit ABOVE the real char in the DOM.
-     GSAP moves the reel DOWN (positive y) so dummy chars scroll into view
-     from above, then after settling the reel resets to 0 showing the real char. */
-  const DUMMY_ROWS  = 20;
-  const DUMMY_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  /* Cleanup on unmount */
+  useEffect(() => {
+    return () => { timers.current.forEach(t => clearInterval(t)); };
+  }, []);
 
   return (
     <span
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
-      style={{ display: 'inline-block', cursor: 'default', userSelect: 'none' }}
+      style={{ display: 'inline', cursor: 'default', userSelect: 'none', letterSpacing: 'inherit' }}
     >
       {JOURNEY.map((char, i) => (
         <span
           key={i}
-          ref={el => { clipRefs.current[i] = el; }}
-          style={{
-            display: 'inline-block',
-            overflow: 'hidden',
-            height: '1.05em',
-            verticalAlign: 'bottom',
-            lineHeight: 1.05,
-          }}
+          ref={el => { spanRefs.current[i] = el; }}
+          style={{ display: 'inline', color: '#ffffff' }}
         >
-          <span
-            ref={el => { reelRefs.current[i] = el; }}
-            style={{ display: 'block', willChange: 'transform' }}
-          >
-            {/* Dummy chars ABOVE — scroll downward into view during animation */}
-            {Array.from({ length: DUMMY_ROWS }, (_, d) => (
-              <span
-                key={d}
-                style={{ display: 'block', lineHeight: 1.05, color: '#96CA45', userSelect: 'none' }}
-              >
-                {DUMMY_CHARS[(char.toUpperCase().charCodeAt(0) - 65 + DUMMY_ROWS - d) % 26]}
-              </span>
-            ))}
-            {/* Real char — always at the bottom of the reel (shown when y = DUMMY_ROWS * lineH) */}
-            <span
-              className="slot-real"
-              style={{ display: 'block', lineHeight: 1.05, color: '#ffffff' }}
-            >
-              {char}
-            </span>
-          </span>
+          {char}
         </span>
       ))}
     </span>
@@ -202,18 +165,30 @@ function WaveDots() {
 function CountryCard({ country, isActive, onClick }: {
   country: Country; isActive: boolean; onClick: () => void;
 }) {
-  const [count,        setCount       ] = useState(0);
-  const [contentReady, setContentReady] = useState(false);
+  const [count,        setCount       ] = useState(isActive ? country.percentage : 0);
+  const [contentReady, setContentReady] = useState(isActive);
   const [hovered,      setHovered     ] = useState(false);
 
+  const isFirstRender = useRef(true);
   const showTmr = useRef<ReturnType<typeof setTimeout>  | null>(null);
   const cntTmr  = useRef<ReturnType<typeof setTimeout>  | null>(null);
   const intTmr  = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
+  const clearAll = () => {
     if (showTmr.current) clearTimeout(showTmr.current);
     if (cntTmr.current)  clearTimeout(cntTmr.current);
     if (intTmr.current)  clearInterval(intTmr.current);
+  };
+
+  useEffect(() => {
+    /* Skip the very first render for the initially-active card
+       (count + contentReady already initialised correctly in useState) */
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (isActive) return;
+    }
+
+    clearAll();
 
     if (!isActive) {
       setContentReady(false);
@@ -221,23 +196,19 @@ function CountryCard({ country, isActive, onClick }: {
       return;
     }
 
-    /* Show content quickly on first mount (no delay needed) */
-    showTmr.current = setTimeout(() => setContentReady(true), 280);
+    showTmr.current = setTimeout(() => setContentReady(true), 260);
     cntTmr.current  = setTimeout(() => {
       let v = 0;
-      const step = country.percentage / (600 / 16);
+      const step = country.percentage / (550 / 16);
       intTmr.current = setInterval(() => {
         v = Math.min(v + step, country.percentage);
         setCount(Math.round(v));
         if (v >= country.percentage) clearInterval(intTmr.current!);
       }, 16);
-    }, 400);
+    }, 380);
 
-    return () => {
-      if (showTmr.current) clearTimeout(showTmr.current);
-      if (cntTmr.current)  clearTimeout(cntTmr.current);
-      if (intTmr.current)  clearInterval(intTmr.current);
-    };
+    return clearAll;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, country.percentage]);
 
   return (
@@ -471,14 +442,15 @@ export default function Hero() {
                 ref={h1Ref}
                 className="font-black tracking-tight"
                 style={{
-                  fontSize: 'clamp(32px,6.5vw,100px)',
+                  fontSize: 'clamp(28px,5.8vw,96px)',
                   lineHeight: 1.05,
                   opacity: 0,
-                  padding: 'clamp(16px,3vw,32px) clamp(8px,2vw,16px)',
+                  padding: 'clamp(12px,2.5vw,28px) clamp(6px,1.5vw,12px)',
                   whiteSpace: 'nowrap',
+                  letterSpacing: '-0.02em',
                 }}
               >
-                Start Your <SlotWord />.<span style={{ color: '#96CA45' }}>!</span>
+                {'Start Your '}<SlotWord />{'.'}<span style={{ color: '#96CA45' }}>{'!'}</span>
               </h1>
             </div>
 
@@ -612,7 +584,8 @@ export default function Hero() {
               className="w-full lg:w-auto flex flex-col gap-3"
               style={{ opacity: 0, flexShrink: 0, minWidth: 0 }}
             >
-              {/* Horizontal scroll-snap row, no scrollbar */}
+              {/* Horizontal scroll-snap row, no scrollbar.
+                  Inactive cards are on the LEFT, active (wide) card on the RIGHT. */}
               <div
                 className="cards-scroll"
                 style={{
@@ -625,15 +598,27 @@ export default function Hero() {
                   maxWidth: '100%',
                 }}
               >
-                {COUNTRIES.map((country, idx) => (
-                  <div key={country.id} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                    <CountryCard
-                      country={country}
-                      isActive={activeIdx === idx}
-                      onClick={() => handleCardClick(idx)}
-                    />
-                  </div>
-                ))}
+                {/* Inactive cards first (all except active) */}
+                {COUNTRIES.filter((_, idx) => idx !== activeIdx).map((country) => {
+                  const origIdx = COUNTRIES.indexOf(country);
+                  return (
+                    <div key={country.id} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
+                      <CountryCard
+                        country={country}
+                        isActive={false}
+                        onClick={() => handleCardClick(origIdx)}
+                      />
+                    </div>
+                  );
+                })}
+                {/* Active card always on the right */}
+                <div style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
+                  <CountryCard
+                    country={COUNTRIES[activeIdx]}
+                    isActive={true}
+                    onClick={() => {}}
+                  />
+                </div>
               </div>
 
               {/* Progress bar */}
