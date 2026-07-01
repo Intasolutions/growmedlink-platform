@@ -16,92 +16,113 @@ interface Country {
 const COUNTRIES: Country[] = [
   { id: 'australia',     name: 'Australia',  mapSrc: '/australia-map.png',     percentage: 54 },
   { id: 'india',         name: 'India',      mapSrc: '/india-map.png',         percentage: 28 },
-  { id: 'africa',        name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
   { id: 'south-america', name: 'S. America', mapSrc: '/south-america-map.png', percentage:  25 },
+  { id: 'africa',        name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
 ];
 
 const GREEN_TINT = 'brightness(0) saturate(100%) invert(68%) sepia(60%) saturate(500%) hue-rotate(40deg) brightness(110%)';
 const AUTO_CYCLE_MS = 3200;
 
 const JOURNEY = 'Journey'.split('');
-const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 /* ══════════════════════════════════════════════════════════
-   SlotWord — "Journey" with per-letter scramble on hover.
+   SlotWord — real vertical reel per letter.
 
-   Each letter span keeps its exact width at all times (no
-   layout shift). On hover, a setInterval rapidly swaps each
-   letter's textContent through random chars, then settles on
-   the real letter in green. On leave, same scramble settles
-   back to white. No DOM reel, no clip windows, no gaps.
+   Structure per letter:
+     <span clip [overflow:hidden, display:inline-block]>
+       <span reel [3 rows: green / white / green]>
+         <span>J</span>  ← row 0, green  (hover-in reveals this)
+         <span>J</span>  ← row 1, white  (visible at rest)
+         <span>J</span>  ← row 2, green  (hover-out reveals this)
+       </span>
+     </span>
+
+   Clip height = 1 row. GSAP moves reel y:
+     rest      → y = -rowH   (row 1 visible)
+     hover-in  → y = 0       (row 0 green visible, scrolled UP)
+     hover-out → y = -2*rowH (row 2 green visible, scrolled DOWN)
+                 then instant snap back to -rowH for next hover
 ══════════════════════════════════════════════════════════ */
 function SlotWord() {
-  const spanRefs  = useRef<(HTMLSpanElement | null)[]>([]);
-  const timers    = useRef<ReturnType<typeof setInterval>[]>([]);
-  const isHovered = useRef(false);
+  const clipRefs   = useRef<(HTMLSpanElement | null)[]>([]);
+  const reelRefs   = useRef<(HTMLSpanElement | null)[]>([]);
+  const gsapCtxRef = useRef<gsap.Context | null>(null);
+  const isHovered  = useRef(false);
+  const rowH       = useRef(0);
 
-  const scramble = useCallback((toGreen: boolean) => {
-    /* Clear any running intervals */
-    timers.current.forEach(t => clearInterval(t));
-    timers.current = [];
+  /* After first paint: read one clip's height, set all reels to y=-rowH */
+  useEffect(() => {
+    const clip = clipRefs.current[0];
+    if (!clip) return;
+    const h = clip.getBoundingClientRect().height;
+    rowH.current = h;
+    reelRefs.current.forEach(reel => {
+      if (reel) gsap.set(reel, { y: -h });
+    });
+  }, []);
 
-    JOURNEY.forEach((finalChar, i) => {
-      const el = spanRefs.current[i];
-      if (!el) return;
-
-      const startDelay = i * 55;           /* stagger: each letter starts 55ms later */
-      const totalTicks = 7 + i * 2;        /* later letters spin longer */
-      let tick = 0;
-
-      setTimeout(() => {
-        const iv = setInterval(() => {
-          tick++;
-          if (tick < totalTicks) {
-            /* Show a random char — same case as the real char */
-            const pool = finalChar === finalChar.toUpperCase() ? SCRAMBLE_CHARS.slice(0, 26) : SCRAMBLE_CHARS.slice(26);
-            el.textContent = pool[Math.floor(Math.random() * pool.length)];
-            el.style.color = '#96CA45';
-          } else {
-            /* Settle on real char with target colour */
-            el.textContent = finalChar;
-            el.style.color = toGreen ? '#96CA45' : '#ffffff';
-            clearInterval(iv);
-          }
-        }, 65); /* 65ms per tick — fast enough to feel like slot, slow enough to read */
-        timers.current[i] = iv;
-      }, startDelay);
+  const animate = useCallback((toGreen: boolean) => {
+    const h = rowH.current;
+    if (!h) return;
+    if (gsapCtxRef.current) gsapCtxRef.current.revert();
+    gsapCtxRef.current = gsap.context(() => {
+      JOURNEY.forEach((_, i) => {
+        const reel = reelRefs.current[i];
+        if (!reel) return;
+        const delay = i * 0.06;
+        if (toGreen) {
+          gsap.to(reel, { y: 0, duration: 0.32, ease: 'back.out(1.6)', delay });
+        } else {
+          gsap.to(reel, {
+            y: -h * 2, duration: 0.32, ease: 'back.out(1.6)', delay,
+            onComplete: () => gsap.set(reel, { y: -h }),
+          });
+        }
+      });
     });
   }, []);
 
   const handleEnter = useCallback(() => {
     if (isHovered.current) return;
     isHovered.current = true;
-    scramble(true);
-  }, [scramble]);
+    animate(true);
+  }, [animate]);
 
   const handleLeave = useCallback(() => {
     isHovered.current = false;
-    scramble(false);
-  }, [scramble]);
+    animate(false);
+  }, [animate]);
 
-  /* Cleanup on unmount */
-  useEffect(() => {
-    return () => { timers.current.forEach(t => clearInterval(t)); };
-  }, []);
+  useEffect(() => () => { gsapCtxRef.current?.revert(); }, []);
 
   return (
     <span
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
-      style={{ display: 'inline', cursor: 'default', userSelect: 'none', letterSpacing: 'inherit' }}
+      style={{ display: 'inline', cursor: 'default', userSelect: 'none',
+               letterSpacing: 'inherit' }}
     >
       {JOURNEY.map((char, i) => (
+        /* Clip: inline-block so it sits in the text flow, overflow hidden clips the reel */
         <span
           key={i}
-          ref={el => { spanRefs.current[i] = el; }}
-          style={{ display: 'inline', color: '#ffffff' }}
+          ref={el => { clipRefs.current[i] = el; }}
+          style={{
+            display: 'inline-block',
+            overflow: 'hidden',
+            verticalAlign: 'top',
+            lineHeight: 'inherit',
+          }}
         >
-          {char}
+          {/* Reel: 3 identical letters stacked, GSAP scrolls it */}
+          <span
+            ref={el => { reelRefs.current[i] = el; }}
+            style={{ display: 'block', willChange: 'transform' }}
+          >
+            <span style={{ display: 'block', color: '#96CA45', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            <span style={{ display: 'block', color: '#ffffff', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            <span style={{ display: 'block', color: '#96CA45', lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+          </span>
         </span>
       ))}
     </span>
@@ -169,10 +190,11 @@ function CountryCard({ country, isActive, onClick }: {
   const [contentReady, setContentReady] = useState(isActive);
   const [hovered,      setHovered     ] = useState(false);
 
-  const isFirstRender = useRef(true);
-  const showTmr = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const cntTmr  = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const intTmr  = useRef<ReturnType<typeof setInterval> | null>(null);
+  /* Track previous isActive so we only animate on a real false→true edge */
+  const prevActive = useRef(isActive);
+  const showTmr    = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const cntTmr     = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const intTmr     = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearAll = () => {
     if (showTmr.current) clearTimeout(showTmr.current);
@@ -181,31 +203,33 @@ function CountryCard({ country, isActive, onClick }: {
   };
 
   useEffect(() => {
-    /* Skip the very first render for the initially-active card
-       (count + contentReady already initialised correctly in useState) */
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (isActive) return;
-    }
+    const wasActive = prevActive.current;
+    prevActive.current = isActive;
 
     clearAll();
 
     if (!isActive) {
-      setContentReady(false);
-      setCount(0);
+      /* Only reset if we were previously active — avoids resetting on mount */
+      if (wasActive) {
+        setContentReady(false);
+        setCount(0);
+      }
       return;
     }
 
-    showTmr.current = setTimeout(() => setContentReady(true), 260);
-    cntTmr.current  = setTimeout(() => {
-      let v = 0;
-      const step = country.percentage / (550 / 16);
-      intTmr.current = setInterval(() => {
-        v = Math.min(v + step, country.percentage);
-        setCount(Math.round(v));
-        if (v >= country.percentage) clearInterval(intTmr.current!);
-      }, 16);
-    }, 380);
+    /* Only animate if this is a genuine inactive→active transition */
+    if (!wasActive) {
+      showTmr.current = setTimeout(() => setContentReady(true), 260);
+      cntTmr.current  = setTimeout(() => {
+        let v = 0;
+        const step = country.percentage / (550 / 16);
+        intTmr.current = setInterval(() => {
+          v = Math.min(v + step, country.percentage);
+          setCount(Math.round(v));
+          if (v >= country.percentage) clearInterval(intTmr.current!);
+        }, 16);
+      }, 380);
+    }
 
     return clearAll;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,10 +278,13 @@ function CountryCard({ country, isActive, onClick }: {
           <span style={{ fontSize: 'clamp(14px,2vw,20px)', fontWeight: 400, lineHeight: '1.4', color: '#000', fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif" }}>
             {country.name}
           </span>
-          <Image src={country.mapSrc} alt={country.name} width={120} height={95}
-            style={{ width: 'clamp(70px,12vw,115px)', height: 'auto', marginTop: '-4px', marginRight: '-4px' }}
-            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-          />
+          {/* Fixed box — map fills it with object-fit:contain so tall shapes (S.America) never overflow */}
+          <div style={{ width: 'clamp(60px,10vw,100px)', height: 'clamp(50px,8vw,80px)', flexShrink: 0, position: 'relative' }}>
+            <Image src={country.mapSrc} alt={country.name} fill
+              style={{ objectFit: 'contain', objectPosition: 'top right' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+            />
+          </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div style={{ width: 'clamp(80px,14vw,130px)', height: 'clamp(32px,5vw,48px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
@@ -420,8 +447,8 @@ export default function Hero() {
             className="flex flex-col items-center text-center"
             style={{ paddingTop: 'clamp(90px,12vh,140px)' }}
           >
-            {/* Sunburst + H1 */}
-            <div className="relative inline-flex items-center justify-center">
+            {/* Sunburst + H1 + Avatars */}
+            <div className="relative inline-flex flex-col items-center justify-center">
               <div
                 ref={sunburstRef}
                 className="absolute pointer-events-none"
@@ -445,25 +472,42 @@ export default function Hero() {
                   fontSize: 'clamp(28px,5.8vw,96px)',
                   lineHeight: 1.05,
                   opacity: 0,
-                  padding: 'clamp(12px,2.5vw,28px) clamp(6px,1.5vw,12px)',
+                  padding: 'clamp(12px,2.5vw,28px) clamp(6px,1.5vw,12px) clamp(4px,1vw,8px)',
                   whiteSpace: 'nowrap',
                   letterSpacing: '-0.02em',
                 }}
               >
                 {'Start Your '}<SlotWord />{'.'}<span style={{ color: '#96CA45' }}>{'!'}</span>
               </h1>
-            </div>
 
-            {/* Avatars */}
-            <div
-              ref={avatarsRef}
-              className="flex flex-row items-center justify-center gap-3 mt-3"
-              style={{ opacity: 0 }}
-            >
-              <Image src="/avatars-group.png" alt="Trusted Students" width={160} height={40} className="h-7 sm:h-9 w-auto" style={{ opacity: 1, filter: 'none' }} />
-              <span className="text-[#CACACA] text-xs sm:text-sm font-medium tracking-wide">
-                1600 + Trusted Students
-              </span>
+              {/* Avatars — directly below heading, full original color, responsive */}
+              <div
+                ref={avatarsRef}
+                className="flex flex-row items-center justify-center gap-2 sm:gap-3"
+                style={{ opacity: 0, marginTop: 'clamp(6px,1.2vw,14px)', zIndex: 1 }}
+              >
+                <Image
+                  src="/avatars-group.png"
+                  alt="Trusted Students"
+                  width={160}
+                  height={40}
+                  style={{
+                    height: 'clamp(28px,4vw,44px)',
+                    width: 'auto',
+                    display: 'block',
+                  }}
+                  priority
+                />
+                <span
+                  className="font-medium tracking-wide"
+                  style={{
+                    color: '#CACACA',
+                    fontSize: 'clamp(11px,1.1vw,15px)',
+                  }}
+                >
+                  1600 + Trusted Students
+                </span>
+              </div>
             </div>
           </div>
 
@@ -598,27 +642,15 @@ export default function Hero() {
                   maxWidth: '100%',
                 }}
               >
-                {/* Inactive cards first (all except active) */}
-                {COUNTRIES.filter((_, idx) => idx !== activeIdx).map((country) => {
-                  const origIdx = COUNTRIES.indexOf(country);
-                  return (
-                    <div key={country.id} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                      <CountryCard
-                        country={country}
-                        isActive={false}
-                        onClick={() => handleCardClick(origIdx)}
-                      />
-                    </div>
-                  );
-                })}
-                {/* Active card always on the right */}
-                <div style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                  <CountryCard
-                    country={COUNTRIES[activeIdx]}
-                    isActive={true}
-                    onClick={() => {}}
-                  />
-                </div>
+                {COUNTRIES.map((country, idx) => (
+                  <div key={country.id} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
+                    <CountryCard
+                      country={country}
+                      isActive={idx === activeIdx}
+                      onClick={() => handleCardClick(idx)}
+                    />
+                  </div>
+                ))}
               </div>
 
               {/* Progress bar */}
