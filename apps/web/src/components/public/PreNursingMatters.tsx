@@ -1,57 +1,134 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import gsap from 'gsap';
 
-/* Keyframes defined in globals.css: pre-arrow-float, pre-reveal */
+/* Keyframes: pre-arrow-float — defined in globals.css */
 
-export default function PreNursingMatters() {
-  const sunburstRef  = useRef<HTMLDivElement>(null);
-  const calloutRef   = useRef<HTMLDivElement>(null);
-  const [calloutIn, setCalloutIn] = useState(false);
+/* ── helpers ── */
+function getServiceImage(s: any): string {
+  if (!s) return '';
+  if (s.image && typeof s.image === 'object' && s.image.secureUrl) return s.image.secureUrl;
+  if (typeof s.image === 'string' && s.image) return s.image;
+  return '';
+}
 
-  /* Parallax sunburst on scroll — rAF-throttled so the style write happens
-     at most once per rendered frame instead of once per raw scroll event
-     (raw scroll events can fire far more often than 60fps and otherwise
-     flood the main thread, which is what causes visible jitter/vibration
-     across the page's other running animations). */
+const FALLBACK = ['/about/3.jpg', '/about/7.jpg'];
+
+/* ── stacking positions (rest = fully stacked behind centre) ── */
+const REST = [
+  { x:  '0%', rotate:  0, scale: 1,    z: 1 },   // left back
+  { x:  '0%', rotate:  0, scale: 1,    z: 3 },   // centre (hero card)
+  { x:  '0%', rotate:  0, scale: 1,    z: 2 },   // right back
+];
+
+/* ── fan-out targets on hover ── */
+const FAN = [
+  { x: '-62%', rotate: -18, scale: 0.90, z: 1 },
+  { x:   '0%', rotate:   0, scale: 1.00, z: 3 },
+  { x:  '62%', rotate:  18, scale: 0.90, z: 2 },
+];
+
+interface Props { services?: any[] }
+
+export default function PreNursingMatters({ services = [] }: Props) {
+  const sunburstRef = useRef<HTMLDivElement>(null);
+  const cardEls     = useRef<(HTMLDivElement | null)[]>([]);
+  const calloutRef  = useRef<HTMLDivElement>(null);
+  const revealedRef = useRef(false);
+  const fannedRef   = useRef(false);
+
+  /* pick two service images, fall back to static about/ photos */
+  const leftImg  = getServiceImage(services[0]) || FALLBACK[0];
+  const rightImg = getServiceImage(services[1]) || FALLBACK[1];
+  const leftLink  = services[0]?.slug ? `/services/${services[0].slug}` : '/services';
+  const rightLink = services[1]?.slug ? `/services/${services[1].slug}` : '/services';
+
+  /* ── Parallax sunburst ── */
   useEffect(() => {
     let ticking = false;
-    const applyTransform = () => {
+    const apply = () => {
       ticking = false;
-      if (sunburstRef.current) {
-        const rotation = window.scrollY * 0.2;
-        sunburstRef.current.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-      }
+      if (sunburstRef.current)
+        sunburstRef.current.style.transform = `translate(-50%,-50%) rotate(${window.scrollY * 0.18}deg)`;
     };
-    const handleScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(applyTransform);
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    applyTransform();
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(apply); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    apply();
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* IntersectionObserver — trigger callout reveal when section scrolls into view */
+  /* ── Scroll-reveal: callout arrow ── */
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setCalloutIn(true);
-          observer.disconnect();
+    const el = calloutRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || revealedRef.current) return;
+      revealedRef.current = true;
+      io.disconnect();
+      gsap.fromTo(el,
+        { y: 20, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.7, ease: 'back.out(1.2)',
+          onComplete: () => { el.style.animation = 'pre-arrow-float 2.6s ease-in-out infinite'; },
         }
-      },
-      { threshold: 0.25 }
-    );
-    if (calloutRef.current) observer.observe(calloutRef.current);
-    return () => observer.disconnect();
+      );
+    }, { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
+
+  /* ── Initial: stack all cards perfectly on top of each other ── */
+  useEffect(() => {
+    cardEls.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.set(el, { x: REST[i].x, rotate: REST[i].rotate, scale: REST[i].scale, zIndex: REST[i].z });
+    });
+  }, []);
+
+  /* ── Fan out ── */
+  const fanOut = () => {
+    if (fannedRef.current) return;
+    fannedRef.current = true;
+    cardEls.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.to(el, {
+        x: FAN[i].x,
+        rotate: FAN[i].rotate,
+        scale: FAN[i].scale,
+        zIndex: FAN[i].z,
+        duration: 0.58,
+        ease: 'back.out(1.5)',
+        overwrite: 'auto',
+      });
+    });
+  };
+
+  /* ── Fan in ── */
+  const fanIn = () => {
+    if (!fannedRef.current) return;
+    fannedRef.current = false;
+    cardEls.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.to(el, {
+        x: REST[i].x,
+        rotate: REST[i].rotate,
+        scale: REST[i].scale,
+        zIndex: REST[i].z,
+        duration: 0.45,
+        ease: 'power3.inOut',
+        overwrite: 'auto',
+      });
+    });
+  };
 
   return (
-    <section className="bg-white py-24 relative overflow-hidden font-['Power_Grotesk'] text-[#252525]">
+    <section
+      className="bg-white relative overflow-hidden font-['Power_Grotesk'] text-[#252525]"
+      style={{ paddingTop: 'clamp(48px,8vw,96px)', paddingBottom: 'clamp(64px,10vw,128px)' }}
+    >
       {/* Crosshair lines */}
       <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-200 pointer-events-none z-0" />
       <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-200 pointer-events-none z-0" />
@@ -59,119 +136,223 @@ export default function PreNursingMatters() {
       {/* Rotating sunburst */}
       <div
         ref={sunburstRef}
-        className="absolute top-1/2 left-1/2 w-[1000px] h-[1000px] pointer-events-none z-0 opacity-40 will-change-transform"
-        style={{ transform: 'translate(-50%, -50%)' }}
+        className="absolute top-1/2 left-1/2 pointer-events-none z-0 opacity-35 will-change-transform"
+        style={{
+          width: 'clamp(600px,85vw,1100px)',
+          height: 'clamp(600px,85vw,1100px)',
+          transform: 'translate(-50%,-50%)',
+        }}
       >
         <Image src="/light-sunburst.png" alt="" fill className="object-contain" />
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
-
-        {/* Heading */}
-        <h2 className="text-4xl md:text-[56px] font-medium mb-6 tracking-tight bg-white px-8">
-          Why <span className="text-[#96CA45] font-bold">Pre-Nursing</span> Matters
+      <div
+        className="max-w-[1440px] mx-auto relative z-10 flex flex-col items-center text-center"
+        style={{ paddingLeft: 'clamp(16px,4vw,64px)', paddingRight: 'clamp(16px,4vw,64px)' }}
+      >
+        {/* ── Heading ── */}
+        <h2
+          className="font-medium tracking-tight"
+          style={{ fontSize: 'clamp(26px,4.5vw,56px)', marginBottom: 'clamp(14px,2vw,24px)' }}
+        >
+          Nursing Dreams,{' '}
+          <span className="text-[#96CA45] font-bold">Made Possible.</span>
         </h2>
 
-        {/* Body copy */}
-        <div className="bg-white px-8 py-2 mb-10 z-10">
-          <p className="text-base md:text-[22px] leading-relaxed max-w-4xl text-[#252525]">
-            T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec
-            Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam
-            Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
-          </p>
-        </div>
+        {/* ── Body copy ── */}
+        <p
+          className="leading-relaxed max-w-3xl text-[#252525] mx-auto"
+          style={{
+            fontSize: 'clamp(14px,1.5vw,20px)',
+            marginBottom: 'clamp(32px,5vw,64px)',
+          }}
+        >
+          GrowMedLink helps nurses transform ambition into achievement through expert-led training,
+          personalised support, and practical preparation for a successful global healthcare career.
+        </p>
 
-        {/* Centerpiece image container */}
-        <div ref={calloutRef} className="relative w-full max-w-[700px] mt-2 mb-12">
-
-          {/* Faint watermarks */}
-          <div className="absolute bottom-1/2 mb-2 -left-4 md:-left-[180px] lg:-left-[220px] text-4xl md:text-5xl lg:text-6xl font-bold text-gray-200 tracking-widest pointer-events-none whitespace-nowrap opacity-50 select-none z-0">
-            EXPLORE
-          </div>
-          <div className="absolute bottom-1/2 mb-2 -right-4 md:-right-[160px] lg:-right-[200px] text-4xl md:text-5xl lg:text-6xl font-bold text-gray-200 tracking-widest pointer-events-none whitespace-nowrap opacity-50 select-none z-0">
-            MORE !
-          </div>
-
-          {/* The image */}
-          <div className="relative z-10 w-full max-w-[350px] md:max-w-[450px] mx-auto h-[150px] md:h-[220px] rounded-[20px] overflow-hidden shadow-xl">
-            <Image
-              src="/pre-nursing-photo.png"
-              alt="Pre-Nursing Matters"
-              fill
-              className="object-cover"
-            />
-          </div>
-
-          {/*
-            Handwritten callout — anti-jitter architecture (same as Hero):
-            ┌─ outer div: scroll-reveal + arrowFloat (translateY only, willChange:transform)
-            │   ├─ rotate wrapper: static rotate(-10deg), no animation
-            │   │   └─ Image: curly arrow
-            │   └─ span: static rotate(-4deg), no animation
-          */}
-          <div
-            className="absolute bottom-[-80px] md:bottom-[-100px] right-[4%] sm:right-[8%] md:right-[10%] z-20"
+        {/* ── Card fan stage ── */}
+        <div
+          className="relative flex items-center justify-center cursor-pointer select-none"
+          style={{
+            /* stage is wider than card to give room for fanned cards */
+            width: '100%',
+            maxWidth: 'clamp(320px,80vw,900px)',
+            /* height = card height + some vertical breathing room */
+            height: 'clamp(220px,40vw,460px)',
+            marginBottom: 'clamp(16px,3vw,40px)',
+          }}
+          onMouseEnter={fanOut}
+          onMouseLeave={fanIn}
+          onTouchStart={fanOut}
+          onTouchEnd={fanIn}
+        >
+          {/* Watermark words — rendered behind everything */}
+          <span
+            className="absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest z-0"
             style={{
-              pointerEvents: 'none',
-              width: 'clamp(200px, 28vw, 320px)',
-              /* Scroll-triggered reveal */
-              opacity: calloutIn ? 1 : 0,
-              animation: calloutIn
-                ? `pre-reveal 0.7s cubic-bezier(.22,.68,0,1.2) both,
-                   pre-arrow-float 2.6s ease-in-out 0.8s infinite`
-                : 'none',
-              willChange: 'transform, opacity',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transformStyle: 'preserve-3d',
+              fontSize: 'clamp(20px,4vw,60px)',
+              left: '0',
+              top: '50%',
+              transform: 'translateY(-50%) translateX(-30%)',
+              whiteSpace: 'nowrap',
             }}
           >
-            {/* Arrow — static rotation, never animated */}
-            <div style={{ transform: 'rotate(-10deg)', transformOrigin: 'top center', display: 'inline-block' }}>
-              <Image
-                src="/red-curly-arrow.png"
-                alt=""
-                width={100}
-                height={100}
-                className="w-12 md:w-16 h-auto"
-                style={{ marginLeft: '40px' }}
-                onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-              />
-            </div>
+            EXPLORE
+          </span>
+          <span
+            className="absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest z-0"
+            style={{
+              fontSize: 'clamp(20px,4vw,60px)',
+              right: '0',
+              top: '50%',
+              transform: 'translateY(-50%) translateX(30%)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MORE !
+          </span>
 
-            {/* Handwritten text — sibling to the arrow wrapper, own static rotate */}
-            <span
-              style={{
-                display: 'block',
-                fontFamily:
-                  "'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive",
-                fontSize: 'clamp(28px, 3.5vw, 38px)',
-                lineHeight: 1.3,
-                paddingBottom: '12px', /* Prevent script descender clipping */
-                color: '#b31b1b',
-                transform: 'rotate(-3deg)',
-                transformOrigin: 'left top',
-                marginLeft: '52px',
-                marginTop: '2px',
-                whiteSpace: 'nowrap',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale',
-              }}
-            >
-              See How Its Work!
-            </span>
+          {/* ── Card 0 — left photo (service / fallback) ── */}
+          <div
+            ref={el => { cardEls.current[0] = el; }}
+            className="absolute rounded-2xl overflow-hidden shadow-2xl"
+            style={{
+              width:  'clamp(180px,44vw,460px)',
+              height: 'clamp(130px,26vw,300px)',
+              left: '50%', top: '50%',
+              marginLeft: 'calc(clamp(180px,44vw,460px) / -2)',
+              marginTop:  'calc(clamp(130px,26vw,300px) / -2)',
+              willChange: 'transform',
+              transformOrigin: 'bottom center',
+            }}
+          >
+            <Image src={leftImg} alt="Service" fill className="object-cover" sizes="50vw" />
+            <div className="absolute inset-0 bg-black/25" />
           </div>
 
+          {/* ── Card 1 — centre: green overlay card ── */}
+          <div
+            ref={el => { cardEls.current[1] = el; }}
+            className="absolute rounded-2xl overflow-hidden shadow-2xl"
+            style={{
+              width:  'clamp(180px,44vw,460px)',
+              height: 'clamp(130px,26vw,300px)',
+              left: '50%', top: '50%',
+              marginLeft: 'calc(clamp(180px,44vw,460px) / -2)',
+              marginTop:  'calc(clamp(130px,26vw,300px) / -2)',
+              willChange: 'transform',
+              transformOrigin: 'bottom center',
+            }}
+          >
+            {/* Background photo */}
+            <Image src="/pre-nursing-photo.png" alt="GrowMedLink" fill className="object-cover" sizes="50vw" />
+            {/* Green overlay */}
+            <div className="absolute inset-0" style={{ background: 'rgba(150,202,69,0.82)' }} />
+            {/* Content on top of overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 sm:gap-5 px-4 sm:px-8 z-10">
+              <p
+                className="text-[#252525] font-bold text-center leading-tight font-['Power_Grotesk']"
+                style={{ fontSize: 'clamp(16px,2.8vw,32px)' }}
+              >
+                Your Global Nursing{' '}
+                <span className="text-white">Career</span>{' '}
+                Starts Here.
+              </p>
+              <Link
+                href="/services"
+                className="bg-white text-[#252525] font-semibold font-['Power_Grotesk'] rounded-full hover:bg-[#252525] hover:text-white transition-colors duration-300"
+                style={{
+                  fontSize: 'clamp(11px,1.3vw,16px)',
+                  padding: 'clamp(8px,1vw,14px) clamp(16px,2.5vw,36px)',
+                }}
+              >
+                Explore Courses
+              </Link>
+            </div>
+          </div>
+
+          {/* ── Card 2 — right photo (service / fallback) ── */}
+          <div
+            ref={el => { cardEls.current[2] = el; }}
+            className="absolute rounded-2xl overflow-hidden shadow-2xl"
+            style={{
+              width:  'clamp(180px,44vw,460px)',
+              height: 'clamp(130px,26vw,300px)',
+              left: '50%', top: '50%',
+              marginLeft: 'calc(clamp(180px,44vw,460px) / -2)',
+              marginTop:  'calc(clamp(130px,26vw,300px) / -2)',
+              willChange: 'transform',
+              transformOrigin: 'bottom center',
+            }}
+          >
+            <Image src={rightImg} alt="Service" fill className="object-cover" sizes="50vw" />
+            <div className="absolute inset-0 bg-black/25" />
+          </div>
         </div>
 
-        {/* Avatars at bottom */}
-        <div className="mt-28 md:mt-32 flex flex-row items-center justify-center gap-3 relative z-10">
-          <Image src="/avatars-group.png" alt="Trusted Students" width={160} height={40} className="h-6 md:h-8 w-auto" />
-          <span className="text-[#252525] text-xs md:text-sm font-medium tracking-wide">
-            1600 + Trusted Students
+        {/* ── Arrow callout ── */}
+        <div
+          ref={calloutRef}
+          className="relative z-10 flex flex-col items-start"
+          style={{
+            opacity: 0,
+            alignSelf: 'flex-end',
+            marginRight: 'clamp(8px,8vw,120px)',
+            pointerEvents: 'none',
+            width: 'clamp(150px,22vw,280px)',
+          }}
+        >
+          <div style={{ transform: 'rotate(-10deg)', transformOrigin: 'top center', display: 'inline-block' }}>
+            <Image
+              src="/red-curly-arrow.png"
+              alt=""
+              width={100}
+              height={100}
+              className="h-auto"
+              style={{ width: 'clamp(32px,4vw,56px)', marginLeft: '32px' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+            />
+          </div>
+          <span
+            style={{
+              display: 'block',
+              fontFamily: "'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive",
+              fontSize: 'clamp(20px,2.8vw,36px)',
+              lineHeight: 1.3,
+              paddingBottom: '12px',
+              color: '#b31b1b',
+              transform: 'rotate(-3deg)',
+              transformOrigin: 'left top',
+              marginLeft: '36px',
+              marginTop: '2px',
+              whiteSpace: 'nowrap',
+              WebkitFontSmoothing: 'antialiased',
+            }}
+          >
+            Start Your Journey Today!
           </span>
         </div>
 
+        {/* ── Social proof ── */}
+        <div
+          className="flex flex-row items-center justify-center gap-3 relative z-10"
+          style={{ marginTop: 'clamp(20px,3.5vw,40px)' }}
+        >
+          <Image
+            src="/avatars-group.png"
+            alt="Trusted Students"
+            width={160}
+            height={40}
+            style={{ height: 'clamp(22px,3vw,34px)', width: 'auto' }}
+          />
+          <span
+            className="text-[#252525] font-medium tracking-wide"
+            style={{ fontSize: 'clamp(11px,1vw,14px)' }}
+          >
+            8,600+ Trusted Global Graduates
+          </span>
+        </div>
       </div>
     </section>
   );

@@ -32,7 +32,7 @@ export default async function Home() {
       <StatsBanner />
 
       {/* Why Pre-Nursing Matters Section */}
-      <PreNursingMatters />
+      <PreNursingMatters services={featuredServices} />
 
       {/* Featured Services Interactive Section */}
       <FeaturedServices services={featuredServices} />
