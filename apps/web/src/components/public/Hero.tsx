@@ -58,7 +58,7 @@ const AUTO_CYCLE_MS = 3200;
    - After onComplete: set copy B to settle color (green or white),
      snap reel back to -1em.
 ──────────────────────────────────────────────────────── */
-const LETTERS = 'Starts'.split('');
+const LETTERS = 'Here'.split('');
 const COL_SPIN  = '#3B82F6';
 const COL_GREEN = '#97C93D';
 const COL_WHITE = '#FFFFFF';
@@ -476,11 +476,11 @@ export default function Hero() {
                 ref={sunburstRef}
                 className="absolute pointer-events-none"
                 style={{
-                  width:  'clamp(300px,70vw,680px)',
-                  height: 'clamp(300px,70vw,680px)',
+                  width:  'clamp(340px,90vw,860px)',
+                  height: 'clamp(340px,90vw,860px)',
                   top: '50%', left: '50%',
-                  marginLeft: 'calc(clamp(300px,70vw,680px) / -2)',
-                  marginTop:  'calc(clamp(300px,70vw,680px) / -2)',
+                  marginLeft: 'calc(clamp(340px,90vw,860px) / -2)',
+                  marginTop:  'calc(clamp(340px,90vw,860px) / -2)',
                   zIndex: -1,
                   willChange: 'transform',
                 }}
@@ -492,15 +492,19 @@ export default function Hero() {
                 ref={h1Ref}
                 className="font-black tracking-tight"
                 style={{
-                  fontSize: 'clamp(36px,7vw,112px)',
-                  lineHeight: 1.05,
+                  fontSize: 'clamp(28px,5vw,80px)',
+                  lineHeight: 1.08,
                   opacity: 0,
-                  padding: 'clamp(12px,2.5vw,28px) clamp(6px,1.5vw,12px) clamp(4px,1vw,8px)',
-                  whiteSpace: 'nowrap',
+                  padding: 'clamp(10px,2vw,24px) clamp(6px,1.5vw,12px) clamp(4px,1vw,8px)',
                   letterSpacing: '-0.02em',
+                  maxWidth: '100%',
+                  textAlign: 'center',
                 }}
               >
-                {'Your Global Nursing Career '}<SlotWord />{' Here.'}<span style={{ color: '#96CA45' }}>{'!'}</span>
+                {'Your Global Nursing Career Starts '}
+                <SlotWord />
+                {'.'}
+                <span style={{ color: '#96CA45' }}>{'!'}</span>
               </h1>
 
               {/* Avatars — directly below heading, full original color, responsive */}
@@ -576,8 +580,7 @@ export default function Hero() {
                   lineHeight: '1.7',
                 }}
               >
-                Our community is full of creative devs and designers exchanging feedback,
-                ideas, and inspiration. Everyone&apos;s here to make the internet a little better.
+                GrowMedLink provides expert nursing exam training, personalised guidance, and skill-focused preparation for nurses aiming to build successful international healthcare careers.
               </p>
 
               {/* CTA button */}
@@ -640,7 +643,7 @@ export default function Hero() {
                     paddingTop: 4,
                   }}
                 >
-                  Finally, your kind<br />of group chat
+                  100% <br />Exam Pass Guarantee
                 </span>
               </div>
             </div>
