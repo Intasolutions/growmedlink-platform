@@ -27,6 +27,107 @@ export default function WhySection() {
   const bodyRef       = useRef<HTMLParagraphElement>(null);
   const triggeredRef  = useRef(false);
 
+  /* ── Cursor trail ── */
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const SRC        = `${window.location.origin}/cursor-trail.png`;
+    const SIZE       = 96;
+    const TRAIL_SIZE = 70;
+    const MAX_TRAIL  = 12;
+    const EVERY_MS   = 55;
+    const OFFSET     = 18;
+    const MAX_ROT    = 8;
+
+    const makeNode = (s: number, z: number) => {
+      const d = document.createElement('div');
+      d.style.cssText = `position:fixed;top:0;left:0;width:${s}px;height:${s}px;`
+        + `pointer-events:none;user-select:none;will-change:transform,opacity;`
+        + `z-index:${z};background:url('${SRC}') center/contain no-repeat;opacity:0;`;
+      return d;
+    };
+
+    const main = makeNode(SIZE, 9999);
+    document.body.appendChild(main);
+    gsap.set(main, { x: -SIZE * 3, y: -SIZE * 3, scale: 0.85, rotation: 0, opacity: 0 });
+
+    const qX  = gsap.quickTo(main, 'x',        { duration: 0.5,  ease: 'power3.out' });
+    const qY  = gsap.quickTo(main, 'y',        { duration: 0.5,  ease: 'power3.out' });
+    const qRt = gsap.quickTo(main, 'rotation', { duration: 0.55, ease: 'power3.out' });
+    const qSc = gsap.quickTo(main, 'scale',    { duration: 0.35, ease: 'power3.out' });
+    const qOp = gsap.quickTo(main, 'opacity',  { duration: 0.25, ease: 'power2.out' });
+
+    let inside = false, mx = 0, my = 0, prevMx = 0, velRot = 0, lastSpawn = 0;
+    let trails: HTMLDivElement[] = [];
+
+    const spawnTrail = (x: number, y: number, rot: number) => {
+      if (trails.length >= MAX_TRAIL) {
+        const d = trails.shift(); d?.parentNode?.removeChild(d);
+      }
+      const node = makeNode(TRAIL_SIZE, 9998);
+      document.body.appendChild(node);
+      trails.push(node);
+      gsap.set(node, { x: x + OFFSET, y: y + OFFSET, rotation: rot * 0.35, scale: 0.7, opacity: 0.36 });
+      gsap.to(node, { opacity: 0, scale: 0.4, duration: 0.5, ease: 'power2.out',
+        onComplete: () => { node.parentNode?.removeChild(node); trails = trails.filter(n => n !== node); }
+      });
+    };
+
+    const tick: gsap.TickerCallback = () => {
+      if (!inside) return;
+      const vx = mx - prevMx; prevMx = mx;
+      velRot = velRot * 0.82 + Math.max(-MAX_ROT, Math.min(MAX_ROT, vx * 2.5)) * 0.18;
+      qX(mx + OFFSET); qY(my + OFFSET); qRt(velRot);
+    };
+    gsap.ticker.add(tick);
+
+    const onMove = (e: MouseEvent) => {
+      mx = e.clientX; my = e.clientY;
+      const now = performance.now();
+      if (now - lastSpawn < EVERY_MS) return;
+      lastSpawn = now;
+      spawnTrail(
+        (gsap.getProperty(main, 'x') as number) - OFFSET,
+        (gsap.getProperty(main, 'y') as number) - OFFSET,
+        velRot
+      );
+    };
+
+    const onEnter = (e: MouseEvent) => {
+      mx = e.clientX; my = e.clientY; prevMx = mx;
+      gsap.set(main, { x: mx + OFFSET, y: my + OFFSET });
+      inside = true;
+      section.style.cursor = 'none';
+      qOp(1); qSc(1);
+    };
+
+    const onLeave = () => {
+      inside = false;
+      section.style.cursor = '';
+      qOp(0); qSc(0.85); velRot = 0; qRt(0);
+      const copy = [...trails]; trails = [];
+      copy.forEach(n => gsap.to(n, { opacity: 0, duration: 0.15,
+        onComplete: () => n.parentNode?.removeChild(n) }));
+    };
+
+    section.addEventListener('mousemove',  onMove);
+    section.addEventListener('mouseenter', onEnter as EventListener);
+    section.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      section.removeEventListener('mousemove',  onMove);
+      section.removeEventListener('mouseenter', onEnter as EventListener);
+      section.removeEventListener('mouseleave', onLeave);
+      section.style.cursor = '';
+      gsap.ticker.remove(tick);
+      gsap.killTweensOf(main);
+      main.parentNode?.removeChild(main);
+      trails.forEach(n => n.parentNode?.removeChild(n));
+      trails = [];
+    };
+  }, []);
+
   /* ── rAF-throttled scroll parallax ── */
   useEffect(() => {
     const card    = cardRef.current;
@@ -131,7 +232,7 @@ export default function WhySection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white flex items-center justify-center overflow-hidden"
+      className="bg-white flex items-center justify-center"
       style={{ padding: 'clamp(32px,5vw,64px) clamp(12px,3vw,32px)' }}
     >
       <div ref={cardRef} className="why-card">
