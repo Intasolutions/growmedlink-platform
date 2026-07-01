@@ -58,107 +58,95 @@ const AUTO_CYCLE_MS = 3200;
    - After onComplete: set copy B to settle color (green or white),
      snap reel back to -1em.
 ──────────────────────────────────────────────────────── */
-const LETTERS   = 'Journey'.split('');
+const LETTERS = 'Journey'.split('');
 const COL_SPIN  = '#3B82F6';
 const COL_GREEN = '#97C93D';
-const COL_WHITE = '#ffffff';
+const COL_WHITE = '#FFFFFF';
 
 function SlotWord() {
-  const clipRefs  = useRef<(HTMLSpanElement | null)[]>([]);
-  const reelRefs  = useRef<(HTMLSpanElement | null)[]>([]);
-  const midRefs   = useRef<(HTMLSpanElement | null)[]>([]);
-  const tlRef     = useRef<gsap.core.Timeline | null>(null);
-  const isRunning = useRef(false);
-  const isHovered = useRef(false);
-  const rowPx     = useRef(0);
+  const reelRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const midRefs  = useRef<(HTMLSpanElement | null)[]>([]);
+  const running  = useRef(false);
+  const tlRef    = useRef<gsap.core.Timeline | null>(null);
 
-  /* Measure ONE clip after mount to get the pixel height of 1 row */
-  useEffect(() => {
-    const clip = clipRefs.current[0];
-    if (!clip) return;
-    const h = clip.getBoundingClientRect().height;
-    rowPx.current = h;
-    /* Place every reel so copy B (index 1) is in view: y = -h */
-    reelRefs.current.forEach(r => { if (r) gsap.set(r, { y: -h }); });
-  }, []);
+  /*
+    Reel = 3 rows of the same char stacked: [A][B][C]
+    Reel height = 3 × row-height.
 
-  const roll = useCallback((toGreen: boolean) => {
-    if (isRunning.current) return;
-    const h = rowPx.current;
-    if (!h) return;
-    isRunning.current = true;
+    yPercent is relative to the REEL's own height (3 rows), so:
+      -33.33% → row B (index 1) is centred in the 1-row clip  ← REST
+        0%    → row A (index 0) is in the clip                ← roll-up destination
+      -66.67% → row C (index 2) is in the clip                ← roll-down destination
+
+    After each animation completes, snap back to -33.33% silently.
+  */
+  const REST = -100 / 3;        /* -33.333...% */
+  const UP   = 0;
+  const DOWN = -(200 / 3);      /* -66.666...% */
+
+  const play = useCallback((hoverIn: boolean) => {
+    if (running.current) return;
+    running.current = true;
+    const settle = hoverIn ? COL_GREEN : COL_WHITE;
 
     if (tlRef.current) tlRef.current.kill();
-    const tl = gsap.timeline({ onComplete: () => { isRunning.current = false; } });
-    tlRef.current = tl;
 
-    const settle = toGreen ? COL_GREEN : COL_WHITE;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        midRefs.current.forEach(el => el && gsap.set(el, { color: settle }));
+        reelRefs.current.forEach(el => el && gsap.set(el, { yPercent: REST }));
+        running.current = false;
+      },
+    });
+    tlRef.current = tl;
 
     LETTERS.forEach((_, i) => {
       const reel = reelRefs.current[i];
       const mid  = midRefs.current[i];
       if (!reel || !mid) return;
 
-      const goUp    = i % 2 === 0;
-      const targetY = goUp ? 0 : -(h * 2);   /* 0 = copy A; -2h = copy C */
-      const at      = i * 0.05;              /* stagger time in timeline */
+      const target  = i % 2 === 0 ? UP : DOWN;
+      const stagger = i * 0.05;
 
-      tl.set(mid, { color: COL_SPIN }, at);
-      tl.to(reel, { y: targetY, duration: 0.55, ease: 'power3.out' }, at);
-      /* After landing: restore mid color, snap reel back to rest for next hover */
-      tl.set(mid, { color: settle }, at + 0.55);
-      tl.set(reel, { y: -h }, at + 0.55);
+      tl.set(mid, { color: COL_SPIN }, stagger);
+      tl.to(reel, { yPercent: target, duration: 0.6, ease: 'expo.out' }, stagger);
     });
-  }, []);
-
-  const handleEnter = useCallback(() => {
-    if (isHovered.current) return;
-    isHovered.current = true;
-    roll(true);
-  }, [roll]);
-
-  const handleLeave = useCallback(() => {
-    isHovered.current = false;
-    roll(false);
-  }, [roll]);
+  }, [REST]);
 
   useEffect(() => () => { tlRef.current?.kill(); }, []);
 
   return (
     <span
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      style={{ display: 'inline', letterSpacing: 'inherit',
+      onMouseEnter={() => play(true)}
+      onMouseLeave={() => play(false)}
+      style={{ display: 'inline-flex', whiteSpace: 'nowrap',
                cursor: 'default', userSelect: 'none' }}
     >
-      {LETTERS.map((char, i) => (
-        /* Clip: exactly 1 row tall, hides the reel above/below */
+      {LETTERS.map((ch, i) => (
+        /* Clip: 1em tall, hides the rows above and below */
         <span
           key={i}
-          ref={el => { clipRefs.current[i] = el; }}
           style={{
             display: 'inline-block',
             overflow: 'hidden',
-            verticalAlign: 'top',
-            lineHeight: 'inherit',
+            height: '1em',
+            lineHeight: '1em',
+            verticalAlign: 'baseline',
           }}
         >
-          {/* Reel: 3 copies stacked. GSAP moves y in pixels. */}
+          {/* Reel starts at REST so row B is visible */}
           <span
             ref={el => { reelRefs.current[i] = el; }}
-            style={{ display: 'block', willChange: 'transform' }}
+            style={{
+              display: 'block',
+              willChange: 'transform',
+              transform: `translateY(${REST}%)`,
+            }}
           >
-            {/* Copy A — enters from above on roll-up */}
-            <span style={{ display: 'block', color: COL_SPIN,
-                           lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
-            {/* Copy B — visible at rest, this is the "real" letter */}
-            <span
-              ref={el => { midRefs.current[i] = el; }}
-              style={{ display: 'block', color: COL_WHITE,
-                       lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
-            {/* Copy C — enters from below on roll-down */}
-            <span style={{ display: 'block', color: COL_SPIN,
-                           lineHeight: 'inherit', whiteSpace: 'pre' }}>{char}</span>
+            <span style={{ display: 'block', color: COL_SPIN,  lineHeight: '1em' }}>{ch}</span>
+            <span ref={el => { midRefs.current[i] = el; }}
+                  style={{ display: 'block', color: COL_WHITE, lineHeight: '1em' }}>{ch}</span>
+            <span style={{ display: 'block', color: COL_SPIN,  lineHeight: '1em' }}>{ch}</span>
           </span>
         </span>
       ))}
