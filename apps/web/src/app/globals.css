@@ -26,16 +26,6 @@
    Prefix convention: hero- | pre- | fs- | scs- | why- | rvs- | ctl-
 ──────────────────────────────────────────────────────────────────────── */
 
-/* ── PreNursingMatters ── */
-@keyframes pre-arrow-float {
-  0%,100% { transform: translate3d(0, 0px, 0);  }
-  50%      { transform: translate3d(0, -6px, 0); }
-}
-@keyframes pre-reveal {
-  from { opacity: 0; transform: translate3d(0, 16px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0px,  0); }
-}
-
 /* ── FeaturedServices ── */
 @keyframes fs-cardExitUp {
   0%   { opacity:1; transform:translateY(0)     scale(1)    rotateX(0deg);  filter:blur(0px); }
