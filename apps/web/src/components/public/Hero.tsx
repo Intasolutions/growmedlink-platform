@@ -74,16 +74,15 @@ function SlotWord() {
   const UP   = 0;            /* row A in clip (roll up)   */
   const DOWN = -(200 / 3);   /* row C in clip (roll down) */
 
-  /* Always stays green after first hover — hover-out also settles green */
-  const play = useCallback((_hoverIn: boolean) => {
+  const play = useCallback((hoverIn: boolean) => {
     if (running.current) return;
     running.current = true;
 
     if (tlRef.current) tlRef.current.kill();
+    const settle = hoverIn ? COL_GREEN : COL_WHITE;
     const tl = gsap.timeline({
       onComplete: () => {
-        /* Both hover-in and hover-out settle on green */
-        midRefs.current.forEach(el => el && gsap.set(el, { color: COL_GREEN }));
+        midRefs.current.forEach(el => el && gsap.set(el, { color: settle }));
         reelRefs.current.forEach(el => el && gsap.set(el, { yPercent: REST }));
         running.current = false;
       },
@@ -109,11 +108,7 @@ function SlotWord() {
     });
   }, [REST]);
 
-  /* Trigger green spin once on mount so word starts green */
-  useEffect(() => {
-    const id = setTimeout(() => play(true), 120);
-    return () => { clearTimeout(id); tlRef.current?.kill(); };
-  }, [play]);
+  useEffect(() => () => { tlRef.current?.kill(); }, []);
 
   return (
     <span
