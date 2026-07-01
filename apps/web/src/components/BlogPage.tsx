@@ -546,7 +546,7 @@ function BlogCard({ blog, index }: { blog: BlogPost; index: number }) {
             marginTop:10,
           }}>
             {/* Author — graceful: hidden if absent */}
-            {blog.author?.name ? (
+            {/* {blog.author?.name ? (
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                 <div style={{
                   width:26, height:26, borderRadius:'50%', flexShrink:0,
@@ -569,7 +569,7 @@ function BlogCard({ blog, index }: { blog: BlogPost; index: number }) {
                   )}
                 </div>
               </div>
-            ) : <div />}
+            ) : <div />} */}
 
             {/* Date swaps to "Read More →" on card hover */}
             <div className="blg-footer-right">

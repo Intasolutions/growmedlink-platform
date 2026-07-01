@@ -453,7 +453,7 @@ export default function Hero() {
             <div
               style={{
                 position: 'absolute',
-                top: '204px',   /* button top(~150px from section top of this div) + 54px height */
+                top: '244px',   /* button top(~150px from section top of this div) + 54px height */
                 left: '60px',
                 width: '300px',
                 pointerEvents: 'none',
