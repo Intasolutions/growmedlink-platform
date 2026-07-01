@@ -86,27 +86,6 @@
   100% { background-position: 400px 0; }
 }
 
-/* ── ServicesCarouselSection ── */
-@keyframes scs-floatY {
-  0%,100% { transform: translateY(0px);  }
-  50%      { transform: translateY(-7px); }
-}
-@keyframes scs-fadeInUp {
-  from { opacity: 0; margin-top: 28px; }
-  to   { opacity: 1; margin-top: 0px;  }
-}
-@keyframes scs-fadeInLeft {
-  from { opacity: 0; margin-left: -40px; }
-  to   { opacity: 1; margin-left: 0px;   }
-}
-@keyframes scs-fadeInRight {
-  from { opacity: 0; margin-right: -40px; }
-  to   { opacity: 1; margin-right: 0px;   }
-}
-@keyframes scs-fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
 
 /* ── WhySection ── */
 @keyframes why-bfloat {

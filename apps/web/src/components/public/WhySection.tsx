@@ -356,10 +356,9 @@ export default function WhySection() {
               maxWidth: '420px',
             }}
           >
-            GrowMedLink transforms nursing ambition into international careers. Through expert-led
-            training, personalised mentorship, and step-by-step pathway support, we've helped
-            thousands of nurses achieve licensure abroad and build the global healthcare careers
-            they deserve.
+            GrowMedLink gives nurses more than exam coaching: expert training, clinical skill building, personalised guidance, and career-focused support.
+
+Our integrated pathway strengthens confidence, improves readiness, and helps nurses move closer to rewarding international healthcare opportunities worldwide with clarity, preparation, and purpose.
           </p>
         </div>
 

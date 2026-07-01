@@ -1,16 +1,29 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import gsap from 'gsap';
+
+const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 
 export default function ServicesCarouselSection({ services }: { services: any[] }) {
+  const sectionRef   = useRef<HTMLElement>(null);
+  const headingRef   = useRef<HTMLHeadingElement>(null);
+  const arrowWrapRef = useRef<HTMLDivElement>(null);
+  const labelRef     = useRef<HTMLSpanElement>(null);
+  const leftColRef   = useRef<HTMLDivElement>(null);
+  const rightColRef  = useRef<HTMLDivElement>(null);
   const carouselRef  = useRef<HTMLDivElement>(null);
   const progressRef  = useRef<HTMLDivElement>(null);
-  const sectionRef   = useRef<HTMLElement>(null);
+  const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs     = useRef<(HTMLDivElement | null)[]>([]);
+  const triggered    = useRef(false);
 
-  const [visible, setVisible] = useState(false);
+  const items   = services && services.length > 0 ? services : Array.from({ length: 4 });
+  const numDots = 10;
 
+  /* ── Progress bar + dot wave on carousel scroll ── */
   const handleScroll = useCallback(() => {
     const el = carouselRef.current;
     if (!el) return;
@@ -18,211 +31,175 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
       ? el.scrollLeft / (el.scrollWidth - el.clientWidth)
       : 0;
     if (progressRef.current) {
-      progressRef.current.style.width = `${Math.max(15, progress * 100)}%`;
+      gsap.to(progressRef.current, {
+        width: `${Math.max(15, progress * 100)}%`,
+        duration: 0.12, ease: 'none', overwrite: true,
+      });
     }
-    document.querySelectorAll<HTMLElement>('.dot-wave').forEach((dot, i, all) => {
+    dotRefs.current.forEach((dot, i, all) => {
+      if (!dot) return;
       const phase = (i / all.length) * Math.PI * 2 + progress * Math.PI * 4;
-      dot.style.transform = `translateY(${Math.sin(phase) * 8}px)`;
-      dot.style.opacity = String(0.45 + 0.55 * ((Math.sin(phase) + 1) / 2));
+      gsap.to(dot, {
+        y: Math.sin(phase) * 8,
+        opacity: 0.45 + 0.55 * ((Math.sin(phase) + 1) / 2),
+        duration: 0.1, ease: 'none', overwrite: true,
+      });
     });
   }, []);
 
+  /* ── Scroll-triggered entrance ── */
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.08 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    const section = sectionRef.current;
+    if (!section) return;
+
+    /* Set initial hidden states */
+    gsap.set(headingRef.current,   { opacity: 0, y: 40 });
+    gsap.set(arrowWrapRef.current, { opacity: 0 });
+    gsap.set(labelRef.current,     { opacity: 0 });
+    gsap.set(leftColRef.current,   { opacity: 0, x: -50 });
+    gsap.set(rightColRef.current,  { opacity: 0, x: 50 });
+    gsap.set(progressRef.current,  { opacity: 0 });
+    if (cardRefs.current.length) {
+      gsap.set(cardRefs.current.filter(Boolean), { opacity: 0, y: 50 });
+    }
+    dotRefs.current.forEach(d => d && gsap.set(d, { opacity: 0.45 }));
+
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || triggered.current) return;
+      triggered.current = true;
+      io.disconnect();
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      /* 1. Heading rises */
+      tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.75, ease: 'back.out(1.3)' }, 0);
+
+      /* 2. Arrow floats in */
+      tl.to(arrowWrapRef.current, { opacity: 1, duration: 0.5 }, 0.35);
+
+      /* 3. Handwritten label fades in with slight y */
+      tl.fromTo(labelRef.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+        0.45
+      );
+
+      /* 4. Left column slides in */
+      tl.to(leftColRef.current,  { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.25);
+
+      /* 5. Right column slides in */
+      tl.to(rightColRef.current, { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.38);
+
+      /* 6. Progress bar fades in */
+      tl.to(progressRef.current, { opacity: 1, duration: 0.4 }, 0.5);
+
+      /* 7. Cards stagger up */
+      tl.to(cardRefs.current.filter(Boolean), {
+        opacity: 1, y: 0,
+        duration: 0.55,
+        stagger: 0.12,
+        ease: 'back.out(1.2)',
+      }, 0.55);
+
+      /* 8. Arrow bounce loop — starts after arrow is visible */
+      tl.call(() => {
+        gsap.to(arrowWrapRef.current, {
+          y: -7, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
+        });
+      }, [], 0.9);
+    }, { threshold: 0.08 });
+
+    io.observe(section);
+    return () => io.disconnect();
   }, []);
 
+  /* ── Carousel scroll listener ── */
   useEffect(() => {
     handleScroll();
     const el = carouselRef.current;
     if (el) el.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener('resize', handleScroll, { passive: true });
     return () => {
       if (el) el.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
   }, [services, handleScroll]);
 
-  const items   = services && services.length > 0 ? services : Array.from({ length: 4 });
-  const numDots = 10;
-
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-16 overflow-hidden"
-      style={{ fontFamily: "'Power Grotesk', sans-serif" }}
+      className="bg-white overflow-hidden"
+      style={{
+        padding: 'clamp(40px,6vw,96px) 0',
+        fontFamily: "'Power Grotesk', sans-serif",
+      }}
     >
+      {/* Hide scrollbar — minimal CSS, layout only */}
       <style>{`
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
-
-        /* Keyframes are in globals.css — only class rules here */
-        .arrow-float { animation: scs-floatY    2.8s ease-in-out infinite; will-change: transform; }
-        .anim-hidden { opacity: 0; }
-        .anim-up     { animation: scs-fadeInUp    0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
-        .anim-left   { animation: scs-fadeInLeft  0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
-        .anim-right  { animation: scs-fadeInRight 0.8s cubic-bezier(.22,.68,0,1.05) 0.12s forwards; }
-        .anim-fade   { animation: scs-fadeIn      0.7s ease forwards; }
-        .anim-d1 { animation-delay: 0.08s; }
-        .anim-d2 { animation-delay: 0.22s; }
-        .anim-d3 { animation-delay: 0.36s; }
-        .anim-d4 { animation-delay: 0.50s; }
-        .card-s1 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.55s both; }
-        .card-s2 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.70s both; }
-        .card-s3 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.85s both; }
-        .card-s4 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 1.00s both; }
-
-        /* ---- CARD HOVER ----
-           card-hover is a standalone element (the Link).
-           It has NO animation on it — only a transition.
-           Its parent has NO animation either (only opacity from fadeInUp which is done).
-           So transform here is completely isolated.
-        */
-        .card-hover {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          background: #2a2a2a;
-          border-radius: 0.75rem;
-          overflow: hidden;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-          /* Only transition here, no animation */
-          transition: transform 0.28s cubic-bezier(.22,.68,0,1.1),
-                      box-shadow 0.28s ease;
-          will-change: transform;
-        }
-        @media (hover: hover) {
-          .card-hover:hover {
-            transform: translateY(-6px) scale(1.012);
-            box-shadow: 0 20px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(150,202,69,0.18);
-          }
-          .card-hover:hover .card-img {
-            transform: scale(1.07);
-          }
-          .card-hover:hover .card-title {
-            background-size: 100% 2px;
-          }
-        }
-
-        /* Card image — own element, own transition, no animation */
-        .card-img {
-          transition: transform 0.45s cubic-bezier(.22,.68,0,1.05);
-          will-change: transform;
-        }
-
-        /* Title underline — background-size only, not transform */
-        .card-title {
-          background-image: linear-gradient(rgba(150,202,69,1), rgba(150,202,69,1));
-          background-repeat: no-repeat;
-          background-position: 0 100%;
-          background-size: 0% 2px;
-          transition: background-size 0.32s ease;
-          padding-bottom: 2px;
-        }
-
-        /* Explore button */
-        .explore-btn {
-          transition: transform 0.25s cubic-bezier(.22,.68,0,1.2),
-                      box-shadow 0.25s ease;
-          will-change: transform;
-        }
-        @media (hover: hover) {
-          .explore-btn:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 28px rgba(150,202,69,0.35);
-          }
-        }
-        .explore-btn:active { transform: scale(0.97) !important; }
-
-        /* Progress bar */
-        .progress-fill {
-          transition: width 0.12s linear;
-          box-shadow: 0 0 8px rgba(150,202,69,0.4);
-        }
-
-        /* Dot wave */
-        .dot-wave {
-          transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-        }
-
-        @media (max-width: 639px) {
-          .carousel-card { width: min(82vw, 270px) !important; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
-            animation-duration:  0.01ms !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
+        .scs-scrollbar::-webkit-scrollbar { display: none; }
+        .scs-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div
+        className="max-w-[1440px] mx-auto"
+        style={{ padding: '0 clamp(16px,4vw,64px)' }}
+      >
 
         {/* ════ HEADER ════ */}
-        <div className="text-center relative mb-16 md:mb-24 flex justify-center">
+        <div
+          className="relative flex justify-center"
+          style={{ marginBottom: 'clamp(40px,6vw,80px)' }}
+        >
           <div style={{ display: 'inline-block', position: 'relative' }}>
-
-            {/* Heading — fades up. Arrow is NOT inside this element. */}
             <h2
-              className={`text-5xl md:text-[80px] font-medium text-[#252525] tracking-tight inline-block ${visible ? 'anim-up' : 'anim-hidden'}`}
+              ref={headingRef}
+              style={{
+                fontSize: 'clamp(36px,6.5vw,88px)',
+                fontWeight: 500,
+                color: '#252525',
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+                margin: 0,
+                display: 'inline-block',
+              }}
             >
-              OUR <span className="text-[rgba(150,202,69,1)]">SERVICES</span>
+              OUR{' '}
+              <span style={{ color: '#96CA45' }}>SERVICES</span>
             </h2>
 
-            {/*
-              Arrow container — absolute, positioned relative to the outer div.
-              It fades in via anim-fade (opacity only — no transform, no margin).
-              The CHILD .arrow-float does the movement via its own isolated animation.
-              These are completely separate elements with separate CSS rules.
-            */}
+            {/* Arrow + label */}
             <div
-              className={`pointer-events-none flex flex-row items-center ${visible ? 'anim-fade anim-d3' : 'anim-hidden'}`}
               style={{
                 position: 'absolute',
-                top: '80%',
+                top: '75%',
                 right: 0,
-                marginLeft: '8px',
-                transform: 'translateX(calc(100% + 8px))',
+                transform: 'translateX(calc(100% + 10px))',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                pointerEvents: 'none',
                 whiteSpace: 'nowrap',
               }}
             >
-              {/*
-                This wrapper fades in (via parent anim-fade).
-                The inner .arrow-float does the bounce.
-                Parent: opacity animation. Child: transform animation.
-                They are on SEPARATE elements — zero conflict.
-              */}
               <div
+                ref={arrowWrapRef}
                 style={{
                   position: 'relative',
-                  width: 'clamp(48px, 5vw, 80px)',
-                  height: 'clamp(36px, 4vw, 64px)',
+                  width: 'clamp(44px,4.5vw,72px)',
+                  height: 'clamp(34px,3.5vw,58px)',
                   flexShrink: 0,
                   marginRight: '6px',
                 }}
               >
-                {/* This element ONLY has the float animation — nothing else */}
-                <div className="arrow-float" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                  <Image src="/red-curly-arrow.png" alt="" fill className="object-contain" />
-                </div>
+                <Image src="/red-curly-arrow.png" alt="" fill className="object-contain" />
               </div>
-
-              {/* Label — static, no animation of its own */}
               <span
-                className={`font-['Great_Day_Personal_Use'] text-[#c94141]`}
+                ref={labelRef}
                 style={{
-                  fontSize: 'clamp(24px, 3.2vw, 42px)',
-                  marginTop: 'clamp(10px, 2vw, 24px)',
+                  fontFamily: FS,
+                  fontSize: 'clamp(20px,2.8vw,40px)',
+                  color: '#c94141',
+                  marginTop: 'clamp(8px,1.5vw,20px)',
                   display: 'inline-block',
                   rotate: '-4deg',
                 }}
@@ -234,110 +211,347 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
         </div>
 
         {/* ════ SPLIT LAYOUT ════ */}
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 'clamp(24px,4vw,80px)',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
 
           {/* ── LEFT ── */}
-          <div className="lg:w-[35%] flex flex-col justify-center">
-            <div className={visible ? 'anim-left' : 'anim-hidden'}>
-              <h3 className="text-3xl md:text-4xl font-bold text-[rgba(150,202,69,1)] mb-6 tracking-tight">
-                Lorem Ipsum Dolor
-              </h3>
-              <p className="text-[#252525] text-base md:text-lg leading-relaxed mb-8 font-medium">
-                Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.
-                Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat
-                Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat
-                Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
-              </p>
-              <button className="explore-btn self-start bg-[rgba(150,202,69,1)] text-[#111] font-bold text-lg px-8 py-3.5 rounded-md shadow-md">
-                Explore Services
-              </button>
-            </div>
+          <div
+            ref={leftColRef}
+            style={{
+              flex: '0 0 clamp(220px,30%,380px)',
+              minWidth: 0,
+            }}
+          >
+            <h3 style={{
+              fontSize: 'clamp(22px,2.4vw,36px)',
+              fontWeight: 700,
+              color: '#96CA45',
+              marginBottom: 'clamp(12px,1.5vw,20px)',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+            }}>
+              Lorem Ipsum Dolor
+            </h3>
+            <p style={{
+              color: '#252525',
+              fontSize: 'clamp(13px,1.1vw,17px)',
+              lineHeight: 1.7,
+              marginBottom: 'clamp(20px,2.5vw,36px)',
+              fontWeight: 500,
+            }}>
+              Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.
+              Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat
+              Consectetur Molestie Est Ornare.
+            </p>
+            <ExploreBtn />
           </div>
 
           {/* ── RIGHT ── */}
-          <div className="lg:w-[65%] flex flex-col min-w-0">
-            <div className={visible ? 'anim-right' : 'anim-hidden'}>
-
-              {/* Progress bar */}
-              <div className="w-full h-1.5 bg-gray-100 rounded-full mb-6 relative overflow-hidden">
-                <div
-                  ref={progressRef}
-                  className="progress-fill absolute top-0 left-0 h-full bg-[rgba(150,202,69,1)] rounded-full"
-                  style={{ width: '15%' }}
-                />
-              </div>
-
-              {/* Cards */}
+          <div
+            ref={rightColRef}
+            style={{ flex: 1, minWidth: 0 }}
+          >
+            {/* Progress bar */}
+            <div style={{
+              width: '100%', height: '4px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '2px',
+              marginBottom: 'clamp(16px,2vw,28px)',
+              overflow: 'hidden',
+              position: 'relative',
+            }}>
               <div
-                ref={carouselRef}
-                className="hide-scrollbar flex gap-5 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 scroll-smooth"
-              >
-                {items.map((service, idx) => {
-                  const img = (!service || !service.title)
-                    ? '/pre-nursing-photo.png'
-                    : (service.image && typeof service.image === 'object'
-                        ? service.image.secureUrl
-                        : service.image) || '/pre-nursing-photo.png';
+                ref={progressRef}
+                style={{
+                  position: 'absolute', top: 0, left: 0,
+                  height: '100%', width: '15%',
+                  backgroundColor: '#96CA45',
+                  borderRadius: '2px',
+                  boxShadow: '0 0 8px rgba(150,202,69,0.4)',
+                }}
+              />
+            </div>
 
-                  const sc = ['card-s1','card-s2','card-s3','card-s4'][Math.min(idx, 3)];
+            {/* Cards */}
+            <div
+              ref={carouselRef}
+              className="scs-scrollbar"
+              style={{
+                display: 'flex',
+                gap: 'clamp(14px,1.8vw,24px)',
+                overflowX: 'auto',
+                scrollSnapType: 'x mandatory',
+                paddingBottom: 'clamp(12px,1.5vw,20px)',
+                paddingTop: '4px',
+                scrollBehavior: 'smooth',
+              }}
+            >
+              {items.map((service, idx) => {
+                const img = (!service || !service.title)
+                  ? '/pre-nursing-photo.png'
+                  : (service.image && typeof service.image === 'object'
+                      ? service.image.secureUrl
+                      : service.image) || '/pre-nursing-photo.png';
 
-                  return (
-                    /*
-                      card-s* runs fadeInUp (margin + opacity) — finishes in ~1s.
-                      card-hover has only a transition (transform on hover).
-                      After fadeInUp completes, margin-top is 0 and animation is done.
-                      The transition on card-hover then works in complete isolation.
-                    */
-                    <div
-                      key={service?._id || idx}
-                      className={`carousel-card flex-shrink-0 w-[280px] md:w-[340px] snap-start ${visible ? sc : 'anim-hidden'}`}
-                    >
-                      <Link
-                        href={`/services/${service?.slug || '#'}`}
-                        className="card-hover"
-                      >
-                        <div
-                          className="w-full relative bg-white overflow-hidden"
-                          style={{ height: '180px', flexShrink: 0 }}
-                        >
-                          <Image
-                            src={img}
-                            alt={service?.title || 'Service'}
-                            fill
-                            className="card-img object-cover object-top"
-                          />
-                        </div>
-                        <div className="p-6 flex flex-col flex-1">
-                          <h4 className="text-[rgba(150,202,69,1)] font-medium text-[22px] mb-3 leading-tight tracking-tight">
-                            <span className="card-title">
-                              {service?.title || 'NCLEX Exam application process'}
-                            </span>
-                          </h4>
-                          <p className="text-gray-300 text-[15px] leading-relaxed line-clamp-3 font-light">
-                            {service?.description || 'Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.'}
-                          </p>
-                        </div>
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Dot wave */}
-              <div className="flex justify-end gap-3 mt-4 pr-4">
-                {Array.from({ length: numDots }).map((_, i) => (
+                return (
                   <div
-                    key={i}
-                    className="dot-wave w-2.5 h-2.5 rounded-full bg-[rgba(150,202,69,1)]"
-                    style={{ opacity: 0.45 }}
-                  />
-                ))}
-              </div>
+                    key={service?._id || idx}
+                    ref={el => { cardRefs.current[idx] = el; }}
+                    style={{
+                      flexShrink: 0,
+                      width: 'clamp(240px,28vw,320px)',
+                      height: 'clamp(320px,34vw,400px)',
+                      scrollSnapAlign: 'start',
+                    }}
+                  >
+                    <ServiceCard
+                      href={`/services/${service?.slug || '#'}`}
+                      img={img}
+                      title={service?.title || 'NCLEX Exam application process'}
+                      description={service?.description || 'Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.'}
+                    />
+                  </div>
+                );
+              })}
+            </div>
 
+            {/* Dot wave */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 'clamp(8px,1vw,14px)',
+              marginTop: 'clamp(12px,1.5vw,20px)',
+              paddingRight: '4px',
+            }}>
+              {Array.from({ length: numDots }).map((_, i) => (
+                <div
+                  key={i}
+                  ref={el => { dotRefs.current[i] = el; }}
+                  style={{
+                    width: 'clamp(7px,0.8vw,10px)',
+                    height: 'clamp(7px,0.8vw,10px)',
+                    borderRadius: '50%',
+                    backgroundColor: '#96CA45',
+                    opacity: 0.45,
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
             </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+/* ── Card with GSAP hover: green image half → "View Details" overlay, dark text half ── */
+function ServiceCard({
+  href, img, title, description,
+}: {
+  href: string; img: string; title: string; description: string;
+}) {
+  const cardRef    = useRef<HTMLAnchorElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const btnRef     = useRef<HTMLDivElement>(null);
+  const imgRef     = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const card    = cardRef.current;
+    const overlay = overlayRef.current;
+    const btn     = btnRef.current;
+    const imgEl   = imgRef.current;
+    if (!card || !overlay || !btn || !imgEl) return;
+
+    /* Initial states — everything hidden, overlay opacity:0 is also set in JSX */
+    gsap.set(btn, { opacity: 0, y: 14, scale: 0.9 });
+
+    const enter = () => {
+      gsap.killTweensOf([card, overlay, btn, imgEl]);
+      gsap.to(card,    { y: -6, scale: 1.012, duration: 0.28, ease: 'power2.out', overwrite: true });
+      gsap.to(imgEl,   { scale: 1.07, duration: 0.45, ease: 'power2.out', overwrite: true });
+      gsap.to(overlay, { opacity: 1, duration: 0.28, ease: 'power2.out', overwrite: true });
+      gsap.to(btn,     { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'back.out(1.5)', overwrite: true });
+    };
+
+    const leave = () => {
+      gsap.killTweensOf([card, overlay, btn, imgEl]);
+      gsap.to(card,    { y: 0, scale: 1, duration: 0.4, ease: 'power3.out', overwrite: true });
+      gsap.to(imgEl,   { scale: 1, duration: 0.45, ease: 'power3.out', overwrite: true });
+      gsap.to(overlay, { opacity: 0, duration: 0.28, ease: 'power2.in', overwrite: true });
+      gsap.to(btn,     { opacity: 0, y: 14, scale: 0.9, duration: 0.2, ease: 'power2.in', overwrite: true });
+    };
+
+    card.addEventListener('mouseenter', enter);
+    card.addEventListener('mouseleave', leave);
+    return () => {
+      card.removeEventListener('mouseenter', enter);
+      card.removeEventListener('mouseleave', leave);
+    };
+  }, []);
+
+  return (
+    <Link
+      ref={cardRef}
+      href={href}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'clamp(320px,34vw,400px)',
+        borderRadius: '14px',
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        textDecoration: 'none',
+        willChange: 'transform',
+        transformOrigin: 'center center',
+      }}
+    >
+      {/* Top: clean image at rest, green overlay + button on hover */}
+      <div style={{
+        position: 'relative',
+        flex: '0 0 58%',
+        backgroundColor: '#111',
+        overflow: 'hidden',
+      }}>
+        {/* Clean image — no blend mode, full opacity */}
+        <div
+          ref={imgRef}
+          style={{
+            position: 'absolute', inset: 0,
+            willChange: 'transform',
+            transformOrigin: 'center center',
+          }}
+        >
+          <Image
+            src={img}
+            alt={title}
+            fill
+            style={{ objectFit: 'cover', objectPosition: 'top' }}
+          />
+        </div>
+
+        {/* Hover overlay — opacity:0 at rest, GSAP fades to 1 on hover */}
+        <div
+          ref={overlayRef}
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundColor: 'rgba(120,175,35,0.78)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 2, pointerEvents: 'none',
+            opacity: 0,
+          }}
+        >
+          {/* Top-right icon inside overlay */}
+          <div
+            style={{
+              position: 'absolute', top: '14px', right: '14px',
+              width: '48px', height: '48px',
+              pointerEvents: 'none',
+            }}
+          >
+            <Image src="/service-hover-icon.png" alt="" fill style={{ objectFit: 'contain' }} />
+          </div>
+          <div
+            ref={btnRef}
+            style={{
+              backgroundColor: '#fff',
+              color: '#111',
+              fontWeight: 700,
+              fontSize: 'clamp(13px,1.2vw,17px)',
+              padding: 'clamp(8px,0.9vw,12px) clamp(22px,2.5vw,36px)',
+              borderRadius: '8px',
+              letterSpacing: '0.01em',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            View Details
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: dark text area */}
+      <div style={{
+        backgroundColor: '#2a2a2a',
+        padding: 'clamp(14px,1.6vw,22px)',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <h4 style={{
+          color: '#96CA45',
+          fontWeight: 600,
+          fontSize: 'clamp(14px,1.4vw,20px)',
+          marginBottom: 'clamp(6px,0.7vw,10px)',
+          lineHeight: 1.25,
+          letterSpacing: '-0.01em',
+        }}>
+          {title}
+        </h4>
+        <p style={{
+          color: 'rgba(255,255,255,0.65)',
+          fontSize: 'clamp(11px,0.9vw,14px)',
+          lineHeight: 1.6,
+          margin: 0,
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {description}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+/* ── Explore button with GSAP hover ── */
+function ExploreBtn() {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const enter = () => gsap.to(el, { y: -3, scale: 1.04, duration: 0.25, ease: 'back.out(2)', overwrite: true });
+    const leave = () => gsap.to(el, { y: 0,  scale: 1,    duration: 0.35, ease: 'power3.out', overwrite: true });
+    const down  = () => gsap.to(el, { scale: 0.97, duration: 0.1, overwrite: true });
+    el.addEventListener('mouseenter', enter);
+    el.addEventListener('mouseleave', leave);
+    el.addEventListener('mousedown',  down);
+    el.addEventListener('mouseup',    leave);
+    return () => {
+      el.removeEventListener('mouseenter', enter);
+      el.removeEventListener('mouseleave', leave);
+      el.removeEventListener('mousedown',  down);
+      el.removeEventListener('mouseup',    leave);
+    };
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      style={{
+        backgroundColor: '#96CA45',
+        color: '#111',
+        fontWeight: 700,
+        fontSize: 'clamp(14px,1.2vw,18px)',
+        padding: 'clamp(10px,1.1vw,16px) clamp(24px,2.5vw,36px)',
+        borderRadius: '8px',
+        border: 'none',
+        cursor: 'pointer',
+        boxShadow: '0 4px 16px rgba(150,202,69,0.35)',
+        willChange: 'transform',
+        display: 'inline-block',
+      }}
+    >
+      Explore Services
+    </button>
   );
 }
