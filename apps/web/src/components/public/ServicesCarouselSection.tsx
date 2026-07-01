@@ -65,68 +65,21 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
-        /*
-          THE ONLY RULE THAT ELIMINATES VIBRATION:
-          An element may own EITHER a CSS transition OR a CSS animation.
-          Never both. Never inherited from a parent that also animates.
-          We enforce this by making every animated element a leaf node
-          with no animated ancestor or descendant.
-        */
-
-        /* ---- ARROW FLOAT ----
-           The arrow image wrapper gets a pure CSS animation — always on,
-           no class toggling, no React state changes ever touch this element.
-           It fades in via opacity on the PARENT, so this element never
-           changes class, never repaints, never fights anything.
-        */
-        @keyframes floatY {
-          0%,100% { transform: translateY(0px);  }
-          50%      { transform: translateY(-7px); }
-        }
-        .arrow-float {
-          animation: floatY 2.8s ease-in-out infinite;
-          will-change: transform;
-        }
-
-        /* ---- SECTION REVEAL ----
-           Uses opacity + margin trick — NOT transform/translate at all.
-           This avoids any possibility of fighting with child transforms.
-        */
-        @keyframes fadeInUp {
-          from { opacity: 0; margin-top: 28px; }
-          to   { opacity: 1; margin-top: 0px;  }
-        }
-        @keyframes fadeInLeft {
-          from { opacity: 0; margin-left: -40px; }
-          to   { opacity: 1; margin-left: 0px;   }
-        }
-        @keyframes fadeInRight {
-          from { opacity: 0; margin-right: -40px; }
-          to   { opacity: 1; margin-right: 0px;   }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-
-        /* Hidden until section visible */
+        /* Keyframes are in globals.css — only class rules here */
+        .arrow-float { animation: scs-floatY    2.8s ease-in-out infinite; will-change: transform; }
         .anim-hidden { opacity: 0; }
-
-        .anim-up    { animation: fadeInUp    0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
-        .anim-left  { animation: fadeInLeft  0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
-        .anim-right { animation: fadeInRight 0.8s cubic-bezier(.22,.68,0,1.05) 0.12s forwards; }
-        .anim-fade  { animation: fadeIn      0.7s ease forwards; }
-
+        .anim-up     { animation: scs-fadeInUp    0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
+        .anim-left   { animation: scs-fadeInLeft  0.8s cubic-bezier(.22,.68,0,1.05) forwards; }
+        .anim-right  { animation: scs-fadeInRight 0.8s cubic-bezier(.22,.68,0,1.05) 0.12s forwards; }
+        .anim-fade   { animation: scs-fadeIn      0.7s ease forwards; }
         .anim-d1 { animation-delay: 0.08s; }
         .anim-d2 { animation-delay: 0.22s; }
         .anim-d3 { animation-delay: 0.36s; }
         .anim-d4 { animation-delay: 0.50s; }
-
-        /* Cards stagger */
-        .card-s1 { animation: fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.55s both; }
-        .card-s2 { animation: fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.70s both; }
-        .card-s3 { animation: fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.85s both; }
-        .card-s4 { animation: fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 1.00s both; }
+        .card-s1 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.55s both; }
+        .card-s2 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.70s both; }
+        .card-s3 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 0.85s both; }
+        .card-s4 { animation: scs-fadeInUp 0.55s cubic-bezier(.22,.68,0,1.1) 1.00s both; }
 
         /* ---- CARD HOVER ----
            card-hover is a standalone element (the Link).

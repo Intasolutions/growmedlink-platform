@@ -71,89 +71,19 @@ export default function FeaturedServices({ services }: { services: any[] }) {
       className="bg-white py-8 pb-16 overflow-hidden font-['Power_Grotesk']"
     >
       <style>{`
-        /* ── Card transitions ── */
-        @keyframes cardExitUp {
-          0%   { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
-          100% { opacity:0; transform:translateY(-44px) scale(0.94) rotateX(8deg); filter:blur(4px); }
-        }
-        @keyframes cardExitDown {
-          0%   { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
-          100% { opacity:0; transform:translateY(44px) scale(0.94) rotateX(-8deg); filter:blur(4px); }
-        }
-        @keyframes cardEnterDown {
-          0%   { opacity:0; transform:translateY(54px) scale(0.92) rotateX(-10deg); filter:blur(6px); }
-          55%  { opacity:1; filter:blur(0px); }
-          80%  { transform:translateY(-3px) scale(1.008) rotateX(0deg); }
-          100% { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
-        }
-        @keyframes cardEnterUp {
-          0%   { opacity:0; transform:translateY(-54px) scale(0.92) rotateX(10deg); filter:blur(6px); }
-          55%  { opacity:1; filter:blur(0px); }
-          80%  { transform:translateY(3px) scale(1.008) rotateX(0deg); }
-          100% { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
-        }
-        .card-exit-up    { animation: cardExitUp    0.36s cubic-bezier(.4,0,.6,1)      forwards; }
-        .card-exit-down  { animation: cardExitDown  0.36s cubic-bezier(.4,0,.6,1)      forwards; }
-        .card-enter-down { animation: cardEnterDown 0.65s cubic-bezier(.22,.68,0,1.12) forwards; }
-        .card-enter-up   { animation: cardEnterUp   0.65s cubic-bezier(.22,.68,0,1.12) forwards; }
-
-        /* ── Scroll reveals ── */
-        @keyframes revealLeft {
-          0%   { opacity:0; transform:translateX(-70px) scale(0.96); }
-          65%  { opacity:1; transform:translateX(5px) scale(1.005); }
-          100% { opacity:1; transform:translateX(0) scale(1); }
-        }
-        @keyframes revealRight {
-          0%   { opacity:0; transform:translateX(70px) scale(0.96); }
-          65%  { opacity:1; transform:translateX(-5px) scale(1.005); }
-          100% { opacity:1; transform:translateX(0) scale(1); }
-        }
-        .reveal-left  { animation: revealLeft  1.05s cubic-bezier(.22,.68,0,1.05) forwards; }
-        .reveal-right { animation: revealRight 1.05s cubic-bezier(.22,.68,0,1.05) 0.15s forwards; }
-        .panel-hidden { opacity:0; }
-
-        /* ── Heading reveal ── */
-        @keyframes headingReveal {
-          0%   { opacity:0; transform:translateY(18px); }
-          100% { opacity:1; transform:translateY(0); }
-        }
-        .heading-reveal { animation: headingReveal 0.85s cubic-bezier(.22,.68,0,1.1) 0.55s both; }
-
-        /* ── Image rise ── */
-        @keyframes imageRise {
-          0%   { opacity:0; transform:translateY(30px) scale(0.97); }
-          100% { opacity:1; transform:translateY(0) scale(1); }
-        }
-        .image-rise { animation: imageRise 1.1s cubic-bezier(.22,.68,0,1.05) 0.4s both; }
-
-        /* ── Gentle float ── */
-        @keyframes floatDoc {
-          0%,100% { transform:translateY(0px); }
-          50%      { transform:translateY(-7px); }
-        }
-        .float-doc { animation: floatDoc 5s ease-in-out infinite; }
-
-        /* ── Orb breathe ── */
-        @keyframes orbBreathe {
-          0%,100% { transform:scale(1); opacity:0.15; }
-          50%      { transform:scale(1.15); opacity:0.25; }
-        }
-        .orb-breathe { animation: orbBreathe 7s ease-in-out infinite; }
-
-        /* ── Progress bar ── */
-        @keyframes progressSweep {
-          from { width:0%; }
-          to   { width:100%; }
-        }
-        .progress-sweep { animation: progressSweep 4s linear forwards; }
-
-        /* ── Dot pulse ── */
-        @keyframes dotPulse {
-          0%,100% { opacity:1; }
-          50%      { opacity:0.5; }
-        }
-
-        /* ── Card hover lift ── */
+        /* Keyframes are in globals.css — only class rules here */
+        .card-exit-up    { animation: fs-cardExitUp    0.36s cubic-bezier(.4,0,.6,1)      forwards; }
+        .card-exit-down  { animation: fs-cardExitDown  0.36s cubic-bezier(.4,0,.6,1)      forwards; }
+        .card-enter-down { animation: fs-cardEnterDown 0.65s cubic-bezier(.22,.68,0,1.12) forwards; }
+        .card-enter-up   { animation: fs-cardEnterUp   0.65s cubic-bezier(.22,.68,0,1.12) forwards; }
+        .reveal-left     { animation: fs-revealLeft    1.05s cubic-bezier(.22,.68,0,1.05) forwards; }
+        .reveal-right    { animation: fs-revealRight   1.05s cubic-bezier(.22,.68,0,1.05) 0.15s forwards; }
+        .panel-hidden    { opacity:0; }
+        .heading-reveal  { animation: fs-headingReveal 0.85s cubic-bezier(.22,.68,0,1.1)  0.55s both; }
+        .image-rise      { animation: fs-imageRise     1.1s  cubic-bezier(.22,.68,0,1.05) 0.4s  both; }
+        .float-doc       { animation: fs-floatDoc      5s    ease-in-out infinite; }
+        .orb-breathe     { animation: fs-orbBreathe    7s    ease-in-out infinite; }
+        .progress-sweep  { animation: fs-progressSweep 4s   linear      forwards; }
         .service-card-inner {
           transition: transform 0.35s cubic-bezier(.22,.68,0,1.1), box-shadow 0.35s ease;
         }
@@ -161,18 +91,11 @@ export default function FeaturedServices({ services }: { services: any[] }) {
           transform: translateY(-3px) scale(1.01);
           box-shadow: 0 28px 65px rgba(150,202,69,0.28), 0 8px 20px rgba(0,0,0,0.4);
         }
-
-        /* ── Shimmer ── */
-        @keyframes shimmer {
-          0%   { background-position:-400px 0; }
-          100% { background-position: 400px 0; }
-        }
         .shimmer {
-          background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
-          background-size:400px 100%;
-          animation:shimmer 3.5s ease-in-out infinite;
+          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
+          background-size: 400px 100%;
+          animation: fs-shimmer 3.5s ease-in-out infinite;
         }
-
         .card-3d-wrap { perspective:900px; }
       `}</style>
 
@@ -305,7 +228,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
                     backgroundColor: idx === activeIndex
                       ? 'rgba(150,202,69,1)'
                       : 'rgba(255,255,255,0.2)',
-                    animation: idx === activeIndex ? 'dotPulse 2.2s ease-in-out infinite' : 'none',
+                    animation: idx === activeIndex ? 'fs-dotPulse 2.2s ease-in-out infinite' : 'none',
                   }}
                   aria-label={`Go to slide ${idx + 1}`}
                 />

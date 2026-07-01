@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, GraduationCap } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   settings: any;
@@ -43,7 +43,6 @@ function LogoCarousel() {
 
   const current = LOGO_VARIANTS[index];
   const incoming = nextIndex !== null ? LOGO_VARIANTS[nextIndex] : null;
-  const sign = direction === 1 ? 1 : -1;
 
   return (
     <div
@@ -92,24 +91,7 @@ function LogoCarousel() {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes navbar-logo-in-left {
-          from { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
-          to   { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
-        }
-        @keyframes navbar-logo-in-right {
-          from { opacity: 0; transform: translateX(130%) scale(0.85); filter: blur(2px); }
-          to   { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
-        }
-        @keyframes navbar-logo-out-right {
-          from { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
-          to   { opacity: 0; transform: translateX(130%) scale(0.85); filter: blur(2px); }
-        }
-        @keyframes navbar-logo-out-left {
-          from { opacity: 1; transform: translateX(0) scale(1);       filter: blur(0); }
-          to   { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
-        }
-      `}</style>
+      {/* Logo carousel keyframes are in globals.css */}
     </div>
   );
 }
@@ -174,29 +156,7 @@ export default function Navbar({ settings }: NavbarProps) {
             );
           })}
         </nav>
-        <style jsx>{`
-          .navlink {
-            display: inline-block;
-          }
-          .navlink::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: 6px;
-            height: 2px;
-            width: 0%;
-            background: #96ca45;
-            border-radius: 2px;
-            transform: translateX(-50%);
-            transition: width 0.35s cubic-bezier(.22, .68, 0, 1.2);
-          }
-          .navlink:hover::after {
-            width: calc(100% - 32px);
-          }
-          .navlink-active::after {
-            width: calc(100% - 32px);
-          }
-        `}</style>
+        {/* navlink underline styles are in globals.css */}
 
         {/* Right: Join Button */}
         <Link

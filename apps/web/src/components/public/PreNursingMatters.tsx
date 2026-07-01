@@ -3,22 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-/*
-  Handwritten callout animation rules (same pattern as Hero):
-  ─ Outer wrapper: arrowFloat (translateY only) — GPU composited, no jitter
-  ─ Static rotate(-Xdeg) lives on a non-animated inner element
-  ─ Text has its own static rotate — NEVER nested inside animated element
-*/
-const KEYFRAMES = `
-  @keyframes preNurseArrowFloat {
-    0%,100% { transform: translate3d(0, 0px, 0);  }
-    50%      { transform: translate3d(0, -6px, 0); }
-  }
-  @keyframes preNurseReveal {
-    from { opacity: 0; transform: translate3d(0, 16px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0px, 0);    }
-  }
-`;
+/* Keyframes defined in globals.css: pre-arrow-float, pre-reveal */
 
 export default function PreNursingMatters() {
   const sunburstRef  = useRef<HTMLDivElement>(null);
@@ -67,8 +52,6 @@ export default function PreNursingMatters() {
 
   return (
     <section className="bg-white py-24 relative overflow-hidden font-['Power_Grotesk'] text-[#252525]">
-      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
-
       {/* Crosshair lines */}
       <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-200 pointer-events-none z-0" />
       <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-200 pointer-events-none z-0" />
@@ -134,8 +117,8 @@ export default function PreNursingMatters() {
               /* Scroll-triggered reveal */
               opacity: calloutIn ? 1 : 0,
               animation: calloutIn
-                ? `preNurseReveal 0.7s cubic-bezier(.22,.68,0,1.2) both,
-                   preNurseArrowFloat 2.6s ease-in-out 0.8s infinite`
+                ? `pre-reveal 0.7s cubic-bezier(.22,.68,0,1.2) both,
+                   pre-arrow-float 2.6s ease-in-out 0.8s infinite`
                 : 'none',
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden',

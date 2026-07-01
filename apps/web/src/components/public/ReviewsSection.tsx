@@ -27,48 +27,10 @@ const FALLBACK: ReviewItem[] = [
 const AUTO_MS = 6000;
 
 /* ─── Styles live outside the component so React never re-creates the string ─── */
+/* Keyframes (rvs-dot-wave, rvs-globe-breathe, rvs-btn-pulse, rvs-bar-draw,
+   rvs-strip-slide) are defined once in globals.css. */
+
 const STYLES = `
-  /* ══════════════════════════════════════════════════════════════════
-     KEYFRAMES — all prefixed "rvs-" to avoid any global collision
-     @keyframes cannot be scoped to a selector; unique names are the
-     only safe solution.
-  ══════════════════════════════════════════════════════════════════ */
-
-  /*
-    Dot wave: each dot bobs up with a phase offset driven by --rvs-wi.
-    We use ONLY translateY here so it composes cleanly with the
-    CSS 'scale' property that handles the entrance (no conflict).
-  */
-  @keyframes rvs-dot-wave {
-    0%, 100% { transform: translateY(0px); }
-    45%       { transform: translateY(-9px); }
-    55%       { transform: translateY(-7px); }
-  }
-
-  /* Globe breathing — scale only, no filter (filter causes full repaint) */
-  @keyframes rvs-globe-breathe {
-    0%, 100% { transform: translateX(-50%) scale(1);    }
-    50%       { transform: translateX(-50%) scale(1.04); }
-  }
-
-  /* Write-review button glow pulse */
-  @keyframes rvs-btn-pulse {
-    0%, 100% { box-shadow: 0 0 0 0   rgba(150,202,69,0.5); }
-    50%       { box-shadow: 0 0 0 10px rgba(150,202,69,0);   }
-  }
-
-  /* Active indicator bar draws from left */
-  @keyframes rvs-bar-draw {
-    from { transform: scaleX(0.05); opacity: 0.3; }
-    to   { transform: scaleX(1);    opacity: 1;   }
-  }
-
-  /* Decorative strips slide down */
-  @keyframes rvs-strip-slide {
-    from { transform: translateY(-110%); }
-    to   { transform: translateY(0);     }
-  }
-
   /* ══════════════════════════════════════════════════════════════════
      ALL RULES SCOPED UNDER .rvs-section
      This prevents every selector from leaking into other components.

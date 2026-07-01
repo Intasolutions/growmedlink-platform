@@ -168,7 +168,7 @@ export default function WhySection() {
         .bracket-item.in {
           scale: 1;
           transition: scale 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--entry-delay, 0s);
-          animation-name: bfloat;
+          animation-name: why-bfloat;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
           animation-fill-mode: both;
@@ -176,10 +176,7 @@ export default function WhySection() {
           animation-delay: var(--float-delay, 1.2s);
         }
 
-        @keyframes bfloat {
-          0%, 100% { translate: 0 0; }
-          50%       { translate: 0 -5px; }
-        }
+        /* why-bfloat keyframe is in globals.css */
 
         /* Hover — on the inner wrapper so it doesn't fight the float animation */
         .step-icon-wrap {

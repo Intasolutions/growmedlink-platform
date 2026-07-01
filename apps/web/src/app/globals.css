@@ -18,6 +18,170 @@
   }
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   GLOBAL KEYFRAMES
+   All component animations live here so they are defined exactly once in a
+   static CSS file. Dynamic <style> tags inside client components re-inject
+   on every render and cause keyframe conflicts / vibration.
+   Prefix convention: hero- | pre- | fs- | scs- | why- | rvs- | ctl-
+──────────────────────────────────────────────────────────────────────── */
+
+/* ── PreNursingMatters ── */
+@keyframes pre-arrow-float {
+  0%,100% { transform: translate3d(0, 0px, 0);  }
+  50%      { transform: translate3d(0, -6px, 0); }
+}
+@keyframes pre-reveal {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0px,  0); }
+}
+
+/* ── FeaturedServices ── */
+@keyframes fs-cardExitUp {
+  0%   { opacity:1; transform:translateY(0)     scale(1)    rotateX(0deg);  filter:blur(0px); }
+  100% { opacity:0; transform:translateY(-44px) scale(0.94) rotateX(8deg);  filter:blur(4px); }
+}
+@keyframes fs-cardExitDown {
+  0%   { opacity:1; transform:translateY(0)    scale(1)    rotateX(0deg);  filter:blur(0px); }
+  100% { opacity:0; transform:translateY(44px) scale(0.94) rotateX(-8deg); filter:blur(4px); }
+}
+@keyframes fs-cardEnterDown {
+  0%   { opacity:0; transform:translateY(54px)  scale(0.92) rotateX(-10deg); filter:blur(6px); }
+  55%  { opacity:1; filter:blur(0px); }
+  80%  { transform:translateY(-3px) scale(1.008) rotateX(0deg); }
+  100% { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
+}
+@keyframes fs-cardEnterUp {
+  0%   { opacity:0; transform:translateY(-54px) scale(0.92) rotateX(10deg); filter:blur(6px); }
+  55%  { opacity:1; filter:blur(0px); }
+  80%  { transform:translateY(3px) scale(1.008) rotateX(0deg); }
+  100% { opacity:1; transform:translateY(0) scale(1) rotateX(0deg); filter:blur(0px); }
+}
+@keyframes fs-revealLeft {
+  0%   { opacity:0; transform:translateX(-70px) scale(0.96); }
+  65%  { opacity:1; transform:translateX(5px)   scale(1.005); }
+  100% { opacity:1; transform:translateX(0)     scale(1); }
+}
+@keyframes fs-revealRight {
+  0%   { opacity:0; transform:translateX(70px) scale(0.96); }
+  65%  { opacity:1; transform:translateX(-5px) scale(1.005); }
+  100% { opacity:1; transform:translateX(0)    scale(1); }
+}
+@keyframes fs-headingReveal {
+  0%   { opacity:0; transform:translateY(18px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+@keyframes fs-imageRise {
+  0%   { opacity:0; transform:translateY(30px) scale(0.97); }
+  100% { opacity:1; transform:translateY(0)    scale(1); }
+}
+@keyframes fs-floatDoc {
+  0%,100% { transform:translateY(0px); }
+  50%      { transform:translateY(-7px); }
+}
+@keyframes fs-orbBreathe {
+  0%,100% { transform:scale(1);    opacity:0.15; }
+  50%      { transform:scale(1.15); opacity:0.25; }
+}
+@keyframes fs-progressSweep {
+  from { width:0%; }
+  to   { width:100%; }
+}
+@keyframes fs-dotPulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.5; }
+}
+@keyframes fs-shimmer {
+  0%   { background-position:-400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* ── ServicesCarouselSection ── */
+@keyframes scs-floatY {
+  0%,100% { transform: translateY(0px);  }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes scs-fadeInUp {
+  from { opacity: 0; margin-top: 28px; }
+  to   { opacity: 1; margin-top: 0px;  }
+}
+@keyframes scs-fadeInLeft {
+  from { opacity: 0; margin-left: -40px; }
+  to   { opacity: 1; margin-left: 0px;   }
+}
+@keyframes scs-fadeInRight {
+  from { opacity: 0; margin-right: -40px; }
+  to   { opacity: 1; margin-right: 0px;   }
+}
+@keyframes scs-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── WhySection ── */
+@keyframes why-bfloat {
+  0%, 100% { translate: 0 0;    }
+  50%       { translate: 0 -5px; }
+}
+
+/* ── ReviewsSection ── */
+@keyframes rvs-dot-wave {
+  0%, 100% { transform: translateY(0px);  }
+  45%       { transform: translateY(-9px); }
+  55%       { transform: translateY(-7px); }
+}
+@keyframes rvs-globe-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1);    }
+  50%       { transform: translateX(-50%) scale(1.04); }
+}
+@keyframes rvs-btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0    rgba(150,202,69,0.5); }
+  50%       { box-shadow: 0 0 0 10px rgba(150,202,69,0);   }
+}
+@keyframes rvs-bar-draw {
+  from { transform: scaleX(0.05); opacity: 0.3; }
+  to   { transform: scaleX(1);    opacity: 1;   }
+}
+@keyframes rvs-strip-slide {
+  from { transform: translateY(-110%); }
+  to   { transform: translateY(0);     }
+}
+
+/* ── Navbar logo carousel ── */
+@keyframes navbar-logo-in-left {
+  from { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
+  to   { opacity: 1; transform: translateX(0)      scale(1);   filter: blur(0); }
+}
+@keyframes navbar-logo-in-right {
+  from { opacity: 0; transform: translateX(130%)  scale(0.85); filter: blur(2px); }
+  to   { opacity: 1; transform: translateX(0)     scale(1);    filter: blur(0); }
+}
+@keyframes navbar-logo-out-right {
+  from { opacity: 1; transform: translateX(0)    scale(1);    filter: blur(0); }
+  to   { opacity: 0; transform: translateX(130%) scale(0.85); filter: blur(2px); }
+}
+@keyframes navbar-logo-out-left {
+  from { opacity: 1; transform: translateX(0)     scale(1);    filter: blur(0); }
+  to   { opacity: 0; transform: translateX(-130%) scale(0.85); filter: blur(2px); }
+}
+
+/* ── Navbar nav-link underline ── */
+.navlink { display: inline-block; }
+.navlink::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  height: 2px;
+  width: 0%;
+  background: #96ca45;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.35s cubic-bezier(.22, .68, 0, 1.2);
+}
+.navlink:hover::after       { width: calc(100% - 32px); }
+.navlink-active::after      { width: calc(100% - 32px); }
+
 /* Premium visual aids */
 .glassmorphism {
   background: rgba(255, 255, 255, 0.7);
