@@ -2,373 +2,428 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import gsap from 'gsap';
 
-/* ─── Types ─── */
 interface NewsItem {
-  id: number;
+  id: string | number;
+  slug: string;
   title: string;
   excerpt: string;
   image: string;
   date: string;
   time: string;
-  author: { name: string; role: string; avatar?: string };
 }
 
-/* ─── Removed prefilled mock data ─── */
+const AUTO_MS = 5500;
 
-const AUTO_MS    = 5500;
-const CARD_W     = 448;  /* center card width (px) — scales at smaller breakpoints */
-const CARD_H     = 304;  /* center card height (px) */
-const OFFSET_1   = 158;  /* translateX for ±1 position */
-const OFFSET_2   = 278;  /* translateX for ±2 position */
+/* ─── fan config per breakpoint ─── */
+const FAN = {
+  desktop: { w: 420, h: 288, off1: 148, off2: 262, r1: 4, r2: 8, s1: 0.82, s2: 0.68, op1: 0.82, op2: 0.54, stageH: 320 },
+  tablet:  { w: 340, h: 234, off1: 120, off2: 212, r1: 4, r2: 8, s1: 0.82, s2: 0.68, op1: 0.78, op2: 0.50, stageH: 264 },
+};
 
-
-/* ────────────────────────────────────────────────────────────────────────── */
-/* CSS — module-level constant so React never re-creates the string           */
 const STYLES = `
-  /* ── keyframes ── all prefixed lns- to avoid global collisions ────── */
-  @keyframes lns-fade-up {
-    from { opacity:0; translate:0 24px; }
-    to   { opacity:1; translate:0 0; }
+  @keyframes lns-ring {
+    0%,100% { box-shadow:0 0 0 0   rgba(150,202,69,0.55); }
+    55%      { box-shadow:0 0 0 8px rgba(150,202,69,0);    }
   }
-  @keyframes lns-progress {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
-  }
-  @keyframes lns-pulse-ring {
-    0%,100% { box-shadow: 0 0 0 0   rgba(150,202,69,0.45); }
-    50%      { box-shadow: 0 0 0 8px rgba(150,202,69,0); }
+  @keyframes lns-orb-drift {
+    0%,100% { transform:translate(0,0) scale(1);     }
+    33%      { transform:translate(18px,-22px) scale(1.08); }
+    66%      { transform:translate(-14px,16px) scale(0.94); }
   }
 
-  /* ── section ────────────────────────────────────────────────────────── */
-  .lns { background:#252525; padding:52px 0 64px; position:relative; overflow:hidden; }
-  .lns-wrap { max-width:1200px; margin:0 auto; padding:0 40px; position:relative; }
+  .lns { background:#1e1e1e; padding:clamp(40px,6vw,72px) 0 clamp(48px,7vw,80px); position:relative; overflow:hidden; }
+  .lns-wrap { max-width:1200px; margin:0 auto; padding:0 clamp(16px,4vw,48px); position:relative; z-index:2; }
 
-  /* ── heading ─────────────────────────────────────────────────────────── */
-  .lns-h { margin-bottom:14px; }
+  /* ambient orbs */
+  .lns-orb {
+    position:absolute; border-radius:50%; pointer-events:none;
+    animation:lns-orb-drift 9s ease-in-out infinite;
+  }
+  .lns-orb-1 { width:clamp(180px,28vw,380px); height:clamp(180px,28vw,380px); top:-8%; left:-6%; background:radial-gradient(circle,rgba(150,202,69,0.10) 0%,transparent 70%); animation-duration:11s; }
+  .lns-orb-2 { width:clamp(140px,22vw,300px); height:clamp(140px,22vw,300px); bottom:-4%; right:-4%; background:radial-gradient(circle,rgba(150,202,69,0.07) 0%,transparent 70%); animation-duration:14s; animation-delay:-4s; }
+  .lns-orb-3 { width:clamp(80px,12vw,160px);  height:clamp(80px,12vw,160px);  top:38%; right:12%;  background:radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 70%); animation-duration:8s;  animation-delay:-7s; }
+
+  /* heading row */
+  .lns-top { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:clamp(24px,3.5vw,36px); }
   .lns-title {
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size:clamp(38px,5.5vw,80px); font-weight:400;
-    line-height:1.18; letter-spacing:-0.03em; color:#fff; white-space:nowrap;
+    font-size:clamp(34px,5.5vw,80px); font-weight:400;
+    line-height:1.14; letter-spacing:-0.03em; color:#fff;
+    white-space:nowrap;
   }
   .lns-title-green { color:#96CA45; }
   .lns-sub {
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size:clamp(13px,1.4vw,18px); font-weight:400;
-    line-height:157%; letter-spacing:0.01em; text-transform:capitalize;
-    color:#fff; max-width:860px;
+    font-size:clamp(12.5px,1.3vw,16px); font-weight:400;
+    line-height:1.65; color:rgba(255,255,255,0.55);
+    max-width:420px; margin-top:clamp(6px,1vw,10px); flex-shrink:0;
   }
 
-  /* ── 'Our Latest Blogs' label (top-right) ─────────────────────────── */
+  /* handwritten label (top-right) */
   .lns-label {
-    position:absolute; top:0; right:40px;
     display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-    opacity:0; translate:16px 0;
-    transition:opacity 0.7s ease 0.45s, translate 0.7s cubic-bezier(.22,.68,0,1.2) 0.45s;
-    pointer-events:none;
+    pointer-events:none; flex-shrink:0;
   }
-  .lns-label.lns-in { opacity:1; translate:0 0; }
   .lns-label-text {
-    font-family:'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive;
-    font-size:22px; color:#96CA45; white-space:nowrap; line-height:1;
+    font-family:'Great Day Personal Use','Brush Script MT',cursive;
+    font-size:clamp(16px,2vw,22px); color:#96CA45; white-space:nowrap;
   }
 
-  /* ── card stage ──────────────────────────────────────────────────────── */
-  .lns-stage-outer {
-    position:relative; margin-top:28px;
-    height:336px; /* accommodates card + side card vertical scale */
-    overflow:visible; /* side cards bleed out horizontally */
-  }
-  .lns-stage {
-    position:absolute; inset:0;
-  }
+  /* ── FAN stage (desktop + tablet) ── */
+  .lns-stage-outer { position:relative; overflow:visible; }
+  .lns-stage { position:absolute; inset:0; }
 
-  /* ── each card wrapper ─────────────────────────────────────────────── */
-  /*
-    Cards are centered via margin-left / margin-top, then offset by
-    translateX for the fan position. Using margin for centering
-    keeps transform purely for the fan/rotation effect.
-  */
   .lns-cw {
-    position:absolute;
-    left:50%; top:50%;
-    width:448px; height:304px;
-    margin-left:-224px; margin-top:-152px;
-    border-radius:12px;
-    transition:
-      transform 0.72s cubic-bezier(.22,.68,0,1.1),
-      opacity   0.72s ease,
-      filter    0.72s ease;
-    will-change:transform,opacity;
+    position:absolute; left:50%; top:50%;
+    border-radius:14px; will-change:transform,opacity;
+    transform-origin:center bottom;
   }
-  /* Side card click cursor */
-  .lns-cw[data-clickable=true] { cursor:pointer; }
-  .lns-cw[data-clickable=true]:hover { filter:brightness(1.12); }
+  .lns-cw { cursor:pointer; }
+  .lns-read-btn {
+    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size:11px; font-weight:700; color:#1a2e00;
+    letter-spacing:0.04em;
+  }
 
-  /* ── card inner ──────────────────────────────────────────────────────── */
   .lns-card { width:100%; height:100%; border-radius:14px; overflow:hidden; position:relative; }
   .lns-card-active   { background:#96CA45; }
-  .lns-card-inactive { background:#3c3c3c; }
+  .lns-card-inactive { background:#2e2e2e; }
 
-  /* Image area (~72% height) */
-  .lns-img {
-    position:absolute; top:0; left:0; right:0;
-    height:72%; overflow:hidden; border-radius:10px;
-  }
-  .lns-img-overlay {
-    position:absolute; inset:0;
-    border-radius:10px; pointer-events:none;
-  }
-  .lns-card-active   .lns-img-overlay { background:rgba(0,0,0,0.04); }
-  .lns-card-inactive .lns-img-overlay { background:rgba(0,0,0,0.42); }
+  .lns-img { position:absolute; inset:0; height:71%; overflow:hidden; border-radius:10px 10px 0 0; }
+  .lns-img-overlay { position:absolute; inset:0; border-radius:10px 10px 0 0; pointer-events:none; }
+  .lns-card-active   .lns-img-overlay { background:rgba(0,0,0,0.06); }
+  .lns-card-inactive .lns-img-overlay { background:rgba(0,0,0,0.38); }
 
-  /* Fallback image placeholder */
-  .lns-img-ph {
-    width:100%; height:100%; object-fit:cover; object-position:center;
-    background:linear-gradient(135deg,#555,#333);
-  }
-
-  /* Author overlay on image */
-  .lns-author {
-    position:absolute; top:10px; left:10px; z-index:2;
-    display:flex; align-items:center; gap:8px;
-  }
-  .lns-av {
-    width:28px; height:28px; border-radius:50%;
-    border:1px solid #fff; overflow:hidden; flex-shrink:0;
-    background:linear-gradient(135deg,#96CA45,#5a9022);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Inter',sans-serif; font-size:10px; font-weight:700; color:#fff;
-  }
-  .lns-av-text { display:flex; flex-direction:column; line-height:1.3; }
-  .lns-av-name { font-family:'Inter',sans-serif; font-size:10px; font-weight:600; color:#96CA45; }
-  .lns-av-role { font-family:'Inter',sans-serif; font-size:10px; font-weight:400; color:#fff; }
-
-  /* Card body (bottom 28%) */
   .lns-body {
     position:absolute; bottom:0; left:0; right:0;
-    padding:10px 14px 12px;
-    height:29%; display:flex; flex-direction:column; justify-content:space-between;
+    padding:clamp(8px,1.2vw,12px) clamp(10px,1.5vw,16px) clamp(10px,1.3vw,14px);
+    height:30%; display:flex; flex-direction:column; justify-content:space-between;
   }
-  .lns-card-active   .lns-body-title { color:#252525; }
+  .lns-card-active   .lns-body-title { color:#1a2e00; }
   .lns-card-inactive .lns-body-title { color:#96CA45; }
   .lns-body-title {
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size:clamp(14px,2.4vw,18px); font-weight:500; line-height:1.3;
+    font-size:clamp(12px,1.4vw,16px); font-weight:600; line-height:1.3;
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
-  .lns-card-active   .lns-body-exc { color:rgba(37,37,37,0.75); }
-  .lns-card-inactive .lns-body-exc { color:rgba(255,255,255,0.75); }
-  .lns-body-exc {
-    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size:11px; line-height:1.5;
-    display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
-    margin-top:2px;
-  }
-  .lns-body-meta { display:flex; justify-content:space-between; margin-top:4px; }
+  .lns-body-meta { display:flex; justify-content:space-between; margin-top:auto; }
   .lns-card-active   .lns-body-date,
-  .lns-card-active   .lns-body-time { color:rgba(0,0,0,0.4); }
+  .lns-card-active   .lns-body-time { color:rgba(0,0,0,0.38); }
   .lns-card-inactive .lns-body-date,
-  .lns-card-inactive .lns-body-time { color:rgba(255,255,255,0.4); }
+  .lns-card-inactive .lns-body-time { color:rgba(255,255,255,0.35); }
   .lns-body-date,.lns-body-time {
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size:11px; letter-spacing:0.01em;
+    font-size:clamp(10px,1vw,12px); letter-spacing:0.01em;
   }
 
-  /* ── bottom nav row ───────────────────────────────────────────────── */
+  /* ── MOBILE single-card stack (< 640px) ── */
+  .lns-mobile { display:none; flex-direction:column; gap:0; position:relative; }
+  .lns-mobile-viewport { overflow:hidden; border-radius:16px; position:relative; }
+  .lns-mobile-track { display:flex; will-change:transform; }
+  .lns-mobile-card { flex-shrink:0; width:100%; border-radius:16px; overflow:hidden; position:relative; background:#2e2e2e; }
+  .lns-mobile-img  { width:100%; aspect-ratio:16/9; position:relative; overflow:hidden; }
+  .lns-mobile-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.3); }
+  .lns-mobile-body {
+    padding:clamp(12px,4vw,18px); background:#96CA45;
+  }
+  .lns-mobile-title {
+    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size:clamp(14px,4vw,18px); font-weight:600; color:#1a2e00;
+    line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin-bottom:6px;
+  }
+  .lns-mobile-exc {
+    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size:clamp(11px,3vw,13px); color:rgba(26,46,0,0.72); line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin-bottom:8px;
+  }
+  .lns-mobile-meta { display:flex; justify-content:space-between; }
+  .lns-mobile-date, .lns-mobile-time {
+    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size:11px; color:rgba(26,46,0,0.5);
+  }
+
+  /* nav + progress */
   .lns-nav {
     display:flex; align-items:center; justify-content:center;
-    gap:10px; margin-top:22px; position:relative; z-index:10;
+    gap:8px; margin-top:clamp(16px,2.5vw,22px); position:relative; z-index:10;
   }
-  .lns-arrow {
-    width:34px; height:34px; border-radius:50%;
-    border:1px solid rgba(255,255,255,0.2);
-    background:rgba(255,255,255,0.04);
-    color:#fff; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    font-size:14px;
-    transition:background 0.25s, border-color 0.25s, color 0.25s;
-    padding:0; line-height:1;
-  }
-  .lns-arrow:hover { background:rgba(150,202,69,0.15); border-color:#96CA45; color:#96CA45; }
-
-  .lns-dots { display:flex; gap:7px; align-items:center; }
   .lns-dot {
     width:7px; height:7px; border-radius:50%;
-    background:rgba(255,255,255,0.28); border:none; cursor:pointer; padding:0;
-    transition:background 0.3s, transform 0.3s;
+    background:rgba(255,255,255,0.25); border:none; cursor:pointer; padding:0;
+    transition:transform 0.25s ease;
   }
-  .lns-dot.lns-dot-on { background:#96CA45; transform:scale(1.45); animation:lns-pulse-ring 2.5s ease-in-out infinite 0.5s; }
+  .lns-dot.lns-dot-on {
+    background:#96CA45; transform:scale(1.5);
+    animation:lns-ring 2.4s ease-in-out infinite 0.3s;
+  }
+  .lns-prog-track { height:2px; background:rgba(255,255,255,0.08); margin-top:clamp(8px,1.5vw,12px); border-radius:2px; overflow:hidden; }
+  .lns-prog-fill  { height:100%; background:#96CA45; transform-origin:left; width:100%; }
 
-  /* ── progress bar ─────────────────────────────────────────────────── */
-  .lns-prog-track { height:2px; background:rgba(255,255,255,0.08); margin-top:10px; border-radius:1px; }
-  .lns-prog-fill { height:100%; background:#96CA45; transform-origin:left; border-radius:1px; animation:lns-progress 5.5s linear both; }
-
-  /* ── entrance animations ──────────────────────────────────────────── */
-  .lns-title.lns-in  { animation:lns-fade-up 0.65s ease 0.05s both; }
-  .lns-sub.lns-in    { animation:lns-fade-up 0.65s ease 0.2s  both; }
-  .lns-nav.lns-in    { animation:lns-fade-up 0.6s  ease 0.55s both; }
-  .lns-prog-track.lns-in { animation:lns-fade-up 0.6s ease 0.6s both; }
-
-  /* ── responsive ────────────────────────────────────────────────────── */
+  /* ── breakpoints ── */
   @media (max-width:1099px) {
-    .lns-wrap { padding:0 24px; }
-    .lns-label { right:24px; }
-    .lns-stage-outer { height:296px; }
-    .lns-cw { width:384px; height:264px; margin-left:-192px; margin-top:-132px; }
-    .lns-body-title { font-size:14px; }
+    .lns-title { white-space:normal; }
   }
   @media (max-width:899px) {
     .lns-label { display:none; }
-    .lns-stage-outer { height:264px; }
-    .lns-cw { width:336px; height:232px; margin-left:-168px; margin-top:-116px; }
-    .lns-body-title { font-size:13.5px; }
+    .lns-top { flex-direction:column; gap:10px; }
+    .lns-sub { max-width:100%; }
   }
-  @media (max-width:767px) {
-    .lns-wrap { padding:0 16px; }
-    .lns { padding:36px 0 48px; }
-    .lns-stage-outer { height:240px; }
-    .lns-cw {
-      width:min(90vw,288px); height:200px;
-      margin-left:min(-45vw,-144px); margin-top:-100px;
-    }
-    /* On mobile: hide ±2 cards entirely via JS; ±1 barely visible */
-    .lns-body-title { font-size:12.5px; }
-    .lns-body-exc { display:none; }
-    .lns-arrow { width:30px; height:30px; font-size:12px; }
-    .lns-dots { gap:5px; }
-    .lns-dot { width:6px; height:6px; }
+  @media (max-width:639px) {
+    .lns-stage-outer { display:none; }
+    .lns-mobile { display:flex; }
   }
-  @media (max-width:479px) {
-    .lns-stage-outer { height:208px; }
-    .lns-cw {
-      width:min(88vw,240px); height:168px;
-      margin-left:min(-44vw,-120px); margin-top:-84px;
-    }
+  @media (min-width:640px) {
+    .lns-mobile { display:none !important; }
   }
 
   @media (prefers-reduced-motion:reduce) {
-    .lns *, .lns *::before, .lns *::after {
-      animation-duration:0.01ms !important;
-      transition-duration:0.01ms !important;
-    }
+    .lns-orb { animation:none !important; }
+    .lns-dot { animation:none !important; }
   }
 `;
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LatestNewsSection({ initialNews = [] }: { initialNews?: any[] }) {
-  const [blogs, setBlogs]     = useState<any[]>(initialNews);
-  const [active, setActive]   = useState(0);
-  const [spread, setSpread]   = useState(false);   /* fan spread after entrance */
-  const [inView, setInView]   = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const sectionRef  = useRef<HTMLDivElement>(null);
-  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
-  const touchRef    = useRef<{ x:number; y:number } | null>(null);
-  const progKey     = useRef(0);                   /* forces progress bar remount */
+  const router = useRouter();
+  const [blogs, setBlogs]   = useState<any[]>(initialNews);
+  const [active, setActive] = useState(0);
+  const [breakpoint, setBreakpoint] = useState<'desktop' | 'tablet'>('desktop');
 
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const titleRef     = useRef<HTMLHeadingElement>(null);
+  const subRef       = useRef<HTMLParagraphElement>(null);
+  const labelRef     = useRef<HTMLDivElement>(null);
+  const navRef       = useRef<HTMLDivElement>(null);
+  const progFillRef  = useRef<HTMLDivElement>(null);
+  const progTrackRef = useRef<HTMLDivElement>(null);
+  const cardRefs     = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileTrackRef = useRef<HTMLDivElement>(null);
+  const orbRefs      = useRef<(HTMLDivElement | null)[]>([]);
+
+  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progTween   = useRef<gsap.core.Tween | null>(null);
+  const touchRef    = useRef<{ x: number; y: number } | null>(null);
+  const triggeredRef = useRef(false);
+  const activeRef   = useRef(0);
+  const bpRef       = useRef<'desktop' | 'tablet'>('desktop');
+
+  /* ── fetch ── */
   useEffect(() => {
     if (initialNews && initialNews.length > 0) return;
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     fetch(`${base}/api/blogs?status=published`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.success && Array.isArray(d?.data) && d.data.length > 0) {
-          setBlogs(d.data);
-        }
-      })
+      .then(r => r.json())
+      .then(d => { if (d?.success && Array.isArray(d?.data) && d.data.length > 0) setBlogs(d.data); })
       .catch(() => {});
   }, [initialNews]);
 
-  const list = (blogs && blogs.length > 0 ? blogs : []).map((item: any) => {
+  const list: NewsItem[] = (blogs && blogs.length > 0 ? blogs : []).map((item: any) => {
     if (item._id) {
-      const imgUrl = item.image
-        ? (typeof item.image === 'object' ? item.image.secureUrl : item.image)
-        : '/news/news-1.jpg';
-      
-      const authorName = item.author?.name || 'Admin';
-      const authorRole = item.author?.role || 'admin';
-      const authorAvatar = item.author?.avatar || '';
-
-      const formattedDate = item.createdAt
-        ? new Date(item.createdAt).toLocaleDateString('en-GB')
-        : '24/06/2026';
-        
-      const formattedTime = item.createdAt
-        ? new Date(item.createdAt).toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          })
-        : '10:00 AM';
-
       return {
         id: item._id,
+        slug: item.slug || item._id,
         title: item.title,
-        excerpt: item.summary,
-        image: imgUrl,
-        date: formattedDate,
-        time: formattedTime,
-        author: {
-          name: authorName,
-          role: authorRole,
-          avatar: authorAvatar || undefined,
-        },
+        excerpt: item.summary || '',
+        image: item.image ? (typeof item.image === 'object' ? item.image.secureUrl : item.image) : '/news/news-1.jpg',
+        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB') : '24/06/2026',
+        time: item.createdAt ? new Date(item.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '10:00 AM',
       };
     }
-    return item;
+    return item as NewsItem;
   });
 
   const len = list.length;
 
-  /* ── viewport tracking ── */
+  /* ── breakpoint tracking ── */
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 600);
+    const check = () => {
+      const bp = window.innerWidth < 900 ? 'tablet' : 'desktop';
+      setBreakpoint(bp);
+      bpRef.current = bp;
+    };
     check();
     window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  /* ── IntersectionObserver — triggers entrance ── */
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          /* Cards spread after a short pause */
-          setTimeout(() => setSpread(true), 150);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.12 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  /* ── fan card positions ── */
+  const positionFor = useCallback((cardIdx: number, cur: number) => {
+    if (len === 0) return null;
+    let o = cardIdx - cur;
+    if (o >  len / 2) o -= len;
+    if (o < -len / 2) o += len;
+    if (Math.abs(o) > 2) return null;
 
-  /* ── Carousel helpers ── */
-  const goTo = useCallback((idx: number) => {
-    setActive(((idx % len) + len) % len);
-    progKey.current += 1;
+    const f = FAN[bpRef.current];
+    const CFG = [
+      { dx: -f.off2, r: -f.r2, s: f.s2, op: f.op2, z: 1 },
+      { dx: -f.off1, r: -f.r1, s: f.s1, op: f.op1, z: 2 },
+      { dx:  0,      r:  0,    s: 1,    op: 1,      z: 5 },
+      { dx:  f.off1, r:  f.r1, s: f.s1, op: f.op1,  z: 2 },
+      { dx:  f.off2, r:  f.r2, s: f.s2, op: f.op2,  z: 1 },
+    ];
+    return { ...CFG[o + 2], w: f.w, h: f.h, clickable: o !== 0 };
   }, [len]);
 
-  const goNext = useCallback(() => goTo(active + 1), [active, goTo]);
-  const goPrev = useCallback(() => goTo(active - 1), [active, goTo]);
+  /* ── GSAP: set fan card sizes + positions ── */
+  const applyPositions = useCallback((cur: number, animate = true) => {
+    const f = FAN[bpRef.current];
+    cardRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const pos = positionFor(i, cur);
+      if (!pos) {
+        gsap.set(el, { opacity: 0, zIndex: 0, pointerEvents: 'none' });
+        return;
+      }
+      /* update size via CSS vars so the card itself stays responsive */
+      el.style.width  = `${pos.w}px`;
+      el.style.height = `${pos.h}px`;
+      el.style.marginLeft = `${-pos.w / 2}px`;
+      el.style.marginTop  = `${-pos.h / 2}px`;
 
-  const resetTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(goNext, AUTO_MS);
-  }, [goNext]);
+      const target = {
+        x: pos.dx, rotation: pos.r, scale: pos.s,
+        opacity: pos.op, zIndex: pos.z,
+        pointerEvents: pos.clickable ? 'auto' : 'none',
+      };
+      animate
+        ? gsap.to(el, { ...target, duration: 0.68, ease: 'power3.out' })
+        : gsap.set(el, target);
+    });
+  }, [positionFor]);
 
+  /* ── GSAP: mobile track slide ── */
+  const applyMobile = useCallback((cur: number, animate = true) => {
+    const track = mobileTrackRef.current;
+    if (!track) return;
+    const pct = -cur * 100;
+    animate
+      ? gsap.to(track,  { x: `${pct}%`, duration: 0.55, ease: 'power3.out' })
+      : gsap.set(track, { x: `${pct}%` });
+  }, []);
+
+  /* ── progress bar ── */
+  const startProgress = useCallback(() => {
+    const fill = progFillRef.current;
+    if (!fill) return;
+    if (progTween.current) progTween.current.kill();
+    gsap.set(fill, { scaleX: 0, transformOrigin: 'left center' });
+    progTween.current = gsap.to(fill, { scaleX: 1, duration: AUTO_MS / 1000, ease: 'none' });
+  }, []);
+
+  /* ── entrance (fires once on scroll) ── */
   useEffect(() => {
-    if (!spread) return;
-    resetTimer();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [spread, resetTimer]);
+    const section = sectionRef.current;
+    if (!section) return;
 
-  /* ── Touch swipe ── */
+    /* pre-hide */
+    if (titleRef.current)    gsap.set(titleRef.current,     { opacity: 0, y: 40 });
+    if (subRef.current)      gsap.set(subRef.current,       { opacity: 0, y: 24 });
+    if (labelRef.current)    gsap.set(labelRef.current,     { opacity: 0, x: 22 });
+    if (navRef.current)      gsap.set(navRef.current,       { opacity: 0, y: 16 });
+    if (progTrackRef.current) gsap.set(progTrackRef.current, { opacity: 0 });
+    orbRefs.current.forEach(o => o && gsap.set(o, { opacity: 0 }));
+    cardRefs.current.forEach(c => c && gsap.set(c, { opacity: 0, scale: 0.8, x: 0, rotation: 0, zIndex: 0 }));
+
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || triggeredRef.current) return;
+      triggeredRef.current = true;
+      io.disconnect();
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      /* orbs fade in slowly */
+      tl.to(orbRefs.current.filter(Boolean), { opacity: 1, duration: 1.8, stagger: 0.3, ease: 'power1.out' }, 0);
+
+      /* heading slides up */
+      tl.to(titleRef.current, { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(1.2)' }, 0.1);
+      tl.to(subRef.current,   { opacity: 1, y: 0, duration: 0.6 }, 0.26);
+      tl.to(labelRef.current, { opacity: 1, x: 0, duration: 0.6, ease: 'back.out(1.4)' }, 0.34);
+
+      /* fan: cards appear from center and spring out */
+      tl.call(() => {
+        cardRefs.current.forEach((c, i) => {
+          if (!c) return;
+          const pos = positionFor(i, 0);
+          if (!pos) return;
+          c.style.width  = `${pos.w}px`;
+          c.style.height = `${pos.h}px`;
+          c.style.marginLeft = `${-pos.w / 2}px`;
+          c.style.marginTop  = `${-pos.h / 2}px`;
+          gsap.set(c, { opacity: 0, scale: 0.75, x: 0, rotation: 0, zIndex: pos.z });
+          gsap.to(c, {
+            opacity: pos.op, scale: pos.s, x: pos.dx, rotation: pos.r,
+            duration: 0.82, ease: 'back.out(1.15)',
+            delay: 0.1 + Math.abs(i) * 0.07,
+          });
+        });
+        /* mobile track */
+        applyMobile(0, false);
+      }, [], 0.32);
+
+      /* nav + progress */
+      tl.to(navRef.current,       { opacity: 1, y: 0, duration: 0.5 }, 0.7);
+      tl.to(progTrackRef.current, { opacity: 1, duration: 0.5 }, 0.78);
+      tl.call(() => startProgress(), [], 1.15);
+
+      /* auto-cycle */
+      tl.call(() => {
+        timerRef.current = setInterval(() => {
+          const next = (activeRef.current + 1) % len;
+          activeRef.current = next;
+          setActive(next);
+          applyPositions(next, true);
+          applyMobile(next, true);
+          startProgress();
+        }, AUTO_MS);
+      }, [], 1.15);
+
+    }, { threshold: 0.08 });
+
+    io.observe(section);
+    return () => {
+      io.disconnect();
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (progTween.current) progTween.current.kill();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [len]);
+
+  /* ── re-layout on breakpoint change ── */
+  useEffect(() => {
+    if (!triggeredRef.current) return;
+    applyPositions(activeRef.current, true);
+  }, [breakpoint, applyPositions]);
+
+  /* ── navigation ── */
+  const goTo = useCallback((idx: number) => {
+    if (len === 0) return;
+    const next = ((idx % len) + len) % len;
+    activeRef.current = next;
+    setActive(next);
+    applyPositions(next, true);
+    applyMobile(next, true);
+    startProgress();
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      const n = (activeRef.current + 1) % len;
+      activeRef.current = n;
+      setActive(n);
+      applyPositions(n, true);
+      applyMobile(n, true);
+      startProgress();
+    }, AUTO_MS);
+  }, [len, applyPositions, applyMobile, startProgress]);
+
+  const goNext = useCallback(() => goTo(activeRef.current + 1), [goTo]);
+  const goPrev = useCallback(() => goTo(activeRef.current - 1), [goTo]);
+
+  /* ── touch ── */
   const onTouchStart = (e: React.TouchEvent) => {
     touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
@@ -376,169 +431,78 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
     if (!touchRef.current) return;
     const dx = e.changedTouches[0].clientX - touchRef.current.x;
     const dy = e.changedTouches[0].clientY - touchRef.current.y;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 38) {
-      dx < 0 ? goNext() : goPrev();
-      resetTimer();
-    }
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 36) dx < 0 ? goNext() : goPrev();
     touchRef.current = null;
   };
 
-  /* ── Card transform ── */
-  const cardTransform = useCallback((cardIdx: number) => {
-    const offset = cardIdx - active;
-    /* wrap offset so it stays in range -2..+2 */
-    let o = offset;
-    if (o >  len / 2) o -= len;
-    if (o < -len / 2) o += len;
-
-    /* Before spread: all cards at center, invisible */
-    if (!spread) {
-      return {
-        style: { transform: 'translateX(0) rotate(0deg) scale(0.92)', opacity: 0, zIndex: 0 } as React.CSSProperties,
-        clickable: false,
-      };
-    }
-
-    /* Hide cards beyond ±2 positions */
-    if (Math.abs(o) > 2) {
-      const dir = Math.sign(o);
-      return {
-        style: {
-          transform: `translateX(${dir * (OFFSET_2 + 160)}px) rotate(${o * 4}deg) scale(0.5)`,
-          opacity: 0, zIndex: 0, transitionDuration: '0s',
-        } as React.CSSProperties,
-        clickable: false,
-      };
-    }
-
-    /* On mobile, only show center and ±1 with reduced offset */
-    const mo = isMobile ? 0.45 : 1; /* scale offsets on mobile */
-    const mHide = isMobile && Math.abs(o) > 1;
-
-    const CFG = [
-      { dx: -OFFSET_2 * mo, r: -8, s: 0.68, op: mHide ? 0 : 0.56, z: 1, delay: '0.1s'  },
-      { dx: -OFFSET_1 * mo, r: -4, s: 0.82, op: isMobile ? 0.45 : 0.82, z: 2, delay: '0.05s' },
-      { dx:  0,              r:  0, s: 1,    op: 1,                    z: 5, delay: '0s'   },
-      { dx:  OFFSET_1 * mo, r:  4, s: 0.82, op: isMobile ? 0.45 : 0.82, z: 2, delay: '0.05s' },
-      { dx:  OFFSET_2 * mo, r:  8, s: 0.68, op: mHide ? 0 : 0.56, z: 1, delay: '0.1s'  },
-    ];
-
-    const c = CFG[o + 2];
-    return {
-      style: {
-        transform: `translateX(${c.dx}px) rotate(${c.r}deg) scale(${c.s})`,
-        opacity: c.op,
-        zIndex: c.z,
-        transitionDelay: c.delay,
-      } as React.CSSProperties,
-      clickable: o !== 0,
-    };
-  }, [active, spread, isMobile, len]);
-
-  const v = inView;
+  const f = FAN[breakpoint];
 
   /* ══════════════════════════════════════════════════════════════════════ */
   return (
-    <section
-      ref={sectionRef}
-      className="lns"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
+    <section ref={sectionRef} className="lns" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
+
+      {/* Ambient orbs */}
+      <div ref={el => { orbRefs.current[0] = el; }} className="lns-orb lns-orb-1" />
+      <div ref={el => { orbRefs.current[1] = el; }} className="lns-orb lns-orb-2" />
+      <div ref={el => { orbRefs.current[2] = el; }} className="lns-orb lns-orb-3" />
 
       <div className="lns-wrap">
 
-        {/* 'Our Latest Blogs' — top right */}
-        <div className={`lns-label${v ? ' lns-in' : ''}`}>
-          {/* Curved arrow SVG */}
-          <svg width="72" height="52" viewBox="0 0 72 52" fill="none" className="lns-arrow-svg">
-            <path
-              d="M 68 8 C 55 6, 28 12, 8 42"
-              stroke="#96CA45" strokeWidth="2" fill="none"
-              strokeLinecap="round"
-            />
-            <polyline
-              points="4,34 8,44 18,40"
-              stroke="#96CA45" strokeWidth="2" fill="none"
-              strokeLinecap="round" strokeLinejoin="round"
-            />
-          </svg>
-          <span className="lns-label-text">Our Latest Blogs</span>
+        {/* Top row: heading + label */}
+        <div className="lns-top">
+          <div>
+            <h2 ref={titleRef} className="lns-title">
+              Latest <span className="lns-title-green">News</span>
+            </h2>
+            <p ref={subRef} className="lns-sub">
+              Stay up to date with the latest insights, success stories, and guidance for healthcare professionals navigating their international career journey.
+            </p>
+          </div>
+          <div ref={labelRef} className="lns-label">
+            <svg width="72" height="52" viewBox="0 0 72 52" fill="none">
+              <path d="M 68 8 C 55 6, 28 12, 8 42" stroke="#96CA45" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <polyline points="4,34 8,44 18,40" stroke="#96CA45" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="lns-label-text">Our Latest Blogs</span>
+          </div>
         </div>
 
-        {/* Heading */}
-        <div className="lns-h">
-          <h2 className={`lns-title${v ? ' lns-in' : ''}`}>
-            Latest <span className="lns-title-green">News</span>
-          </h2>
-          <p className={`lns-sub${v ? ' lns-in' : ''}`}>
-            Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae. Curabitur
-            Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est
-            Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque
-            Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.Lorem Ipsum Dolor Sit Amet Consectetur.
-          </p>
-        </div>
-
-        {/* Card fan stage */}
-        <div className="lns-stage-outer">
+        {/* ── Fan stage (≥ 640px) ── */}
+        <div className="lns-stage-outer" style={{ height: f.stageH }}>
           <div className="lns-stage">
             {list.map((news, i) => {
-              const { style, clickable } = cardTransform(i);
               const isActive = i === active;
               return (
                 <div
                   key={news.id}
+                  ref={el => { cardRefs.current[i] = el; }}
                   className="lns-cw"
-                  style={style}
-                  data-clickable={clickable}
+                  data-clickable="true"
                   onClick={() => {
-                    if (!clickable) return;
-                    goTo(i);
-                    resetTimer();
+                    if (!isActive) { goTo(i); }
+                    else { router.push(`/blog/${news.slug}`); }
                   }}
                 >
                   <div className={`lns-card lns-card-${isActive ? 'active' : 'inactive'}`}>
-
-                    {/* Image area */}
                     <div className="lns-img">
                       <Image
-                        src={news.image}
-                        alt={news.title}
-                        fill
-                        className="lns-img-ph"
+                        src={news.image} alt={news.title} fill
                         style={{ objectFit: 'cover', objectPosition: 'center' }}
                         onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
                       />
                       <div className="lns-img-overlay" />
-
-                      {/* Author overlay */}
-                      <div className="lns-author">
-                        <div className="lns-av">
-                          {news.author.avatar
-                            ? <Image src={news.author.avatar} alt={news.author.name} width={28} height={28} style={{ objectFit: 'cover', borderRadius: '50%' }} />
-                            : news.author.name.charAt(0)
-                          }
-                        </div>
-                        <div className="lns-av-text">
-                          <span className="lns-av-name">{news.author.name}</span>
-                          <span className="lns-av-role">{news.author.role}</span>
-                        </div>
-                      </div>
                     </div>
-
-                    {/* Bottom body */}
                     <div className="lns-body">
-                      <div>
-                        <h3 className="lns-body-title">{news.title}</h3>
-                        <p className="lns-body-exc">{news.excerpt}</p>
-                      </div>
+                      <h3 className="lns-body-title">{news.title}</h3>
                       <div className="lns-body-meta">
                         <span className="lns-body-date">{news.date}</span>
-                        <span className="lns-body-time">{news.time}</span>
+                        {isActive
+                          ? <span className="lns-read-btn">Read →</span>
+                          : <span className="lns-body-time">{news.time}</span>
+                        }
                       </div>
                     </div>
-
                   </div>
                 </div>
               );
@@ -546,33 +510,54 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
           </div>
         </div>
 
-        {/* Navigation: prev arrow + dots + next arrow */}
-        <div className={`lns-nav${v ? ' lns-in' : ''}`}>
-          <button
-            className="lns-arrow" aria-label="Previous"
-            onClick={() => { goPrev(); resetTimer(); }}
-          >&#8592;</button>
-
-          <div className="lns-dots">
-            {list.map((_, i) => (
-              <button
-                key={i}
-                className={`lns-dot${i === active ? ' lns-dot-on' : ''}`}
-                aria-label={`News ${i + 1}`}
-                onClick={() => { goTo(i); resetTimer(); }}
-              />
-            ))}
+        {/* ── Mobile single-card slider (< 640px) ── */}
+        <div className="lns-mobile">
+          <div className="lns-mobile-viewport">
+            <div ref={mobileTrackRef} className="lns-mobile-track">
+              {list.map((news, i) => (
+                <div
+                  key={news.id}
+                  className="lns-mobile-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => router.push(`/blog/${news.slug}`)}
+                >
+                  <div className="lns-mobile-img">
+                    <Image
+                      src={news.image} alt={news.title} fill
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
+                    <div className="lns-mobile-overlay" />
+                  </div>
+                  <div className="lns-mobile-body">
+                    <div className="lns-mobile-title">{news.title}</div>
+                    <div className="lns-mobile-exc">{news.excerpt}</div>
+                    <div className="lns-mobile-meta">
+                      <span className="lns-mobile-date">{news.date}</span>
+                      <span className="lns-mobile-time" style={{ fontWeight: 700, color: '#1a2e00' }}>Read →</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
-          <button
-            className="lns-arrow" aria-label="Next"
-            onClick={() => { goNext(); resetTimer(); }}
-          >&#8594;</button>
         </div>
 
-        {/* Progress bar — key changes on every slide so animation resets */}
-        <div className={`lns-prog-track${v ? ' lns-in' : ''}`}>
-          <div key={progKey.current} className="lns-prog-fill" />
+        {/* Dots */}
+        <div ref={navRef} className="lns-nav">
+          {list.map((_, i) => (
+            <button
+              key={i}
+              className={`lns-dot${i === active ? ' lns-dot-on' : ''}`}
+              aria-label={`News ${i + 1}`}
+              onClick={() => goTo(i)}
+            />
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div ref={progTrackRef} className="lns-prog-track">
+          <div ref={progFillRef} className="lns-prog-fill" />
         </div>
 
       </div>
