@@ -1884,101 +1884,127 @@ function CoreValuesSection() {
   const revealedRef    = useRef(false);
 
   const N   = CORE_VALUES.length;
-  const GAP = 16; // px gap between cards
+  const GAP = 16;
 
-  /* responsive sizes — recalculated from live DOM */
+  /* measure natural height of a desc by cloning off-screen */
+  const measureDesc = (desc: HTMLElement, cardWidth?: number): number => {
+    const w = cardWidth || desc.closest('div[style]')?.clientWidth || desc.offsetWidth || 300;
+    const clone = desc.cloneNode(true) as HTMLElement;
+    clone.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;height:auto;overflow:visible;opacity:1;width:${w}px;left:-9999px;top:-9999px`;
+    document.body.appendChild(clone);
+    const h = clone.offsetHeight;
+    document.body.removeChild(clone);
+    return Math.ceil(h) || 140;
+  };
+
+  /* measure full active-card height for stacked layout */
+  const measureCardH = (idx: number): number => {
+    const card = cardRefs.current[idx];
+    const desc = descRefs.current[idx];
+    if (!card) return 280;
+    const cw    = card.offsetWidth || 300;
+    const style = getComputedStyle(card);
+    const padV  = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const padH  = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const innerW = cw - padH;
+    const icon  = iconRefs.current[idx];
+    const iconH = icon ? (icon.offsetHeight + parseFloat(getComputedStyle(icon).marginBottom)) : 74;
+    const titleEl = card.querySelector('h3') as HTMLElement | null;
+    const titleH  = titleEl ? titleEl.offsetHeight : 36;
+    const dh      = desc ? measureDesc(desc, innerW) : 0;
+    return Math.ceil(padV + iconH + titleH + 20 + dh + 12);
+  };
+
   const getSizes = () => {
-    const row = rowRef.current;
-    if (!row) return { active: 0, inactive: 0, h: 400, mobile: false };
-    const totalW  = row.offsetWidth;
-    const vw      = window.innerWidth;
-    const mobile  = vw <= 767;
-    const tablet  = vw <= 1023;
+    const row    = rowRef.current;
+    const vw     = window.innerWidth;
+    const totalW = row ? row.offsetWidth : vw;
+    const stacked = vw <= 1023;
 
-    if (mobile) {
-      const hAct  = Math.round(Math.max(300, vw * 0.85));
-      const hInact = Math.round(Math.max(110, vw * 0.25));
-      return { active: totalW, inactive: totalW, h: hAct, hInact, mobile: true, tablet: false };
+    if (stacked) {
+      const hInact = vw <= 767 ? 104 : 124;
+      return { stacked: true, totalW, hInact, desktopActive: 0, desktopInactive: 0, desktopH: 0 };
     }
-    if (tablet) {
-      const hAct  = Math.round(Math.max(300, vw * 0.5));
-      const hInact = Math.round(Math.max(140, vw * 0.2));
-      return { active: totalW, inactive: totalW, h: hAct, hInact, mobile: false, tablet: true };
-    }
-
-    /* desktop: active=52%, two inactive split remainder minus gaps */
-    const active   = Math.round(totalW * 0.52);
-    const inactive = Math.round((totalW - active - GAP * (N - 1)) / (N - 1));
-    const h        = Math.round(Math.max(340, vw * 0.26));
-    return { active, inactive, h, hInact: h, mobile: false, tablet: false };
+    const dActive   = Math.round(totalW * 0.52);
+    const dInactive = Math.round((totalW - dActive - GAP * (N - 1)) / (N - 1));
+    const dH        = Math.round(Math.max(340, vw * 0.26));
+    return { stacked: false, totalW, hInact: dH, desktopActive: dActive, desktopInactive: dInactive, desktopH: dH };
   };
 
-  /* snap without animation */
+  /* instant snap — used on resize and first reveal */
   const applySnap = (idx: number, g: any) => {
-    const s = getSizes();
+    const s   = getSizes();
     const row = rowRef.current;
     if (!row) return;
-
-    if (s.mobile || s.tablet) {
-      row.style.flexDirection = 'column';
-      cardRefs.current.forEach((card, i) => {
-        if (!card) return;
-        const isAct = i === idx;
-        g.set(card, { width: '100%', height: isAct ? s.h : s.hInact, clearProps: 'flex' });
-        const desc = descRefs.current[i];
-        if (desc) g.set(desc, { opacity: isAct ? 1 : 0, height: isAct ? 'auto' : 0, y: 0, overflow: 'hidden' });
-      });
-    } else {
-      row.style.flexDirection = 'row';
-      cardRefs.current.forEach((card, i) => {
-        if (!card) return;
-        const isAct = i === idx;
-        g.set(card, { width: isAct ? s.active : s.inactive, height: s.h, flex: 'none' });
-        const desc = descRefs.current[i];
-        if (desc) g.set(desc, { opacity: isAct ? 1 : 0, height: isAct ? 'auto' : 0, y: 0, overflow: 'hidden' });
-      });
-    }
-  };
-
-  /* smooth animated spotlight */
-  const goTo = (idx: number, g: any) => {
-    if (idx === activeRef.current) return;
-    activeRef.current = idx;
-    const s = getSizes();
-    const row = rowRef.current;
-    if (!row) return;
-
-    const isMobTab = s.mobile || s.tablet;
-    if (isMobTab) row.style.flexDirection = 'column';
-    else row.style.flexDirection = 'row';
+    row.style.flexDirection = s.stacked ? 'column' : 'row';
 
     cardRefs.current.forEach((card, i) => {
       if (!card) return;
       const isAct = i === idx;
+      const desc  = descRefs.current[i];
 
-      if (isMobTab) {
-        g.to(card, { width: '100%', height: isAct ? s.h : s.hInact, duration: 0.65, ease: 'power3.inOut', clearProps: 'flex' });
+      const cw = s.stacked ? s.totalW : (isAct ? s.desktopActive : s.desktopInactive);
+      const cardStyle = card ? getComputedStyle(card) : null;
+      const padH = cardStyle ? (parseFloat(cardStyle.paddingLeft) + parseFloat(cardStyle.paddingRight)) : 0;
+      const innerW = Math.max(60, cw - padH);
+
+      if (s.stacked) {
+        const h = isAct ? measureCardH(i) : s.hInact;
+        g.set(card, { width: '100%', height: h, flex: 'none', overflow: 'hidden' });
+        if (desc) g.set(desc, { height: isAct ? measureDesc(desc, innerW) : 0, opacity: isAct ? 1 : 0, y: 0, overflow: 'hidden' });
       } else {
-        g.to(card, { width: isAct ? s.active : s.inactive, height: s.h, flex: 'none', duration: 0.72, ease: 'power3.inOut' });
+        g.set(card, { width: cw, height: s.desktopH, flex: 'none', overflow: 'hidden' });
+        if (desc) g.set(desc, { height: isAct ? measureDesc(desc, innerW) : 0, opacity: isAct ? 1 : 0, y: 0, overflow: 'hidden' });
+      }
+    });
+  };
+
+  /* animated transition */
+  const goTo = (idx: number, g: any) => {
+    if (idx === activeRef.current) return;
+    activeRef.current = idx;
+    const s   = getSizes();
+    const row = rowRef.current;
+    if (!row) return;
+    row.style.flexDirection = s.stacked ? 'column' : 'row';
+
+    cardRefs.current.forEach((card, i) => {
+      if (!card) return;
+      const isAct = i === idx;
+      const desc  = descRefs.current[i];
+      const cw    = s.stacked ? s.totalW : (isAct ? s.desktopActive : s.desktopInactive);
+      const cardStyle = getComputedStyle(card);
+      const padH  = parseFloat(cardStyle.paddingLeft) + parseFloat(cardStyle.paddingRight);
+      const innerW = Math.max(60, cw - padH);
+
+      if (s.stacked) {
+        const h = isAct ? measureCardH(i) : s.hInact;
+        g.to(card, { width: '100%', height: h, flex: 'none', overflow: 'hidden', duration: 0.6, ease: 'power3.inOut' });
+        if (desc) {
+          if (isAct) {
+            g.to(desc, { height: measureDesc(desc, innerW), opacity: 1, y: 0, overflow: 'hidden', duration: 0.38, ease: 'power2.out', delay: 0.12 });
+          } else {
+            g.to(desc, { height: 0, opacity: 0, y: 4, overflow: 'hidden', duration: 0.2, ease: 'power2.in' });
+          }
+        }
+      } else {
+        g.to(card, { width: cw, height: s.desktopH, flex: 'none', overflow: 'hidden', duration: 0.7, ease: 'power3.inOut' });
+        if (desc) {
+          if (isAct) {
+            g.to(desc, { height: measureDesc(desc, innerW), opacity: 1, y: 0, overflow: 'hidden', duration: 0.38, ease: 'power2.out', delay: 0.18 });
+          } else {
+            g.to(desc, { height: 0, opacity: 0, y: 6, overflow: 'hidden', duration: 0.22, ease: 'power2.in' });
+          }
+        }
       }
 
-      /* icon spin on activation */
       const icon = iconRefs.current[i];
       if (icon && isAct) {
         g.fromTo(icon,
           { rotation: 0, scale: 1 },
-          { rotation: 360, scale: 1.18, duration: 0.55, ease: 'back.out(1.6)',
-            onComplete: () => g.to(icon, { scale: 1, duration: 0.2, ease: 'power2.out' }) }
+          { rotation: 360, scale: 1.15, duration: 0.5, ease: 'back.out(1.6)',
+            onComplete: () => g.to(icon, { scale: 1, duration: 0.18, ease: 'power2.out' }) }
         );
-      }
-
-      /* desc reveal / hide */
-      const desc = descRefs.current[i];
-      if (!desc) return;
-      if (isAct) {
-        g.to(desc, { opacity: 1, height: 'auto', y: 0, duration: 0.42, ease: 'power2.out', delay: 0.16, overflow: 'hidden' });
-      } else {
-        g.to(desc, { opacity: 0, height: 0, y: 6, duration: 0.25, ease: 'power2.in', overflow: 'hidden' });
       }
     });
   };
@@ -1989,48 +2015,39 @@ function CoreValuesSection() {
       if (cancelled) return;
       gsapRef.current = gsap;
 
-      /* hide all descs + set initial equal widths */
-      const row = rowRef.current;
-      if (row) row.style.flexDirection = 'row';
-      descRefs.current.forEach(d => {
-        if (d) gsap.set(d, { opacity: 0, height: 0, y: 10, overflow: 'hidden' });
-      });
-      cardRefs.current.forEach(card => {
-        if (card) gsap.set(card, { opacity: 0, y: 48, scale: 0.96 });
-      });
+      /* initial state: cards hidden, descs collapsed */
+      descRefs.current.forEach(d => { if (d) gsap.set(d, { height: 0, opacity: 0, overflow: 'hidden' }); });
+      cardRefs.current.forEach(c => { if (c) gsap.set(c, { opacity: 0, y: 44, scale: 0.95 }); });
 
-      /* scroll reveal */
       const obs = new IntersectionObserver(([e]) => {
         if (!e.isIntersecting || revealedRef.current) return;
         obs.disconnect();
         revealedRef.current = true;
 
         gsap.to(cardRefs.current, {
-          y: 0, opacity: 1, scale: 1,
-          duration: 0.68, ease: 'power3.out', stagger: 0.11,
+          y: 0, opacity: 1, scale: 1, duration: 0.62, ease: 'power3.out', stagger: 0.1,
           onComplete: () => {
-            applySnap(-1, gsap); // reset widths equal first
-            activeRef.current = -1;
-            setTimeout(() => goTo(0, gsap), 60);
+            /* let browser paint before measuring */
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              activeRef.current = -1;
+              goTo(0, gsap);
+            }));
           },
         });
-      }, { threshold: 0.12 });
+      }, { threshold: 0.1 });
       if (secRef.current) obs.observe(secRef.current);
 
-      /* auto-rotate */
+      /* auto-rotate — starts 4 s after first activation */
       timerRef.current = setInterval(() => {
-        if (isHoveredRef.current || pausedRef.current || !revealedRef.current) return;
+        if (isHoveredRef.current || pausedRef.current || !revealedRef.current || activeRef.current < 0) return;
         goTo((activeRef.current + 1) % N, gsap);
       }, 4000);
 
-      /* resize: re-snap to current active */
       const onResize = () => {
-        if (!revealedRef.current) return;
-        const idx = activeRef.current < 0 ? 0 : activeRef.current;
-        applySnap(idx, gsap);
+        if (!revealedRef.current || activeRef.current < 0) return;
+        applySnap(activeRef.current, gsap);
       };
       window.addEventListener('resize', onResize, { passive: true });
-
       return () => window.removeEventListener('resize', onResize);
     });
 
