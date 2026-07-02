@@ -350,9 +350,7 @@ const STYLES = `
 .abt-team-strip { animation: abt-team-up 32s linear infinite; }
 .abt-team-strip.abt-paused { animation-play-state: paused; }
 
-/* ── Faces Behind the Brand — premium carousel ── */
-
-/* sizes: center=176, +/-1=124, +/-2=80 */
+/* ── Faces Behind the Brand — responsive orbit carousel ── */
 .abt-tc-wrap {
   position: relative;
   width: 100%;
@@ -363,34 +361,29 @@ const STYLES = `
   padding: 16px 0 0;
 }
 
-/* The orbit row */
+/* Orbit row: height = center avatar size + room for active glow */
 .abt-tc-orbit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
   position: relative;
-  height: 208px;
   width: 100%;
-  max-width: 736px;
+  height: clamp(140px, 22vw, 210px);
   margin: 0 auto;
 }
 
-/* Each slot in the carousel */
+/* Each avatar slot */
 .abt-tc-slot {
   position: absolute;
+  top: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateX(-50%) translateY(-50%);
   transition: left 0.72s cubic-bezier(0.25,1,0.22,1),
-              transform 0.72s cubic-bezier(0.25,1,0.22,1),
-              opacity 0.55s ease,
-              z-index 0.72s step-end;
-  will-change: left, transform, opacity;
+              opacity 0.55s ease;
+  will-change: left, opacity;
   cursor: pointer;
 }
 
-/* Avatar circle shell */
+/* Avatar circle */
 .abt-tc-img {
   border-radius: 50%;
   overflow: hidden;
@@ -403,87 +396,47 @@ const STYLES = `
   will-change: width, height, box-shadow;
 }
 
-/* Active ring */
 .abt-tc-img-active {
   border: 3px solid #96CA45;
   box-shadow: 0 0 0 5px rgba(150,202,69,0.18), 0 12px 38px rgba(0,0,0,0.16);
 }
 .abt-tc-img-inactive {
-  border: 2px solid rgba(150,202,69,0.25);
+  border: 2px solid rgba(150,202,69,0.22);
   box-shadow: 0 3px 14px rgba(0,0,0,0.10);
 }
 
-/* Detail panel below orbit */
+/* Detail panel */
 .abt-tc-detail {
   text-align: center;
-  margin-top: 29px;
+  margin-top: clamp(20px, 3vw, 32px);
   width: 100%;
-  max-width: 496px;
+  max-width: clamp(300px, 60vw, 560px);
+  padding: 0 16px;
 }
 
-/* Name fade/slide transition container */
-.abt-tc-fade-enter {
-  animation: abt-tc-fadein 0.45s cubic-bezier(0.25,1,0.22,1) both;
-}
 @keyframes abt-tc-fadein {
-  from { opacity:0; transform: translateY(14px); }
+  from { opacity:0; transform: translateY(12px); }
   to   { opacity:1; transform: translateY(0);    }
 }
 
-/* Dot progress indicators */
+/* Dot indicators */
 .abt-tc-dots {
   display: flex;
   gap: 6px;
   justify-content: center;
-  margin-top: 22px;
+  margin-top: clamp(16px, 2.5vw, 26px);
 }
 .abt-tc-dot {
-  width: 7px;
-  height: 7px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: #D0D5DD;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.3s ease, width 0.35s ease;
+  transition: background 0.3s ease, width 0.35s ease;
 }
 .abt-tc-dot.abt-tc-dot-active {
   background: #96CA45;
-  width: 19px;
+  width: 20px;
   border-radius: 4px;
-}
-
-/* Social icon buttons */
-.abt-tc-social {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 16px;
-}
-.abt-tc-soc-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid #D0D5DD;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
-  background: transparent;
-  text-decoration: none;
-}
-.abt-tc-soc-btn:hover {
-  border-color: #96CA45;
-  background: rgba(150,202,69,0.10);
-  transform: translateY(-2px);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .abt-tc-orbit { height: 168px; max-width: 560px; }
-}
-@media (max-width: 640px) {
-  .abt-tc-orbit { height: 144px; max-width: 100%; }
-  .abt-tc-detail { padding: 0 16px; }
 }
 
 /* ── FAQ premium accordion ── */
@@ -2182,40 +2135,51 @@ function CoreValuesSection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   §6  FACES BEHIND THE BRAND — premium circular carousel
+   §6  FACES BEHIND THE BRAND — responsive orbit carousel
 ══════════════════════════════════════════════════════════════════════════ */
 
-/* Slot sizes (px) per distance from center */
-const SLOT_SIZES   = [176, 124, 80];   // index 0 = center, 1 = ±1, 2 = ±2  (–20%)
-const SLOT_OPACITY = [1, 0.82, 0.55];
-// Horizontal centres relative to orbit midpoint (px)
-const SLOT_X = [0, 184, 328]; // ±distance for rank 1, rank 2  (–20%)
+/*
+  Responsive slot sizes as fractions of viewport width:
+    center:  clamp(120px, 15vw, 176px)
+    rank-1:  clamp( 84px, 10vw, 124px)
+    rank-2:  clamp( 52px,  7vw,  88px)
 
+  Horizontal offsets as % of orbit width so spacing scales with container:
+    rank-1: ±25%   rank-2: ±44%
+*/
 function TeamSection() {
   const rh = useReveal();
   const n = TEAM.length;
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [activeIdx, setActiveIdx]   = useState(0);
   const [displayIdx, setDisplayIdx] = useState(0);
-  const [textKey, setTextKey] = useState(0);   // forces re-mount for fade animation
-  const [isPaused, setIsPaused] = useState(false);
+  const [textKey, setTextKey]       = useState(0);
+  const [isPaused, setIsPaused]     = useState(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
-  const orbitRef = useRef<HTMLDivElement>(null);
 
-  /* Auto-rotate */
+  /* slot sizes calculated from live vw so they stay fluid */
+  const getSlotSize = (rank: number): number => {
+    if (typeof window === 'undefined') return [176, 124, 88][rank] ?? 52;
+    const vw = window.innerWidth;
+    const sizes = [
+      Math.round(Math.min(Math.max(vw * 0.15, 110), 176)),
+      Math.round(Math.min(Math.max(vw * 0.105, 78), 124)),
+      Math.round(Math.min(Math.max(vw * 0.072, 50), 88)),
+    ];
+    return sizes[rank] ?? sizes[sizes.length - 1];
+  };
+
+  /* x-offset as % of "50%" so it scales with any container width */
+  const RANK_OFFSET_PCT = [0, 25, 44]; // percent of half-width
+  const SLOT_OPACITY    = [1, 0.80, 0.48];
+
   useEffect(() => {
     if (isPaused) return;
-    const t = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % n);
-    }, 4000);
+    const t = setInterval(() => setActiveIdx(prev => (prev + 1) % n), 4000);
     return () => clearInterval(t);
   }, [isPaused, n]);
 
-  /* When activeIdx changes, update displayIdx after brief delay for text */
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDisplayIdx(activeIdx);
-      setTextKey(k => k + 1);
-    }, 200);
+    const t = setTimeout(() => { setDisplayIdx(activeIdx); setTextKey(k => k + 1); }, 200);
     return () => clearTimeout(t);
   }, [activeIdx]);
 
@@ -2229,29 +2193,28 @@ function TeamSection() {
 
   useEffect(() => () => { if (resumeTimer.current) clearTimeout(resumeTimer.current); }, []);
 
-  const member = TEAM[displayIdx];
-  // Split name into first + rest for two-color treatment
+  const member    = TEAM[displayIdx];
   const nameParts = member.name.replace(/^(Dr\.|Ms\.|Mr\.)\s*/, '').split(' ');
   const nameFirst = nameParts.slice(0, -1).join(' ') || nameParts[0];
   const nameLast  = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
 
   return (
-    <section style={{ background:'#fff', padding:'64px 32px 77px' }}>
-      <div style={{ maxWidth:896, margin:'0 auto', textAlign:'center' }}>
+    <section style={{ background: '#fff', padding: 'clamp(48px,6vw,80px) clamp(16px,4vw,40px) clamp(56px,7vw,88px)' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
 
         {/* Heading */}
-        <div ref={rh} className="abt-rv" style={{ marginBottom:38 }}>
-          <h2 className="abt-sh" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(26px,3.8vw,54px)', color:DARK, marginBottom:16 }}>
-            The Faces <span style={{ color:GREEN }}>Behind The Brand</span>
+        <div ref={rh} className="abt-rv" style={{ marginBottom: 'clamp(28px,4vw,48px)' }}>
+          <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(26px,3.8vw,54px)', color: DARK, marginBottom: 'clamp(12px,1.5vw,20px)', lineHeight: 1.2 }}>
+            The Faces <span style={{ color: GREEN }}>Behind The Brand</span>
           </h2>
-          <p style={{ fontFamily:FH, fontSize:'clamp(11px,1.0vw,14px)', lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#444', maxWidth:688, margin:'0 auto' }}>
+          <p style={{ fontFamily: FH, fontSize: 'clamp(13px,1.2vw,16px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#555', maxWidth: 680, margin: '0 auto' }}>
             T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique
             Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum
             Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
           </p>
         </div>
 
-        {/* Carousel orbit */}
+        {/* Orbit */}
         <div
           className="abt-tc-wrap"
           onMouseEnter={() => setIsPaused(true)}
@@ -2260,17 +2223,20 @@ function TeamSection() {
             resumeTimer.current = setTimeout(() => setIsPaused(false), 1200);
           }}
         >
-          <div className="abt-tc-orbit" ref={orbitRef}>
+          <div className="abt-tc-orbit">
             {TEAM.map((m, i) => {
-              // Compute signed distance from active (wraps around)
               let dist = ((i - activeIdx) % n + n) % n;
-              if (dist > n / 2) dist -= n; // range: -n/2 .. n/2
-              const absDist = Math.abs(dist);
-              const rank = Math.min(absDist, SLOT_SIZES.length - 1);
-              const size = SLOT_SIZES[rank];
-              const opacity = absDist >= SLOT_SIZES.length ? 0 : SLOT_OPACITY[rank];
-              const xOffset = dist === 0 ? 0 : (dist > 0 ? 1 : -1) * (SLOT_X[Math.min(absDist, SLOT_X.length - 1)]);
-              const zIndex = 10 - absDist * 2;
+              if (dist > n / 2) dist -= n;
+              const absDist  = Math.abs(dist);
+              /* show at most 2 slots each side of center */
+              const visible  = absDist <= 2;
+              const rank     = Math.min(absDist, 2);
+              const size     = getSlotSize(rank);
+              const opacity  = visible ? SLOT_OPACITY[rank] : 0;
+              const sign     = dist === 0 ? 0 : dist > 0 ? 1 : -1;
+              const pct      = RANK_OFFSET_PCT[rank]; // rank is already clamped to 0-2
+              const xLeft    = `calc(50% + ${sign * pct}%)`;
+              const zIndex   = visible ? 10 - absDist * 2 : -1;
               const isCenter = dist === 0;
 
               return (
@@ -2279,11 +2245,10 @@ function TeamSection() {
                   className="abt-tc-slot"
                   onClick={() => handleClick(i)}
                   style={{
-                    left: `calc(50% + ${xOffset}px)`,
-                    transform: `translateX(-50%)`,
+                    left: xLeft,
                     opacity,
-                    zIndex: absDist >= SLOT_SIZES.length ? -1 : zIndex,
-                    pointerEvents: opacity === 0 ? 'none' : 'auto',
+                    zIndex,
+                    pointerEvents: visible ? 'auto' : 'none',
                   }}
                 >
                   <div
@@ -2294,26 +2259,22 @@ function TeamSection() {
                       src={m.photo}
                       alt={m.name}
                       fill
-                      sizes={`${SLOT_SIZES[0]}px`}
+                      sizes="(max-width:640px) 30vw, (max-width:1024px) 20vw, 176px"
                       style={{
                         objectFit: 'cover',
-                        filter: isCenter ? 'none' : 'grayscale(60%)',
+                        filter: isCenter ? 'none' : 'grayscale(65%)',
                         transition: 'filter 0.72s ease',
                       }}
-                      onError={e => {
-                        // fallback gradient with initials
-                        const el = e.currentTarget as HTMLImageElement;
-                        el.style.opacity = '0';
-                      }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
                     />
-                    {/* Initials fallback overlay */}
+                    {/* Initials fallback */}
                     <div style={{
-                      position:'absolute', inset:0,
-                      background:`linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`,
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      zIndex:-1,
+                      position: 'absolute', inset: 0,
+                      background: `linear-gradient(135deg,${m.grad[0]},${m.grad[1]})`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      zIndex: -1,
                     }}>
-                      <span style={{ fontFamily:FM, fontSize: size * 0.22, fontWeight:700, color:'#fff' }}>{m.initials}</span>
+                      <span style={{ fontFamily: FM, fontSize: size * 0.22, fontWeight: 700, color: '#fff' }}>{m.initials}</span>
                     </div>
                   </div>
                 </div>
@@ -2321,42 +2282,21 @@ function TeamSection() {
             })}
           </div>
 
-          {/* Detail panel — re-keyed on textKey so React remounts it for fade-in animation */}
-          <div className="abt-tc-detail" style={{ animation:'abt-tc-fadein 0.45s cubic-bezier(0.25,1,0.22,1) both', animationDelay:'0s' }} data-key={textKey}>
-            {/* Name */}
-            <p style={{ fontFamily:FH, fontWeight:700, fontSize:'clamp(22px,2.5vw,36px)', color:DARK, lineHeight:'1.25', marginBottom:6 }}>
-              {nameFirst}{nameLast ? <span> <span style={{ color:GREEN }}>{nameLast}</span></span> : null}
+          {/* Detail panel — key forces remount for fade animation */}
+          <div
+            key={textKey}
+            className="abt-tc-detail"
+            style={{ animation: 'abt-tc-fadein 0.42s cubic-bezier(0.25,1,0.22,1) both' }}
+          >
+            <p style={{ fontFamily: FH, fontWeight: 700, fontSize: 'clamp(20px,2.4vw,34px)', color: DARK, lineHeight: 1.25, marginBottom: 'clamp(4px,0.5vw,8px)' }}>
+              {nameFirst}{nameLast ? <> <span style={{ color: GREEN }}>{nameLast}</span></> : null}
             </p>
-            {/* Role */}
-            <p style={{ fontFamily:FH, fontSize:'clamp(13px,1.1vw,16px)', color:'#9F9F9F', fontWeight:400, letterSpacing:'0.03em', marginBottom:18, textTransform:'uppercase' }}>
+            <p style={{ fontFamily: FH, fontSize: 'clamp(12px,1.1vw,15px)', color: '#9F9F9F', fontWeight: 400, letterSpacing: '0.06em', marginBottom: 'clamp(12px,1.5vw,20px)', textTransform: 'uppercase' }}>
               {member.role}
             </p>
-            {/* Bio */}
-            <p style={{ fontFamily:FH, fontSize:'clamp(13px,1.1vw,16px)', lineHeight:'1.7', color:'#444', maxWidth:580, margin:'0 auto 0', textAlign:'center' }}>
+            <p style={{ fontFamily: FH, fontSize: 'clamp(13px,1.1vw,16px)', lineHeight: '1.72', color: '#444', margin: '0 auto', textAlign: 'center' }}>
               {member.bio}
             </p>
-
-            {/* Social icons */}
-            <div className="abt-tc-social">
-              {/* Instagram */}
-              <a href={member.social.ig} className="abt-tc-soc-btn" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                  <rect x={2} y={2} width={20} height={20} rx={5}/><circle cx={12} cy={12} r={4}/><circle cx={17.5} cy={6.5} r={0.1} strokeWidth={3}/>
-                </svg>
-              </a>
-              {/* Facebook */}
-              <a href={member.social.fb} className="abt-tc-soc-btn" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                </svg>
-              </a>
-              {/* X / Twitter */}
-              <a href={member.social.tw} className="abt-tc-soc-btn" aria-label="X" target="_blank" rel="noopener noreferrer">
-                <svg width={18} height={18} viewBox="0 0 24 24" fill={DARK}>
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </a>
-            </div>
           </div>
 
           {/* Progress dots */}
