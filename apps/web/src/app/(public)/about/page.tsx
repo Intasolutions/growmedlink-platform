@@ -723,23 +723,24 @@ const STYLES = `
 
 .abt-mv-container {
   display: flex;
-  gap: 8%;
+  gap: 5%;
   align-items: stretch;
   position: relative;
 }
 .abt-mv-left {
-  flex: 1.1;
+  flex: 1;
   min-width: 0;
   position: relative;
   z-index: 2;
 }
 .abt-mv-right {
-  flex: 0.9;
+  flex: 1.1;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   position: relative;
   z-index: 1;
+  padding-left: 20px;
 }
 .abt-mv-avatars {
   position: absolute;
@@ -755,17 +756,18 @@ const STYLES = `
 @media (max-width: 1024px) {
   .abt-mv-container {
     flex-direction: column;
-    gap: 60px;
+    gap: 72px;
     align-items: center;
   }
   .abt-mv-left {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
   }
   .abt-mv-right {
     width: 100%;
-    max-width: 460px;
-    justify-content: center;
+    max-width: 540px;
+    justify-content: flex-start;
+    padding-left: 40px;
   }
   .abt-mv-avatars {
     position: relative;
@@ -778,6 +780,12 @@ const STYLES = `
   }
   .abt-mv-divider-v, .abt-mv-divider-h {
     display: none !important;
+  }
+}
+@media (max-width: 640px) {
+  .abt-mv-right {
+    padding-left: 16px;
+    max-width: 100%;
   }
 }
 
@@ -1085,18 +1093,290 @@ function HeroSection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   §2  MISSION / VISION — staggered reveals + image wipe
+   §2  MISSION / VISION — left text + right GSAP collage
+   Default:  circle portrait (top-left) + small rounded-rect (top-right overlapping)
+             + large main rect image below
+   Hover Ph1: morph each image to its next position (translate + border-radius)
+   Hover Ph2: green overlay + scale-down + #1 badge on main image
+   Hover Ph3: new rotated cards slide up from below with stagger
 ══════════════════════════════════════════════════════════════════════════ */
+function ShelfCollage({ vis }: { vis: boolean }) {
+  const wrapRef    = useRef<HTMLDivElement>(null);
+  /* phase-1 elements */
+  const circleRef  = useRef<HTMLDivElement>(null);
+  const rectRef    = useRef<HTMLDivElement>(null);
+  /* phase-2 elements */
+  const mainRef    = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const badgeRef   = useRef<HTMLDivElement>(null);
+  /* phase-3 elements */
+  const card3aRef  = useRef<HTMLDivElement>(null);
+  const card3bRef  = useRef<HTMLDivElement>(null);
+
+  const hoveredRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tlRef      = useRef<any>(null);
+
+  /* set initial hidden state for phase-3 cards */
+  useEffect(() => {
+    import('gsap').then(({ gsap }) => {
+      if (overlayRef.current) gsap.set(overlayRef.current, { opacity: 0 });
+      if (badgeRef.current)   gsap.set(badgeRef.current,   { opacity: 0, y: 18 });
+      if (card3aRef.current)  gsap.set(card3aRef.current,  { opacity: 0, y: 120, rotation: -6, scale: 0.9 });
+      if (card3bRef.current)  gsap.set(card3bRef.current,  { opacity: 0, y: 140, rotation: 7,  scale: 0.9 });
+    });
+  }, []);
+
+  const onEnter = async () => {
+    if (hoveredRef.current) return;
+    hoveredRef.current = true;
+    const { gsap } = await import('gsap');
+
+    if (tlRef.current) tlRef.current.kill();
+
+    const tl = gsap.timeline();
+    tlRef.current = tl;
+
+    /* ── Phase 1: morph top images to new positions ── */
+    tl.to(circleRef.current, {
+      x: -10, y: 8, scale: 0.88,
+      borderRadius: '22px',
+      duration: 0.6, ease: 'power3.inOut',
+    }, 0);
+    tl.to(rectRef.current, {
+      x: 6, y: 12, scale: 0.92,
+      borderRadius: '50%',
+      duration: 0.6, ease: 'power3.inOut',
+    }, 0);
+
+    /* ── Phase 2: green overlay + scale main + badge ── */
+    tl.to(overlayRef.current, { opacity: 1, duration: 0.45, ease: 'power2.out' }, 0.15);
+    tl.to(mainRef.current,    { scale: 0.96, duration: 0.55, ease: 'power2.out' }, 0.15);
+    tl.to(badgeRef.current,   { opacity: 1, y: 0, duration: 0.42, ease: 'back.out(1.4)' }, 0.32);
+
+    /* ── Phase 3: new cards slide up from below ── */
+    tl.to(card3aRef.current, {
+      opacity: 1, y: 0, rotation: 0, scale: 1,
+      boxShadow: '0 16px 48px rgba(0,0,0,0.22)',
+      duration: 0.58, ease: 'power3.out',
+    }, 0.38);
+    tl.to(card3bRef.current, {
+      opacity: 1, y: 0, rotation: 0, scale: 1,
+      boxShadow: '0 20px 56px rgba(0,0,0,0.18)',
+      duration: 0.58, ease: 'power3.out',
+    }, 0.52);
+  };
+
+  const onLeave = async () => {
+    if (!hoveredRef.current) return;
+    hoveredRef.current = false;
+    const { gsap } = await import('gsap');
+
+    if (tlRef.current) tlRef.current.kill();
+
+    const tl = gsap.timeline();
+    tlRef.current = tl;
+
+    /* reverse phase 3 first */
+    tl.to([card3aRef.current, card3bRef.current], {
+      opacity: 0, y: 120, rotation: (i) => i === 0 ? -6 : 7, scale: 0.9,
+      duration: 0.38, ease: 'power2.in', stagger: 0.06,
+    }, 0);
+
+    /* reverse phase 2 */
+    tl.to(badgeRef.current,   { opacity: 0, y: 18, duration: 0.28, ease: 'power2.in' }, 0.06);
+    tl.to(overlayRef.current, { opacity: 0, duration: 0.32, ease: 'power2.in' }, 0.1);
+    tl.to(mainRef.current,    { scale: 1,   duration: 0.45, ease: 'power3.out' }, 0.12);
+
+    /* reverse phase 1 */
+    tl.to(circleRef.current, {
+      x: 0, y: 0, scale: 1,
+      borderRadius: '50%',
+      duration: 0.52, ease: 'power3.inOut',
+    }, 0.1);
+    tl.to(rectRef.current, {
+      x: 0, y: 0, scale: 1,
+      borderRadius: '18px',
+      duration: 0.52, ease: 'power3.inOut',
+    }, 0.1);
+  };
+
+  return (
+    <div
+      ref={wrapRef}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      style={{
+        position: 'relative',
+        width: 'clamp(300px,46vw,480px)',
+        userSelect: 'none',
+        cursor: 'default',
+      }}
+    >
+      {/* ── Top row: circle (left) + rounded-rect (right, overlapping) ── */}
+      <div
+        className={`abt-ms${vis ? ' abt-in' : ''}`}
+        style={{
+          position: 'relative',
+          height: 'clamp(150px,18vw,210px)',
+          marginBottom: 12,
+          zIndex: 2,
+        }}
+      >
+        {/* Circle portrait */}
+        <div
+          ref={circleRef}
+          style={{
+            position: 'absolute',
+            left: 0, top: '50%',
+            transform: 'translateY(-50%)',
+            width: 'clamp(130px,16vw,175px)',
+            height: 'clamp(130px,16vw,175px)',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '4px solid #fff',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.18)',
+            zIndex: 3,
+            willChange: 'transform, border-radius',
+          }}
+        >
+          <Image src="/about/1.jpg" alt="" fill style={{ objectFit: 'cover' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+        </div>
+
+        {/* Rounded-rect portrait — overlaps right side of circle */}
+        <div
+          ref={rectRef}
+          style={{
+            position: 'absolute',
+            left: 'clamp(96px,12vw,128px)',
+            top: 0,
+            width: 'clamp(118px,15vw,160px)',
+            height: 'clamp(150px,18vw,205px)',
+            borderRadius: 18,
+            overflow: 'hidden',
+            border: '4px solid #fff',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.14)',
+            zIndex: 2,
+            willChange: 'transform, border-radius',
+          }}
+        >
+          <Image src="/about/3.jpg" alt="" fill style={{ objectFit: 'cover' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+        </div>
+      </div>
+
+      {/* ── Main large image ── */}
+      <div
+        className={`abt-ms abt-d1${vis ? ' abt-in' : ''}`}
+        style={{ position: 'relative', zIndex: 1 }}
+      >
+        <div
+          ref={mainRef}
+          style={{
+            width: '100%',
+            height: 'clamp(240px,32vw,380px)',
+            borderRadius: 20,
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.14)',
+            willChange: 'transform',
+          }}
+        >
+          <Image src="/about/5.jpg" alt="Mission & Vision" fill style={{ objectFit: 'cover' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+
+          {/* Green overlay — fades in on hover */}
+          <div
+            ref={overlayRef}
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(150,202,69,0.38)',
+              zIndex: 2,
+              willChange: 'opacity',
+            }}
+          />
+
+          {/* #1 badge */}
+          <div
+            ref={badgeRef}
+            style={{
+              position: 'absolute',
+              left: '50%', top: '50%',
+              transform: 'translate(-50%,-50%)',
+              zIndex: 3,
+              fontFamily: FH,
+              fontSize: 'clamp(52px,8vw,88px)',
+              fontWeight: 700,
+              color: '#fff',
+              letterSpacing: '-0.04em',
+              textShadow: '0 4px 24px rgba(0,0,0,0.32)',
+              willChange: 'transform, opacity',
+            }}
+          >
+            #1
+          </div>
+        </div>
+      </div>
+
+      {/* ── Phase-3 cards (hidden until hover, slide up from below) ── */}
+      {/* Card A — left, behind */}
+      <div
+        ref={card3aRef}
+        style={{
+          position: 'absolute',
+          bottom: -10,
+          left: -16,
+          width: 'clamp(170px,22vw,250px)',
+          height: 'clamp(195px,26vw,290px)',
+          borderRadius: 18,
+          overflow: 'hidden',
+          zIndex: 4,
+          willChange: 'transform, opacity, box-shadow',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        }}
+      >
+        <Image src="/about/7.jpg" alt="" fill style={{ objectFit: 'cover' }}
+          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+        {/* subtle green tint on this card too */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(150,202,69,0.28)', zIndex: 2 }} />
+      </div>
+
+      {/* Card B — right, in front, rotated */}
+      <div
+        ref={card3bRef}
+        style={{
+          position: 'absolute',
+          bottom: -28,
+          right: -20,
+          width: 'clamp(148px,19vw,220px)',
+          height: 'clamp(200px,26vw,300px)',
+          borderRadius: 18,
+          overflow: 'hidden',
+          zIndex: 5,
+          willChange: 'transform, opacity, box-shadow',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+        }}
+      >
+        <Image src="/about/9.jpg" alt="" fill style={{ objectFit: 'cover' }}
+          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+      </div>
+
+      {/* Wave dots decoration */}
+      <div style={{ position: 'absolute', bottom: '-44px', right: '-28px', zIndex: 0, pointerEvents: 'none' }}>
+        <WaveDots />
+      </div>
+    </div>
+  );
+}
+
 function MissionVision() {
   const secRef = useRef<HTMLDivElement>(null);
   const [vis, setVis] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        setVis(true);
-        obs.disconnect();
-      }
+      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
     }, { threshold: 0.08 });
     if (secRef.current) obs.observe(secRef.current);
     return () => obs.disconnect();
@@ -1110,8 +1390,8 @@ function MissionVision() {
       style={{
         background: '#fff',
         position: 'relative',
-        overflow: 'hidden',
-        padding: '80px 0 96px'
+        overflow: 'visible',
+        padding: 'clamp(60px,8vw,80px) 0 clamp(180px,24vw,220px)',
       }}
     >
       {/* centre dividers */}
@@ -1123,7 +1403,7 @@ function MissionVision() {
 
           {/* Left Column - Text Content */}
           <div className="abt-mv-left">
-            
+
             {/* OUR MISSION */}
             <div style={{ marginBottom: '64px' }}>
               <h2
@@ -1135,7 +1415,7 @@ function MissionVision() {
                   letterSpacing: '-0.03em',
                   color: DARK,
                   lineHeight: '1.2',
-                  marginBottom: '24px'
+                  marginBottom: '24px',
                 }}
               >
                 OUR <span style={{ color: GREEN, fontWeight: 700 }}>MISSION</span>
@@ -1147,7 +1427,7 @@ function MissionVision() {
                   fontSize: 'clamp(14px, 1.5vw, 16px)',
                   lineHeight: '1.7',
                   color: '#252525',
-                  maxWidth: '416px'
+                  maxWidth: '416px',
                 }}
               >
                 T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
@@ -1162,10 +1442,9 @@ function MissionVision() {
                 height: '64px',
                 margin: '16px 0 48px 32px',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
-              {/* Curly arrow pointing down-left from text to OUR VISION */}
               <div style={{ position: 'absolute', left: '-36px', top: '5px' }}>
                 <Image
                   src="/red-curly-arrow.png"
@@ -1184,7 +1463,7 @@ function MissionVision() {
                   whiteSpace: 'nowrap',
                   marginLeft: '16px',
                   transform: 'rotate(-3deg)',
-                  display: 'inline-block'
+                  display: 'inline-block',
                 }}
               >
                 See How Its Work!
@@ -1202,7 +1481,7 @@ function MissionVision() {
                   letterSpacing: '-0.03em',
                   color: DARK,
                   lineHeight: '1.2',
-                  marginBottom: '24px'
+                  marginBottom: '24px',
                 }}
               >
                 OUR <span style={{ color: BLUE, fontWeight: 700 }}>VISION</span>
@@ -1214,7 +1493,7 @@ function MissionVision() {
                   fontSize: 'clamp(14px, 1.5vw, 16px)',
                   lineHeight: '1.7',
                   color: '#252525',
-                  maxWidth: '416px'
+                  maxWidth: '416px',
                 }}
               >
                 T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
@@ -1223,89 +1502,9 @@ function MissionVision() {
 
           </div>
 
-          {/* Right Column - Large Simulation Image */}
-          <div className="abt-mv-right">
-            
-            {/* Simulation image container with reveal and Ken Burns animations */}
-            <div
-              className={`abt-ms-img${v ? ' abt-in' : ''}`}
-              style={{
-                width: '100%',
-                maxWidth: '368px',
-                height: 'clamp(320px, 36vw, 464px)',
-                position: 'relative',
-                boxShadow: '0 20px 48px rgba(0,0,0,0.12)',
-                borderRadius: 24,
-                overflow: 'hidden'
-              }}
-            >
-              <div className="abt-ms-img-inner" style={{ width: '100%', height: '100%', position: 'relative' }}>
-                <Image
-                  src="/about/14.jpg"
-                  alt="Our Mission & Vision"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-                />
-              </div>
-            </div>
-
-            {/* Green Dots Wave at bottom-right corner */}
-            <div style={{ position: 'absolute', bottom: '-40px', right: '-40px', zIndex: 0 }}>
-              <WaveDots />
-            </div>
-
-          </div>
-
-          {/* Central Overlapping Avatars (circle + rounded rect) */}
-          <div
-            className={`abt-mv-avatars abt-ms abt-d2${v ? ' abt-in' : ''}`}
-          >
-            {/* Circle Avatar (Left) */}
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                width: '96px',
-                height: '96px',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '5px solid #fff',
-                boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
-                background: '#e0e0e0'
-              }}
-            >
-              <Image
-                src="/about/1.jpg"
-                alt=""
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-
-            {/* Rounded Rect Avatar (Right, overlaps circle) */}
-            <div
-              style={{
-                position: 'absolute',
-                right: 0,
-                bottom: 0,
-                width: '96px',
-                height: '96px',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                border: '5px solid #fff',
-                boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
-                background: '#dcdcdc'
-              }}
-            >
-              <Image
-                src="/about/2.jpg"
-                alt=""
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
+          {/* Right Column — Shelf-opener image collage */}
+          <div className="abt-mv-right" style={{ overflow: 'visible' }}>
+            <ShelfCollage vis={v} />
           </div>
 
         </div>
@@ -1520,6 +1719,121 @@ function LogoRenderer({ name, src }: { name: string; src: string }) {
   );
 }
 
+function CertHoverCard() {
+  const cardRef   = useRef<HTMLDivElement>(null);
+  const circleRef = useRef<HTMLDivElement>(null);
+  const hoveredRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tlRef = useRef<any>(null);
+
+  useEffect(() => {
+    import('gsap').then(({ gsap }) => {
+      /* default state — small, straight */
+      gsap.set(cardRef.current,   { width: 160, height: 104, rotation: 0, scale: 1, transformOrigin: 'center center' });
+      gsap.set(circleRef.current, { scale: 0.55, opacity: 0.7, x: 30, y: 20 });
+    });
+  }, []);
+
+  const onEnter = async () => {
+    if (hoveredRef.current) return;
+    hoveredRef.current = true;
+    const { gsap } = await import('gsap');
+    if (tlRef.current) tlRef.current.kill();
+    const tl = gsap.timeline();
+    tlRef.current = tl;
+    /* enlarge card with tilt */
+    tl.to(cardRef.current, {
+      width: 'clamp(260px,32vw,380px)',
+      height: 'clamp(340px,42vw,500px)',
+      rotation: -8,
+      scale: 1,
+      boxShadow: '0 32px 80px rgba(0,0,0,0.28)',
+      duration: 0.65, ease: 'power3.out',
+    }, 0);
+    /* green circle blooms behind card */
+    tl.to(circleRef.current, {
+      scale: 1, opacity: 1, x: 60, y: -20,
+      duration: 0.65, ease: 'power3.out',
+    }, 0);
+  };
+
+  const onLeave = async () => {
+    if (!hoveredRef.current) return;
+    hoveredRef.current = false;
+    const { gsap } = await import('gsap');
+    if (tlRef.current) tlRef.current.kill();
+    const tl = gsap.timeline();
+    tlRef.current = tl;
+    tl.to(cardRef.current, {
+      width: 160, height: 104, rotation: 0,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.14)',
+      duration: 0.5, ease: 'power3.inOut',
+    }, 0);
+    tl.to(circleRef.current, {
+      scale: 0.55, opacity: 0.7, x: 30, y: 20,
+      duration: 0.5, ease: 'power3.inOut',
+    }, 0);
+  };
+
+  return (
+    <div
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        /* reserve enough room so the enlarged card doesn't shift layout */
+        width: 'clamp(300px,38vw,440px)',
+        height: 'clamp(380px,48vw,560px)',
+        cursor: 'default',
+      }}
+    >
+      {/* green blob circle — sits behind card */}
+      <div
+        ref={circleRef}
+        style={{
+          position: 'absolute',
+          width: 'clamp(200px,26vw,320px)',
+          height: 'clamp(200px,26vw,320px)',
+          borderRadius: '50%',
+          background: GREEN,
+          zIndex: 1,
+          willChange: 'transform, opacity',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* photo card */}
+      <div
+        ref={cardRef}
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          width: 160,
+          height: 104,
+          borderRadius: 20,
+          overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.14)',
+          background: '#ddd',
+          willChange: 'transform, width, height, box-shadow',
+          flexShrink: 0,
+        }}
+      >
+        <Image
+          src="/about/4.jpg"
+          alt="Trusted Partner"
+          fill
+          sizes="(max-width:768px) 260px, 380px"
+          style={{ objectFit: 'cover', objectPosition: 'top center' }}
+          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function CertificationSection() {
   const rh = useReveal();
   const sunburstRef = useRef<HTMLDivElement>(null);
@@ -1645,26 +1959,8 @@ function CertificationSection() {
               MORE !
             </div>
 
-            {/* Centerpiece Image Card */}
-            <div style={{
-              position:'relative',
-              zIndex:10,
-              width:280,
-              height:180,
-              borderRadius:20,
-              overflow:'hidden',
-              background:'linear-gradient(135deg,#155BA9,#0a3d7a)',
-              boxShadow:'0 20px 48px rgba(0,0,0,0.18)',
-            }}>
-              <Image
-                src="/about/4.jpg"
-                alt="Trusted Partner"
-                fill
-                sizes="280px"
-                style={{ objectFit:'cover' }}
-                onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-              />
-            </div>
+            {/* Centerpiece Image Card — small default, enlarges+tilts on hover */}
+            <CertHoverCard />
 
             {/* Handwritten callout pointing to the photo */}
             <div
