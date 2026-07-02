@@ -118,7 +118,7 @@ const STYLES = `
 }
 
 /* ── arch carousel ── */
-.abt-arch { position:relative; height:clamp(180px,28vw,340px); overflow:hidden; cursor:grab; user-select:none; }
+.abt-arch { position:relative; height:clamp(200px,32vw,380px); overflow:hidden; cursor:grab; user-select:none; }
 .abt-arch:active { cursor:grabbing; }
 
 /* ── mission stagger ── */
@@ -649,28 +649,41 @@ function BracketIcon({ size = '100%' }: { size?: string }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   ARCH CAROUSEL — GSAP ticker, fully responsive radius/card size
+   ARCH CAROUSEL — static arch, cards scroll along the curve
+   Cards are fixed at positions on the top arc of a large off-screen circle.
+   Only the offset angle animates, sliding items through the visible window.
 ══════════════════════════════════════════════════════════════════════════ */
 function ArchCarousel() {
-  const wrapRef   = useRef<HTMLDivElement>(null);
-  const pivotRef  = useRef<HTMLDivElement>(null);
-  const cardRefs  = useRef<(HTMLDivElement | null)[]>([]);
-  const angleRef  = useRef(-75);
-  const velRef    = useRef(0.02);
+  const wrapRef  = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const offsetRef = useRef(0);   // current scroll offset in degrees
+  const velRef    = useRef(0.18); // auto-scroll speed deg/frame
   const isDrag    = useRef(false);
   const lastX     = useRef(0);
-  const STEP      = 360 / ARCH_ITEMS.length;
+  const N = ARCH_ITEMS.length;
 
-  /* read responsive values from live DOM */
+  /*
+   * Arc geometry:
+   *  - imaginary circle has its centre BELOW the container
+   *  - only the top arc is visible; cards sit on that arc
+   *  - offsetRef is a continuous value that shifts all card angles together
+   *  - STEP_DEG = angular gap between cards; visHalf = half the visible arc window
+   */
+  const STEP_DEG = 11; // degrees between adjacent cards
+  const VIS_HALF = 38; // cards within ±38° of top are visible (≈ 7 cards max)
+
   const getDims = () => {
-    const vw     = window.innerWidth;
-    const contH  = wrapRef.current ? wrapRef.current.offsetHeight : Math.min(400, vw * 0.38);
-    const radius = Math.round(Math.max(360, vw * 0.78));
-    /* push centre of circle down so the top arc sits nicely inside contH */
-    const ctrDy  = Math.round(contH * 0.18 + radius * 0.82);
-    const cardW  = Math.round(Math.min(Math.max(120, vw * 0.23), 297));
-    const cardH  = Math.round(cardW * 0.72);
-    return { contH, radius, ctrDy, cardW, cardH };
+    const vw    = window.innerWidth;
+    const contH = wrapRef.current ? wrapRef.current.offsetHeight : Math.round(vw * 0.25);
+    // Radius large enough that the top arc spans the full container width
+    const radius = Math.round(Math.max(520, vw * 0.85));
+    // Circle centre Y: apex of arc sits at ~22% from top of container
+    // cy_apex = ctrY - radius  =>  ctrY = apex_y + radius
+    const apexY  = Math.round(contH * 0.22);
+    const ctrY   = apexY + radius;
+    const cardW  = Math.round(Math.min(Math.max(110, vw * 0.19), 260));
+    const cardH  = Math.round(cardW * 0.70);
+    return { radius, ctrY, cardW, cardH };
   };
 
   useEffect(() => {
@@ -680,49 +693,60 @@ function ArchCarousel() {
     import('gsap').then(({ gsap }) => {
       gsapInst = gsap;
 
-      /* set initial card sizes from DOM */
-      const applyCardSizes = () => {
-        const { cardW, cardH, radius } = getDims();
+      const render = () => {
+        const wrap = wrapRef.current;
+        if (!wrap) return;
+        const { radius, ctrY, cardW, cardH } = getDims();
+        const ctrX = wrap.offsetWidth / 2;
+
         cardRefs.current.forEach((card, i) => {
           if (!card) return;
-          card.style.width  = cardW + 'px';
-          card.style.height = cardH + 'px';
-          card.style.transform = `rotate(${i * STEP}deg) translateY(${-radius}px) translate(-50%,-50%)`;
-        });
-        if (pivotRef.current) {
-          const { contH, ctrDy } = getDims();
-          pivotRef.current.style.top = (contH + ctrDy) + 'px';
-        }
-      };
 
-      applyCardSizes();
-      window.addEventListener('resize', applyCardSizes, { passive: true });
+          // Each card has a base angle: card i sits at i * STEP_DEG degrees
+          // offsetRef shifts all cards together (continuous scroll)
+          // fromTop = 0 → card is at the very top of the circle
+          // Wrap angle into -180..+180 range
+          let fromTop = (i * STEP_DEG + offsetRef.current) % 360;
+          if (fromTop >  180) fromTop -= 360;
+          if (fromTop < -180) fromTop += 360;
+
+          const radA = (fromTop * Math.PI) / 180;
+          // Top of circle = ctrY - radius (straight up, sin=0, cos=1)
+          const cx = ctrX + radius * Math.sin(radA);
+          const cy = ctrY - radius * Math.cos(radA);
+
+          const absOff = Math.abs(fromTop);
+          // Full opacity in inner 60% of window, fade to 0 at edge
+          const alpha = Math.max(0, Math.min(1, 1 - (absOff - VIS_HALF * 0.55) / (VIS_HALF * 0.45)));
+
+          // Tilt cards along the tangent of the arc
+          const tiltDeg = fromTop * 0.5;
+
+          card.style.width      = cardW + 'px';
+          card.style.height     = cardH + 'px';
+          card.style.left       = cx + 'px';
+          card.style.top        = cy + 'px';
+          card.style.transform  = `translate(-50%, -50%) rotate(${tiltDeg}deg)`;
+          card.style.opacity    = absOff > VIS_HALF ? '0' : String(Math.round(alpha * 100) / 100);
+          card.style.visibility = absOff > VIS_HALF ? 'hidden' : 'visible';
+          card.style.zIndex     = String(Math.round((1 - absOff / VIS_HALF) * 10));
+        });
+      };
 
       ticker = gsap.ticker.add(() => {
         if (!isDrag.current) {
-          velRef.current = velRef.current * 0.993 + 0.02 * 0.007;
-          angleRef.current += velRef.current;
+          offsetRef.current -= velRef.current;
         } else {
-          velRef.current *= 0.96;
+          velRef.current *= 0.92; // decelerate drag momentum
         }
-        angleRef.current = angleRef.current % 360;
-
-        if (pivotRef.current) {
-          pivotRef.current.style.transform = `rotate(${angleRef.current}deg)`;
-        }
-
-        cardRefs.current.forEach((card, i) => {
-          if (!card) return;
-          let cardAngle = (angleRef.current + i * STEP) % 360;
-          if (cardAngle > 180)  cardAngle -= 360;
-          if (cardAngle < -180) cardAngle += 360;
-          const alpha = Math.max(0, Math.min(1, (75 - Math.abs(cardAngle)) / 25));
-          card.style.opacity    = String(alpha);
-          card.style.visibility = alpha === 0 ? 'hidden' : 'visible';
-        });
+        render();
       });
 
-      return () => window.removeEventListener('resize', applyCardSizes);
+      const onResize = () => render();
+      window.addEventListener('resize', onResize, { passive: true });
+      render();
+
+      return () => window.removeEventListener('resize', onResize);
     });
 
     return () => {
@@ -738,9 +762,11 @@ function ArchCarousel() {
   const onMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrag.current) return;
     const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    velRef.current  = (cx - lastX.current) * 0.055;
-    angleRef.current += velRef.current;
-    lastX.current   = cx;
+    const dx = cx - lastX.current;
+    const degPerPx = STEP_DEG / 80; // ~1 card per 80px drag
+    offsetRef.current += dx * degPerPx;
+    velRef.current     = dx * degPerPx * 0.5;
+    lastX.current      = cx;
   };
   const onUp = () => { isDrag.current = false; };
 
@@ -750,30 +776,28 @@ function ArchCarousel() {
       className="abt-arch"
       onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp}
       onTouchStart={onDown} onTouchMove={onMove} onTouchEnd={onUp}
+      style={{ touchAction: 'pan-y' }}
     >
-      <div ref={pivotRef} style={{ position: 'absolute', left: '50%', transformOrigin: 'center center', willChange: 'transform' }}>
-        {ARCH_ITEMS.map((item, i) => (
-          <div
-            key={i}
-            ref={el => { cardRefs.current[i] = el; }}
-            style={{
-              position: 'absolute', left: 0, top: 0,
-              borderWidth: 'clamp(2px,0.4vw,4.5px) clamp(2px,0.4vw,4.5px) clamp(12px,1.8vw,28px) clamp(2px,0.4vw,4.5px)',
-              borderStyle: 'solid', borderColor: item.border,
-              borderRadius: 'clamp(6px,0.8vw,10px)', overflow: 'hidden',
-              transformOrigin: 'center center',
-              background: ARCH_COLORS[i % ARCH_COLORS.length],
-              willChange: 'transform, opacity',
-              pointerEvents: 'none',
-              opacity: 0,
-            }}
-          >
-            <Image src={item.src} alt="" fill sizes="(max-width:640px) 40vw, (max-width:1024px) 28vw, 297px"
-              style={{ objectFit: 'cover' }}
-              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
-          </div>
-        ))}
-      </div>
+      {ARCH_ITEMS.map((item, i) => (
+        <div
+          key={i}
+          ref={el => { cardRefs.current[i] = el; }}
+          style={{
+            position: 'absolute',
+            borderWidth: 'clamp(2px,0.35vw,4px) clamp(2px,0.35vw,4px) clamp(10px,1.5vw,22px) clamp(2px,0.35vw,4px)',
+            borderStyle: 'solid', borderColor: item.border,
+            borderRadius: 'clamp(6px,0.7vw,9px)', overflow: 'hidden',
+            background: ARCH_COLORS[i % ARCH_COLORS.length],
+            willChange: 'transform, opacity',
+            pointerEvents: 'none',
+            opacity: 0, visibility: 'hidden',
+          }}
+        >
+          <Image src={item.src} alt="" fill sizes="(max-width:640px) 35vw, (max-width:1024px) 25vw, 260px"
+            style={{ objectFit: 'cover' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+        </div>
+      ))}
     </div>
   );
 }
