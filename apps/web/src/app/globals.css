@@ -118,27 +118,6 @@
   will-change: transform;
 }
 
-/* Wipe overlay — covers image, slides away when .revealed is added */
-.why-img-wrap::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: #F0F0F0;
-  z-index: 2;
-  transform-origin: right center;
-  transform: scaleX(1);
-  transition: transform 1.15s cubic-bezier(0.77,0,0.175,1) 0.05s;
-  will-change: transform;
-}
-.why-img-wrap.revealed::after { transform: scaleX(0); }
-
-/* Ken Burns on the img */
-.why-img-wrap img {
-  transform: scale(1.08);
-  transition: transform 1.8s cubic-bezier(.22,.68,0,1.05) 0.05s;
-  will-change: transform;
-}
-.why-img-wrap.revealed img { transform: scale(1); }
 
 .step-icon-wrap {
   width: 100%;
@@ -173,33 +152,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .why-img-wrap::after,
-  .why-img-wrap img,
   .step-icon-wrap { transition-duration: 0.01ms !important; }
 }
 
-/* ── ReviewsSection ── */
-@keyframes rvs-dot-wave {
-  0%, 100% { transform: translateY(0px);  }
-  45%       { transform: translateY(-9px); }
-  55%       { transform: translateY(-7px); }
-}
-@keyframes rvs-globe-breathe {
-  0%, 100% { transform: translateX(-50%) scale(1);    }
-  50%       { transform: translateX(-50%) scale(1.04); }
-}
-@keyframes rvs-btn-pulse {
-  0%, 100% { box-shadow: 0 0 0 0    rgba(150,202,69,0.5); }
-  50%       { box-shadow: 0 0 0 10px rgba(150,202,69,0);   }
-}
-@keyframes rvs-bar-draw {
-  from { transform: scaleX(0.05); opacity: 0.3; }
-  to   { transform: scaleX(1);    opacity: 1;   }
-}
-@keyframes rvs-strip-slide {
-  from { transform: translateY(-110%); }
-  to   { transform: translateY(0);     }
-}
 
 /* ── Navbar logo carousel ── */
 @keyframes navbar-logo-in-left {

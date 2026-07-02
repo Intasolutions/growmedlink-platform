@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { Plus, X, Star, Check, MessageSquare } from 'lucide-react';
+import gsap from 'gsap';
 
 interface ReviewItem {
   _id: string;
@@ -26,211 +27,143 @@ const FALLBACK: ReviewItem[] = [
 
 const AUTO_MS = 6000;
 
-/* ─── Styles live outside the component so React never re-creates the string ─── */
-/* Keyframes (rvs-dot-wave, rvs-globe-breathe, rvs-btn-pulse, rvs-bar-draw,
-   rvs-strip-slide) are defined once in globals.css. */
-
+/* Layout-only styles — no CSS animation/transition on animated elements */
 const STYLES = `
-  /* ══════════════════════════════════════════════════════════════════
-     ALL RULES SCOPED UNDER .rvs-section
-     This prevents every selector from leaking into other components.
-  ══════════════════════════════════════════════════════════════════ */
-
-  /* ── wrapper ────────────────────────────────────────────────────── */
-  .rvs-section { background: #fff; padding: 40px 0 60px; }
-  .rvs-section .rvs-outer {
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 24px; position: relative;
+  /* dot pulse-ring keyframe */
+  @keyframes rvs-dot-ring {
+    0%   { box-shadow: 0 0 0 0px rgba(150,202,69,0.7); }
+    70%  { box-shadow: 0 0 0 7px rgba(150,202,69,0);   }
+    100% { box-shadow: 0 0 0 0px rgba(150,202,69,0);   }
   }
 
-  /* ── green wave dots ─────────────────────────────────────────────
-     Entrance: scale 0→1 via the CSS 'scale' property (Level 2 transform).
-     Wave:     translateY via @keyframes rvs-dot-wave using 'transform'.
-     These two properties compose rather than conflict.
-  */
-  .rvs-section .rvs-dots { position: relative; height: 38px; margin-bottom: 6px; }
+  .rvs-section { background: #fff; padding: clamp(24px,4vw,40px) 0 clamp(40px,6vw,60px); }
+  .rvs-section .rvs-outer { max-width: 1200px; margin: 0 auto; padding: 0 clamp(12px,3vw,24px); position: relative; }
+
+  .rvs-section .rvs-dots { position: relative; height: clamp(26px,3.5vw,38px); margin-bottom: 6px; }
   .rvs-section .rvs-dot {
     position: absolute;
-    width: 9px; height: 9px; border-radius: 50%; background: #96CA45;
-    opacity: 0;
-    scale: 0; /* CSS individual transform — does NOT conflict with animation's transform */
-    transition: opacity 0.4s ease, scale 0.45s cubic-bezier(.34,1.56,.64,1);
-    /* wave animation: paused until dot appears */
-    animation: rvs-dot-wave 2.3s ease-in-out infinite;
-    animation-delay: calc(var(--rvs-wi, 0) * 0.14s);
-    animation-play-state: paused;
-  }
-  .rvs-section .rvs-dot.rvs-dot-in {
-    opacity: 1; scale: 1;
-    animation-play-state: running;
+    width: clamp(6px,1vw,9px); height: clamp(6px,1vw,9px);
+    border-radius: 50%; background: #96CA45;
+    animation: rvs-dot-ring 2.2s ease-out infinite;
   }
 
-  /* ── grid ────────────────────────────────────────────────────────── */
   .rvs-section .rvs-grid {
     display: grid;
-    grid-template-columns: 460fr 740fr;
-    gap: 20px; align-items: start;
+    grid-template-columns: 38fr 62fr;
+    gap: clamp(12px,2vw,20px);
+    align-items: start;
   }
 
-  /* ── left panel ──────────────────────────────────────────────────── */
+  /* ── LEFT panel ── */
   .rvs-section .rvs-left {
-    height: 500px; background: #252525; border-radius: 12px;
+    height: clamp(320px,45vw,500px);
+    background: #252525; border-radius: clamp(10px,1.5vw,16px);
     position: relative; overflow: hidden;
-    opacity: 0; translate: -48px 0;
-    transition: opacity 0.85s ease, translate 0.85s cubic-bezier(.22,.68,0,1.05);
   }
-  .rvs-section .rvs-left.rvs-in { opacity: 1; translate: 0 0; }
-
   .rvs-section .rvs-globe-wrap {
-    position: absolute; left: 50%; top: 35px;
+    position: absolute; left: 50%; top: clamp(20px,4vw,35px);
     transform: translateX(-50%);
-    width: 330px; height: 330px;
+    width: clamp(160px,26vw,330px); height: clamp(160px,26vw,330px);
   }
-  /* Breathing starts after entrance — delay 1s */
-  .rvs-section .rvs-left.rvs-in .rvs-globe-wrap {
-    animation: rvs-globe-breathe 5s ease-in-out infinite 1s;
-  }
-
   .rvs-section .rvs-left-footer {
-    position: absolute; bottom: 35px; left: 0; right: 0; text-align: center;
+    position: absolute; bottom: clamp(18px,3.5vw,35px); left: 0; right: 0; text-align: center;
   }
-  .rvs-section .rvs-connect,
-  .rvs-section .rvs-community {
-    opacity: 0; translate: 0 18px;
-    transition: opacity 0.6s ease, translate 0.6s cubic-bezier(.22,.68,0,1.1);
-  }
-  .rvs-section .rvs-left.rvs-in .rvs-connect  { opacity:1; translate:0 0; transition-delay:0.72s; }
-  .rvs-section .rvs-left.rvs-in .rvs-community{ opacity:1; translate:0 0; transition-delay:0.9s;  }
   .rvs-section .rvs-connect {
     font-family:'Haffer XH Mono-TRIAL','Courier New',monospace;
-    font-size:16px; font-weight:500; line-height:20px;
-    color:#fff; letter-spacing:0.04em; margin-bottom:8px;
+    font-size: clamp(12px,1.3vw,16px); font-weight:500; line-height:1.4;
+    color:#fff; letter-spacing:0.04em; margin-bottom:6px;
   }
   .rvs-section .rvs-community {
-    font-family:'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive;
-    font-size:19px; font-weight:400; line-height:18px; color:#96CA45;
+    font-family:'Great Day Personal Use','Brush Script MT',cursive;
+    font-size: clamp(14px,1.5vw,19px); font-weight:400; color:#96CA45;
   }
 
-  /* ── right panel ─────────────────────────────────────────────────── */
+  /* ── RIGHT panel ── */
   .rvs-section .rvs-right {
-    height: 500px; background: #F0F0F0; border-radius: 12px;
+    height: clamp(320px,45vw,500px);
+    background: #F0F0F0; border-radius: clamp(10px,1.5vw,16px);
     position: relative; overflow: hidden;
-    opacity: 0; translate: 48px 0;
-    transition: opacity 0.85s ease 0.1s, translate 0.85s cubic-bezier(.22,.68,0,1.05) 0.1s;
   }
-  .rvs-section .rvs-right.rvs-in { opacity: 1; translate: 0 0; }
-
-  /* ── heading – word-by-word slide ───────────────────────────────── */
   .rvs-section .rvs-heading {
-    position: absolute; top: 22px;
+    position: absolute; top: clamp(14px,2.2vw,22px);
     left: 50%; transform: translateX(calc(-50% - 15px));
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size: 56px; font-weight: 400; line-height: 68px; letter-spacing: -0.03em;
+    font-size: clamp(28px,4.2vw,56px); font-weight:400;
+    line-height: 1.22; letter-spacing: -0.03em;
     color: #252525; white-space: nowrap;
   }
   .rvs-section .rvs-heading-green { color: #96CA45; }
-  .rvs-section .rvs-hw {
-    display: inline-block; opacity: 0; translate: 0 32px;
-    transition: opacity 0.65s ease var(--rvs-hwd,0.3s),
-                translate 0.65s cubic-bezier(.22,.68,0,1.3) var(--rvs-hwd,0.3s);
-  }
-  .rvs-section .rvs-hw.rvs-hw-in { opacity: 1; translate: 0 0; }
+  .rvs-section .rvs-hw { display: inline-block; }
 
-  /* ── carousel row ────────────────────────────────────────────────── */
   .rvs-section .rvs-carousel-row {
-    position: absolute; left: 45px; top: 115px; right: 24px;
-    display: flex; align-items: center; gap: 20px;
-    opacity: 0; translate: 0 22px;
-    transition: opacity 0.7s ease 0.52s, translate 0.7s cubic-bezier(.22,.68,0,1.2) 0.52s;
+    position: absolute;
+    left: clamp(16px,3.5vw,45px); top: clamp(80px,10vw,115px); right: clamp(12px,2vw,24px);
+    display: flex; align-items: center; gap: clamp(10px,1.5vw,20px);
   }
-  .rvs-section .rvs-carousel-row.rvs-in { opacity: 1; translate: 0 0; }
 
-  /* ── blue review card ────────────────────────────────────────────── */
+  /* card itself: full-width inside clip wrapper */
   .rvs-section .rvs-card {
-    width: 530px; height: 350px; flex-shrink: 0;
-    background: #155BA9; border-radius: 12px;
+    width: 100%; height: clamp(240px,27vw,350px);
+    background: #155BA9; border-radius: clamp(8px,1vw,12px);
     position: relative; overflow: hidden;
-    opacity: 1; transform: translateY(0) scale(1);
-    transition: opacity 0.32s ease, transform 0.32s cubic-bezier(.22,.68,0,1.1);
+    will-change: transform;
   }
-  .rvs-section .rvs-card.rvs-card-hidden {
-    opacity: 0; transform: translateY(12px) scale(0.975);
+  .rvs-section .rvs-deco {
+    position: absolute; left: clamp(14px,2.5vw,30px); top: 0; display: flex; gap: clamp(6px,0.8vw,9px);
   }
-
-  /* Decorative strips */
-  .rvs-section .rvs-deco { position: absolute; left: 30px; top: 0; display: flex; gap: 9px; }
-  .rvs-section .rvs-deco-strip { width: 40px; height: 100px; border-radius: 0 0 6px 6px; transform: translateY(-110%); }
-  .rvs-section .rvs-carousel-row.rvs-in .rvs-deco-strip:nth-child(1) { animation: rvs-strip-slide 0.7s cubic-bezier(.22,.68,0,1.2) 0.72s both; }
-  .rvs-section .rvs-carousel-row.rvs-in .rvs-deco-strip:nth-child(2) { animation: rvs-strip-slide 0.7s cubic-bezier(.22,.68,0,1.2) 0.88s both; }
+  .rvs-section .rvs-deco-strip {
+    width: clamp(22px,3vw,40px); height: clamp(70px,8.5vw,100px);
+    border-radius: 0 0 6px 6px;
+  }
   .rvs-section .rvs-deco-white { background: #fff; }
   .rvs-section .rvs-deco-green { background: #96CA45; }
-
-  /* Avatar */
   .rvs-section .rvs-avatar {
-    position: absolute; left: 35px; top: 65px;
-    width: 80px; height: 80px; border-radius: 50%;
-    background: #fff; box-shadow: 0 -6px 8px rgba(0,0,0,0.12);
+    position: absolute; left: clamp(14px,2.8vw,35px); top: clamp(46px,5.5vw,65px);
+    width: clamp(52px,6.5vw,80px); height: clamp(52px,6.5vw,80px);
+    border-radius: 50%; background: #fff; box-shadow: 0 -6px 8px rgba(0,0,0,0.12);
     overflow: hidden; z-index: 2;
     display: flex; align-items: center; justify-content: center;
   }
-
-  /* Review text */
   .rvs-section .rvs-text {
-    position: absolute; right: 25px; top: 65px;
-    width: 280px; height: 190px; overflow-y: auto;
+    position: absolute;
+    right: clamp(12px,2vw,25px); top: clamp(46px,5.5vw,65px);
+    width: clamp(140px,20vw,280px); height: clamp(110px,14vw,190px);
+    overflow-y: auto;
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size: 13.5px; font-weight: 400; line-height: 165%;
-    letter-spacing: 0.01em; text-transform: capitalize;
-    color: #fff; text-align: right; padding-right: 4px;
+    font-size: clamp(11px,1.1vw,13.5px); font-weight:400; line-height:165%;
+    letter-spacing:0.01em; text-transform:capitalize;
+    color:#fff; text-align:right; padding-right:4px;
   }
   .rvs-section .rvs-text::-webkit-scrollbar { width: 3px; }
   .rvs-section .rvs-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-
-  /* Card meta */
   .rvs-section .rvs-name {
-    position: absolute; left: 30px; top: 160px;
-    font-family:'Great Day Personal Use','Great Day Bold Personal Use','Brush Script MT',cursive;
-    font-size: 20px; font-weight: 400; line-height: 20px; color: #96CA45;
+    position: absolute; left: clamp(14px,2.5vw,30px); top: clamp(112px,13.5vw,160px);
+    font-family:'Great Day Personal Use','Brush Script MT',cursive;
+    font-size: clamp(15px,1.6vw,20px); font-weight:400; color:#96CA45;
   }
   .rvs-section .rvs-role {
-    position: absolute; left: 30px; top: 188px;
+    position: absolute; left: clamp(14px,2.5vw,30px); top: clamp(133px,15.8vw,188px);
     font-family:'Haffer VF-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size: 14px; color: #fff;
-    max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: clamp(11px,1.1vw,14px); color:#fff;
+    max-width: clamp(110px,13vw,170px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .rvs-section .rvs-date {
-    position: absolute; left: 30px; bottom: 30px;
+    position: absolute; left: clamp(14px,2.5vw,30px); bottom: clamp(14px,2.2vw,30px);
     font-family:'Haffer VF-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size: 14px; color: rgba(255,255,255,0.6);
+    font-size: clamp(10px,1.1vw,14px); color: rgba(255,255,255,0.6);
   }
   .rvs-section .rvs-time {
-    position: absolute; right: 25px; bottom: 30px;
+    position: absolute; right: clamp(12px,2vw,25px); bottom: clamp(14px,2.2vw,30px);
     font-family:'Haffer VF-TRIAL','Helvetica Neue',Arial,sans-serif;
-    font-size: 14px; text-align: right; color: rgba(255,255,255,0.6);
+    font-size: clamp(10px,1.1vw,14px); text-align:right; color: rgba(255,255,255,0.6);
   }
 
-  /* ── indicator ───────────────────────────────────────────────────── */
-  .rvs-section .rvs-indicator { display:flex; flex-direction:column; align-items:flex-end; gap:12px; flex-shrink:0; }
-  .rvs-section .rvs-bar { border-radius:6px; cursor:pointer; transition: width .35s ease, height .35s ease, background .35s ease; }
+  .rvs-section .rvs-indicator { display:flex; flex-direction:column; align-items:flex-end; gap:clamp(8px,1vw,12px); flex-shrink:0; }
+  .rvs-section .rvs-bar { border-radius:6px; cursor:pointer; }
   .rvs-section .rvs-bar:hover { opacity: 0.7; }
-  .rvs-section .rvs-bar-active {
-    width: 32px; height: 3.5px; background: #155BA9;
-    transform-origin: left center;
-    animation: rvs-bar-draw 0.4s cubic-bezier(.22,.68,0,1.2) both;
-  }
-  .rvs-section .rvs-bar-inactive { width: 22px; height: 1.8px; background: rgba(151,151,151,0.34); }
 
-  /* ── write-review button ─────────────────────────────────────────── */
-  .rvs-section .rvs-write-btn {
-    position: absolute; right: 24px; top: 40px; z-index: 10;
-    opacity: 0; translate: 20px 0;
-    transition: opacity 0.5s ease 0.2s, translate 0.5s cubic-bezier(.22,.68,0,1.1) 0.2s;
-  }
-  .rvs-section .rvs-write-btn.rvs-in { opacity: 1; translate: 0 0; }
-  .rvs-section .rvs-write-btn.rvs-in > button { animation: rvs-btn-pulse 2.8s ease-in-out infinite 2s; }
-  .rvs-section .rvs-write-btn.rvs-in > button:hover { animation: none; }
+  .rvs-section .rvs-write-btn { position: absolute; right: clamp(14px,2vw,24px); top: clamp(28px,3.5vw,40px); z-index: 10; }
 
-  /* ── modal glass panel ───────────────────────────────────────────── */
   .rvs-glass {
     background: rgba(255,255,255,0.92);
     backdrop-filter: blur(16px);
@@ -238,176 +171,95 @@ const STYLES = `
     box-shadow: 0 24px 60px rgba(0,0,0,0.15);
   }
 
-  /* ══════════════════════════════════════════════════════════════════
-     RESPONSIVE — desktop-first, 5 breakpoints
-  ══════════════════════════════════════════════════════════════════ */
+  /* ── Stagger each dot's ring pulse so they don't all fire at once ── */
+  .rvs-section .rvs-dot:nth-child(1)  { animation-delay: 0.00s; }
+  .rvs-section .rvs-dot:nth-child(2)  { animation-delay: 0.22s; }
+  .rvs-section .rvs-dot:nth-child(3)  { animation-delay: 0.44s; }
+  .rvs-section .rvs-dot:nth-child(4)  { animation-delay: 0.66s; }
+  .rvs-section .rvs-dot:nth-child(5)  { animation-delay: 0.88s; }
+  .rvs-section .rvs-dot:nth-child(6)  { animation-delay: 1.10s; }
+  .rvs-section .rvs-dot:nth-child(7)  { animation-delay: 1.32s; }
+  .rvs-section .rvs-dot:nth-child(8)  { animation-delay: 1.54s; }
+  .rvs-section .rvs-dot:nth-child(9)  { animation-delay: 1.76s; }
+  .rvs-section .rvs-dot:nth-child(10) { animation-delay: 1.98s; }
 
-  /* ── Small desktop: 1024–1199px ─────────────────────────────────── */
-  @media (max-width: 1199px) {
-    .rvs-section .rvs-grid { grid-template-columns: 42fr 58fr; }
-    .rvs-section .rvs-left { height: 470px; }
-    .rvs-section .rvs-globe-wrap { width: 295px; height: 295px; top: 30px; }
-    .rvs-section .rvs-right { height: 470px; }
-    .rvs-section .rvs-heading { font-size: 46px; line-height: 56px; top: 20px; }
-    .rvs-section .rvs-carousel-row { left: 36px; top: 105px; right: 20px; gap: 16px; }
-    .rvs-section .rvs-card { width: 100%; max-width: 440px; height: 330px; }
-    .rvs-section .rvs-text { right: 22px; top: 60px; width: 240px; height: 170px; font-size: 13px; }
-    .rvs-section .rvs-avatar { left: 30px; top: 60px; width: 74px; height: 74px; }
-    .rvs-section .rvs-deco { left: 26px; }
-    .rvs-section .rvs-deco-strip { width: 36px; height: 92px; }
-    .rvs-section .rvs-name { top: 148px; font-size: 18px; }
-    .rvs-section .rvs-role { top: 174px; font-size: 13px; }
-    .rvs-section .rvs-date, .rvs-section .rvs-time { bottom: 26px; font-size: 13px; }
-  }
-
-  /* ── Tablet: <1024px — stacked layout ───────────────────────────── */
+  /* ── Tablet: stack panels ── */
   @media (max-width: 1023px) {
     .rvs-section .rvs-grid { grid-template-columns: 1fr; }
-
-    /* Left */
-    .rvs-section .rvs-left { height: 380px; }
-    .rvs-section .rvs-globe-wrap { width: 245px; height: 245px; top: 28px; }
-    .rvs-section .rvs-left-footer { bottom: 28px; }
-    .rvs-section .rvs-connect  { font-size: 15px; }
-    .rvs-section .rvs-community { font-size: 17px; }
-
-    /* Right — switch to flow layout */
-    .rvs-section .rvs-right { height: auto; padding: 24px 24px 32px; overflow: visible; }
+    .rvs-section .rvs-left { height: clamp(280px,52vw,420px); }
+    .rvs-section .rvs-right { height: auto; padding: clamp(16px,3vw,28px) clamp(16px,3vw,24px) clamp(24px,4vw,36px); overflow: visible; }
     .rvs-section .rvs-heading {
-      position: relative; top: auto; left: auto;
-      transform: none; font-size: 40px; line-height: 50px;
-      text-align: center; display: block; margin-bottom: 20px;
+      position: relative; top: auto; left: auto; transform: none;
+      font-size: clamp(28px,5vw,44px); line-height: 1.2;
+      text-align: center; display: block; margin-bottom: clamp(14px,2.5vw,22px); white-space: normal;
     }
     .rvs-section .rvs-carousel-row {
       position: relative; top: auto; left: auto; right: auto;
-      gap: 16px; justify-content: center;
+      justify-content: center;
     }
-    .rvs-section .rvs-card { width: 100%; max-width: 520px; height: 320px; }
-    .rvs-section .rvs-text { right: 20px; top: 58px; width: 250px; height: 168px; font-size: 13px; }
-    .rvs-section .rvs-avatar { left: 28px; top: 58px; width: 72px; height: 72px; }
-    .rvs-section .rvs-deco { left: 24px; }
-    .rvs-section .rvs-deco-strip { width: 35px; height: 88px; }
-    .rvs-section .rvs-name { top: 146px; font-size: 18px; }
-    .rvs-section .rvs-role { top: 170px; font-size: 13px; }
-    .rvs-section .rvs-date, .rvs-section .rvs-time { bottom: 24px; font-size: 13px; }
-
-    /* Write btn: switch to relative */
     .rvs-section .rvs-write-btn { position: relative; right: auto; top: auto; margin-bottom: 12px; display: inline-flex; }
   }
 
-  /* ── Mobile: <768px ──────────────────────────────────────────────── */
+  /* ── Mobile ≤ 767px ── */
   @media (max-width: 767px) {
-    .rvs-section .rvs-outer { padding: 0 16px; }
-    .rvs-section .rvs-left { height: 320px; }
-    .rvs-section .rvs-globe-wrap { width: 210px; height: 210px; top: 22px; }
-    .rvs-section .rvs-left-footer { bottom: 22px; }
-    .rvs-section .rvs-connect  { font-size: 14px; }
-    .rvs-section .rvs-community { font-size: 16px; }
-
-    .rvs-section .rvs-right { padding: 20px 16px 28px; }
-    .rvs-section .rvs-heading { font-size: 34px; line-height: 42px; margin-bottom: 16px; }
-    .rvs-section .rvs-carousel-row { gap: 12px; }
-    .rvs-section .rvs-card { height: 300px; }
-    .rvs-section .rvs-text { right: 16px; top: 52px; width: 210px; height: 155px; font-size: 12.5px; }
-    .rvs-section .rvs-avatar { left: 22px; top: 52px; width: 64px; height: 64px; }
-    .rvs-section .rvs-deco { left: 18px; }
-    .rvs-section .rvs-deco-strip { width: 30px; height: 80px; }
-    .rvs-section .rvs-name { top: 132px; font-size: 17px; }
-    .rvs-section .rvs-role { top: 155px; font-size: 12px; max-width: 140px; }
-    .rvs-section .rvs-date, .rvs-section .rvs-time { bottom: 20px; font-size: 12px; }
-    .rvs-section .rvs-date { left: 20px; }
-    .rvs-section .rvs-time { right: 16px; }
-
-    /* indicator horizontal on mobile */
+    .rvs-section .rvs-outer { padding: 0 clamp(10px,3vw,16px); }
+    .rvs-section .rvs-left { height: clamp(240px,68vw,320px); }
     .rvs-section .rvs-indicator { flex-direction: row; align-items: center; gap: 10px; justify-content: center; }
-    .rvs-section .rvs-bar-active   { width: 24px; height: 3px; }
-    .rvs-section .rvs-bar-inactive { width: 16px; height: 2px; }
-
-    /* dots scale down */
-    .rvs-section .rvs-dot { width: 8px; height: 8px; }
   }
 
-  /* ── Small mobile: <480px ────────────────────────────────────────── */
+  /* ── Small mobile ≤ 479px ── */
   @media (max-width: 479px) {
-    .rvs-section .rvs-left { height: 275px; }
-    .rvs-section .rvs-globe-wrap { width: 175px; height: 175px; top: 18px; }
-    .rvs-section .rvs-left-footer { bottom: 16px; }
-    .rvs-section .rvs-connect  { font-size: 13px; margin-bottom: 5px; }
-    .rvs-section .rvs-community { font-size: 14px; }
-
-    .rvs-section .rvs-heading { font-size: 28px; line-height: 36px; margin-bottom: 14px; }
-    .rvs-section .rvs-card { height: 270px; }
-    .rvs-section .rvs-text { right: 12px; top: 46px; width: 170px; height: 138px; font-size: 12px; line-height: 158%; }
-    .rvs-section .rvs-avatar { left: 16px; top: 46px; width: 56px; height: 56px; }
-    .rvs-section .rvs-deco { left: 14px; gap: 7px; }
-    .rvs-section .rvs-deco-strip { width: 26px; height: 70px; }
-    .rvs-section .rvs-name { top: 118px; font-size: 16px; left: 16px; }
-    .rvs-section .rvs-role { top: 140px; font-size: 11px; left: 16px; max-width: 120px; }
-    .rvs-section .rvs-date { bottom: 16px; left: 16px; font-size: 11px; }
-    .rvs-section .rvs-time { bottom: 16px; right: 12px; font-size: 11px; }
-
-    /* dots */
-    .rvs-section .rvs-dots { height: 30px; margin-bottom: 4px; }
-    .rvs-section .rvs-dot  { width: 7px; height: 7px; }
+    .rvs-section .rvs-heading { font-size: clamp(22px,7vw,30px); }
+    .rvs-section .rvs-card { height: clamp(220px,70vw,270px); }
+    .rvs-section .rvs-text { width: clamp(120px,38vw,170px); }
   }
 
-  /* ── Tiny mobile: <360px ─────────────────────────────────────────── */
+  /* ── Tiny ≤ 359px ── */
   @media (max-width: 359px) {
     .rvs-section .rvs-outer { padding: 0 10px; }
-    .rvs-section .rvs-heading { font-size: 24px; line-height: 30px; }
-    .rvs-section .rvs-card { height: 250px; }
-    .rvs-section .rvs-text { width: 148px; font-size: 11px; right: 10px; top: 42px; height: 124px; }
-    .rvs-section .rvs-avatar { width: 50px; height: 50px; left: 12px; top: 42px; }
-    .rvs-section .rvs-name { font-size: 15px; top: 106px; left: 12px; }
-    .rvs-section .rvs-role { font-size: 10.5px; top: 126px; left: 12px; max-width: 110px; }
-  }
-
-  /* ── Reduced motion ──────────────────────────────────────────────── */
-  @media (prefers-reduced-motion: reduce) {
-    .rvs-section *,
-    .rvs-section *::before,
-    .rvs-section *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
+    .rvs-section .rvs-heading { font-size: 22px; }
+    .rvs-section .rvs-card { height: 210px; }
+    .rvs-section .rvs-text { width: 120px; font-size: 10.5px; }
+    .rvs-section .rvs-avatar { width: 46px; height: 46px; }
+    .rvs-section .rvs-name { font-size: 14px; }
+    .rvs-section .rvs-role { font-size: 10px; }
   }
 `;
 
-/* ══════════════════════════════════════════════════════════════════════════
-   Main component
-══════════════════════════════════════════════════════════════════════════ */
 export default function ReviewsSection({ initialReviews = [] }: { initialReviews?: ReviewItem[] }) {
-  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
+  const [reviews, setReviews]           = useState<ReviewItem[]>(initialReviews);
+  const [activeIdx, setActiveIdx]       = useState(0);
+  const timerRef                        = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* carousel */
-  const [activeIdx, setActiveIdx]     = useState(0);
-  const [cardVisible, setCardVisible] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /* entrance */
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
+  /* refs for GSAP */
+  const sectionRef   = useRef<HTMLDivElement>(null);
+  const leftRef      = useRef<HTMLDivElement>(null);
+  const rightRef     = useRef<HTMLDivElement>(null);
+  const globeRef    = useRef<HTMLDivElement>(null);
+  const worldMapRef = useRef<HTMLDivElement>(null);
+  const globeIdxRef = useRef(0);
+  const connectRef   = useRef<HTMLParagraphElement>(null);
+  const communityRef = useRef<HTMLParagraphElement>(null);
+  const hw1Ref       = useRef<HTMLSpanElement>(null);
+  const hw2Ref       = useRef<HTMLSpanElement>(null);
+  const carouselRef  = useRef<HTMLDivElement>(null);
+  const cardClipRef  = useRef<HTMLDivElement>(null);
+  const cardRef      = useRef<HTMLDivElement>(null);
+  const strip1Ref    = useRef<HTMLDivElement>(null);
+  const strip2Ref    = useRef<HTMLDivElement>(null);
+  const writeBtnRef  = useRef<HTMLDivElement>(null);
+  const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
+  const barRefs      = useRef<(HTMLDivElement | null)[]>([]);
+  const triggeredRef = useRef(false);
 
   /* modal */
-  const [isModalOpen, setIsModalOpen]     = useState(false);
-  const [services, setServices]           = useState<any[]>([]);
-  const [formData, setFormData]           = useState({ studentName:'', rating:5, comment:'', service:'' });
-  const [hoverRating, setHoverRating]     = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting]   = useState(false);
+  const [isModalOpen, setIsModalOpen]   = useState(false);
+  const [services, setServices]         = useState<any[]>([]);
+  const [formData, setFormData]         = useState({ studentName:'', rating:5, comment:'', service:'' });
+  const [hoverRating, setHoverRating]   = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError]     = useState<string | null>(null);
-
-  /* ── IntersectionObserver — fires once ── */
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setInView(true); io.disconnect(); } },
-      { threshold: 0.07 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const [submitError, setSubmitError]   = useState<string | null>(null);
 
   /* ── fetch reviews ── */
   useEffect(() => {
@@ -421,31 +273,209 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
   const list    = reviews.length > 0 ? reviews : FALLBACK;
   const listLen = list.length;
 
-  /* ── carousel ── */
-  const goTo = useCallback((next: number, len: number) => {
-    const t = ((next % len) + len) % len;
-    if (t === activeIdx) return;
-    setCardVisible(false);
-    setTimeout(() => { setActiveIdx(t); setCardVisible(true); }, 320);
-  }, [activeIdx]);
+  /* ── GSAP scroll-triggered entrance ── */
+  useEffect(() => {
+    const els = {
+      left:      leftRef.current,
+      right:     rightRef.current,
+      globe:     globeRef.current,
+      connect:   connectRef.current,
+      community: communityRef.current,
+      hw1:       hw1Ref.current,
+      hw2:       hw2Ref.current,
+      carousel:  carouselRef.current,
+      card:      cardRef.current,
+      strip1:    strip1Ref.current,
+      strip2:    strip2Ref.current,
+      writeBtn:  writeBtnRef.current,
+    };
+    if (!els.left || !els.right) return;
 
-  const resetTimer = useCallback((len: number) => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (len <= 1) return;
-    timerRef.current = setInterval(() => {
-      setCardVisible(false);
-      setTimeout(() => { setActiveIdx(p => (p + 1) % len); setCardVisible(true); }, 320);
-    }, AUTO_MS);
+    /* set hidden states */
+    gsap.set(els.left,      { opacity: 0, x: -56 });
+    gsap.set(els.right,     { opacity: 0, x:  56 });
+    gsap.set(els.globe,     { scale: 0.7, opacity: 0 });
+    gsap.set(els.connect,   { opacity: 0, y: 18 });
+    gsap.set(els.community, { opacity: 0, y: 18 });
+    gsap.set(els.hw1,       { opacity: 0, y: 34 });
+    gsap.set(els.hw2,       { opacity: 0, y: 34 });
+    gsap.set(els.carousel,  { opacity: 0, y: 24 });
+    gsap.set(els.strip1,    { y: '-110%' });
+    gsap.set(els.strip2,    { y: '-110%' });
+    gsap.set(els.writeBtn,  { opacity: 0, x: 22 });
+    dotRefs.current.forEach((d, i) => d && gsap.set(d, { scale: 0, opacity: 0, y: 0 }));
+
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || triggeredRef.current) return;
+      triggeredRef.current = true;
+      io.disconnect();
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      /* 1. Both panels slide in */
+      tl.to(els.left,  { opacity: 1, x: 0, duration: 0.85, ease: 'power3.out' }, 0);
+      tl.to(els.right, { opacity: 1, x: 0, duration: 0.85, ease: 'power3.out' }, 0.1);
+
+      /* 2. Globe pops in */
+      tl.to(els.globe, { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.4)' }, 0.3);
+
+      /* 3. Globe breathe loop after entrance */
+      tl.call(() => {
+        gsap.to(els.globe, { scale: 1.04, duration: 2.5, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+      }, [], 1.1);
+
+      /* 4. World-map pan — each country drifts to centre, eastward loop */
+      tl.call(() => {
+        const map = worldMapRef.current;
+        if (!map) return;
+
+        /*
+          Map is rendered at 260% of circle width so there's room to pan.
+          Longitude stops (% across map width, Mercator):
+            Brazil    ~47°W  → 37%
+            Turkey    ~33°E  → 59%
+            India     ~77°E  → 66%
+            Australia ~151°E → 81%
+          To centre country at 50% of circle:
+            translateX = -(countryPct - 0.5) * mapWidth
+          mapWidth = 2.6 × circleWidth, so in % of circleWidth:
+            tx = -(countryPct - 0.5) * 260%
+        */
+        const STOPS = [
+          { label: 'Brazil',    pct: 0.37 },
+          { label: 'Turkey',    pct: 0.59 },
+          { label: 'India',     pct: 0.66 },
+          { label: 'Australia', pct: 0.81 },
+        ];
+        const MAP_SCALE = 2.6; // map width as multiple of circle
+
+        const xFor = (pct: number) => `-${(pct - 0.5) * MAP_SCALE * 100}%`;
+
+        /* Start at Brazil */
+        gsap.set(map, { x: xFor(STOPS[0].pct) });
+        globeIdxRef.current = 0;
+
+        const advance = () => {
+          const next = (globeIdxRef.current + 1) % STOPS.length;
+          globeIdxRef.current = next;
+          gsap.to(map, {
+            x: xFor(STOPS[next].pct),
+            duration: 1.6,
+            ease: 'power2.inOut',
+          });
+        };
+
+        const id = setInterval(advance, 3200);
+        if (globeRef.current) (globeRef.current as any).__clearCycle = () => clearInterval(id);
+      }, [], 1.4);
+
+      /* 4. Left footer text */
+      tl.to(els.connect,   { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.72);
+      tl.to(els.community, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.88);
+
+      /* 5. Heading words drop in */
+      tl.to(els.hw1, { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.3)' }, 0.38);
+      tl.to(els.hw2, { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.3)' }, 0.54);
+
+      /* 6. Carousel row rises */
+      tl.to(els.carousel, { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }, 0.52);
+
+      /* 7. Deco strips drop */
+      tl.to(els.strip1, { y: '0%', duration: 0.65, ease: 'power3.out' }, 0.72);
+      tl.to(els.strip2, { y: '0%', duration: 0.65, ease: 'power3.out' }, 0.86);
+
+      /* 8. Write-review button slides in */
+      tl.to(els.writeBtn, { opacity: 1, x: 0, duration: 0.5, ease: 'back.out(1.4)' }, 0.6);
+
+      /* 8. Write-review pulse loop */
+      tl.call(() => {
+        gsap.to(els.writeBtn, {
+          boxShadow: '0 0 0 8px rgba(150,202,69,0)', duration: 1.4,
+          ease: 'power2.out', repeat: -1, repeatDelay: 1.4,
+        });
+      }, [], 2.2);
+
+      /* 9. Dots pop in with stagger then wave loop */
+      tl.to(dotRefs.current.filter(Boolean), {
+        scale: 1, opacity: 1, duration: 0.4, stagger: 0.055, ease: 'back.out(1.6)',
+      }, 0.2);
+      tl.call(() => {
+        dotRefs.current.forEach((d, i) => {
+          if (!d) return;
+          gsap.to(d, {
+            y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1,
+            delay: i * 0.14,
+          });
+        });
+      }, [], 0.9);
+    }, { threshold: 0.07 });
+
+    if (sectionRef.current) io.observe(sectionRef.current);
+    return () => {
+      io.disconnect();
+      (globeRef.current as any)?.__clearCycle?.();
+    };
   }, []);
 
+  /* ── GSAP carousel: exit up-back, enter from below ── */
+  const animateOut = useCallback((onDone: () => void) => {
+    const card = cardRef.current;
+    if (!card) { onDone(); return; }
+    gsap.to(card, {
+      y: '-60%', opacity: 0, scale: 0.88,
+      duration: 0.38, ease: 'power2.in',
+      onComplete: () => {
+        gsap.set(card, { y: '70%', scale: 0.92 });
+        onDone();
+      },
+    });
+  }, []);
+
+  const animateIn = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    gsap.to(card, { y: '0%', opacity: 1, scale: 1, duration: 0.48, ease: 'back.out(1.3)' });
+  }, []);
+
+  const goTo = useCallback((next: number) => {
+    const t = ((next % listLen) + listLen) % listLen;
+    if (t === activeIdx) return;
+    animateOut(() => { setActiveIdx(t); animateIn(); });
+  }, [activeIdx, listLen, animateOut, animateIn]);
+
+  /* ── GSAP indicator bars ── */
   useEffect(() => {
-    resetTimer(listLen);
+    barRefs.current.forEach((bar, i) => {
+      if (!bar) return;
+      if (i === activeIdx) {
+        gsap.to(bar, { width: 32, height: 3.5, backgroundColor: '#155BA9', duration: 0.35, ease: 'power2.out' });
+      } else {
+        gsap.to(bar, { width: 22, height: 1.8, backgroundColor: 'rgba(151,151,151,0.34)', duration: 0.35, ease: 'power2.out' });
+      }
+    });
+  }, [activeIdx]);
+
+  /* ── auto-cycle ── */
+  const activeIdxRef = useRef(activeIdx);
+  useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (listLen <= 1) return;
+    timerRef.current = setInterval(() => {
+      const next = (activeIdxRef.current + 1) % listLen;
+      animateOut(() => { setActiveIdx(next); animateIn(); });
+    }, AUTO_MS);
+  }, [listLen, animateOut, animateIn]);
+
+  useEffect(() => {
+    resetTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [resetTimer, listLen]);
+  }, [resetTimer]);
 
-  const handleDot = (i: number) => { goTo(i, listLen); resetTimer(listLen); };
+  const handleDot = (i: number) => { goTo(i); resetTimer(); };
 
-  /* ── modal ── */
+  /* modal */
   const openModal = () => {
     setIsModalOpen(true); setSubmitSuccess(false); setSubmitError(null);
     setFormData({ studentName:'', rating:5, comment:'', service:'' });
@@ -456,7 +486,7 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     const { name, value } = e.target;
     setFormData(p => ({ ...p, [name]: value }));
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault(); setIsSubmitting(true); setSubmitError(null);
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     try {
@@ -469,25 +499,27 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     finally { setIsSubmitting(false); }
   };
 
-  /* ── display helpers ── */
   const fmtDate = (s: string) => { try { return new Date(s).toLocaleDateString('en-GB'); } catch { return '24/06/2026'; } };
   const fmtTime = (s: string) => { try { return new Date(s).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}); } catch { return '10:00 AM'; } };
   const getBg   = (n: string) => { const h = n.split('').reduce((a,c)=>a+c.charCodeAt(0),0); return `linear-gradient(135deg,hsl(${h%360},65%,65%),hsl(${(h+60)%360},65%,45%))`; };
   const getInit = (n: string) => n ? n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : 'S';
 
-  const rev = list[activeIdx] ?? list[0];
-  const cls = (base: string, cond?: string) => cond ? `${base} ${cond}` : base;
+  const dots = [
+    {left:0,top:22},{left:28,top:4},{left:63,top:22},{left:90,top:10},
+    {left:118,top:22},{left:139,top:16},{left:170,top:22},{left:196,top:19},
+    {left:219,top:22},{left:244,top:22},
+  ];
 
-  /* ══════════════════════════════════════════════════════════════════════ */
+  const rev = list[activeIdx] ?? list[0];
+
   return (
     <section ref={sectionRef} className="rvs-section relative">
-      {/* Styles are a stable constant string — React never re-creates it */}
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <div className="rvs-outer">
 
         {/* Write review button */}
-        <div className={cls('rvs-write-btn', inView ? 'rvs-in' : undefined)}>
+        <div ref={writeBtnRef} className="rvs-write-btn">
           <button
             onClick={openModal}
             className="flex items-center gap-2 px-4 py-2 bg-[rgba(150,202,69,1)] text-[#111] font-bold text-xs rounded-lg hover:bg-[rgba(150,202,69,0.9)] transition-colors shadow-sm cursor-pointer"
@@ -498,64 +530,104 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
         </div>
 
         {/* Green wave dots */}
-        <GreenDots inView={inView} />
+        <div className="rvs-dots">
+          {dots.map((d, i) => (
+            <div
+              key={i}
+              ref={el => { dotRefs.current[i] = el; }}
+              className="rvs-dot"
+              style={{ left: d.left, top: d.top }}
+            />
+          ))}
+        </div>
 
         <div className="rvs-grid">
 
           {/* ═══════ LEFT PANEL ═══════ */}
-          <div className={cls('rvs-left', inView ? 'rvs-in' : undefined)}>
-            <div className="rvs-globe-wrap">
-              <Image src="/reviews-globe.png" alt="World map globe with India highlighted" fill className="object-contain" priority />
+          <div ref={leftRef} className="rvs-left">
+            {/* outer: breathe scale lives here */}
+            <div ref={globeRef} className="rvs-globe-wrap">
+              {/* inner clip — overflow:hidden keeps map pan inside the circle */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                borderRadius: '50%',
+                overflow: 'hidden',
+              }}>
+                {/* world map rendered at 260% width; GSAP pans x to centre each country */}
+                <div
+                  ref={worldMapRef}
+                  style={{
+                    position: 'absolute',
+                    top: 0, bottom: 0,
+                    width: '260%',
+                    willChange: 'transform',
+                  }}
+                >
+                  <Image
+                    src="/world-map-bg.png"
+                    alt="World map"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    priority
+                  />
+                </div>
+              </div>
             </div>
             <div className="rvs-left-footer">
-              <p className="rvs-connect">Connect World Wide</p>
-              <p className="rvs-community">GrowMedLink&apos;s Global Community</p>
+              <p ref={connectRef}   className="rvs-connect">Connect World Wide</p>
+              <p ref={communityRef} className="rvs-community">GrowMedLink&apos;s Global Community</p>
             </div>
           </div>
 
           {/* ═══════ RIGHT PANEL ═══════ */}
-          <div className={cls('rvs-right', inView ? 'rvs-in' : undefined)}>
+          <div ref={rightRef} className="rvs-right">
 
             <h2 className="rvs-heading">
-              <span className={cls('rvs-hw', inView ? 'rvs-hw-in' : undefined)} style={{'--rvs-hwd':'0.3s'} as React.CSSProperties}>
-                Students{' '}
-              </span>
-              <span className={cls('rvs-hw rvs-heading-green', inView ? 'rvs-hw-in' : undefined)} style={{'--rvs-hwd':'0.48s'} as React.CSSProperties}>
-                Reviews
-              </span>
+              <span ref={hw1Ref} className="rvs-hw">Students </span>
+              <span ref={hw2Ref} className="rvs-hw rvs-heading-green">Reviews</span>
             </h2>
 
-            <div className={cls('rvs-carousel-row', inView ? 'rvs-in' : undefined)}>
+            <div ref={carouselRef} className="rvs-carousel-row">
 
-              {/* Review card */}
-              <div className={cls('rvs-card', !cardVisible ? 'rvs-card-hidden' : undefined)}>
-                <div className="rvs-deco">
-                  <div className="rvs-deco-strip rvs-deco-white" />
-                  <div className="rvs-deco-strip rvs-deco-green" />
+              {/* clip wrapper — overflow:hidden keeps exit-up inside bounds */}
+              <div ref={cardClipRef} style={{ flex: '1 1 0', minWidth: 0, overflow: 'hidden', borderRadius: 12 }}>
+                <div ref={cardRef} className="rvs-card" style={{ width: '100%' }}>
+                  <div className="rvs-deco">
+                    <div ref={strip1Ref} className="rvs-deco-strip rvs-deco-white" />
+                    <div ref={strip2Ref} className="rvs-deco-strip rvs-deco-green" />
+                  </div>
+
+                  <div className="rvs-avatar">
+                    {rev.studentImage
+                      ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
+                      : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
+                    }
+                  </div>
+
+                  <p className="rvs-text">&quot;{rev.comment}&quot;</p>
+                  <div className="rvs-name">{rev.studentName}</div>
+                  <div className="rvs-role">{rev.service?.title || 'Verified Student'}</div>
+                  <div className="rvs-date">{fmtDate(rev.createdAt)}</div>
+                  <div className="rvs-time">{fmtTime(rev.createdAt)}</div>
                 </div>
-
-                <div className="rvs-avatar">
-                  {rev.studentImage
-                    ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
-                    : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
-                  }
-                </div>
-
-                <p className="rvs-text">&quot;{rev.comment}&quot;</p>
-                <div className="rvs-name">{rev.studentName}</div>
-                <div className="rvs-role">{rev.service?.title || 'Verified Student'}</div>
-                <div className="rvs-date">{fmtDate(rev.createdAt)}</div>
-                <div className="rvs-time">{fmtTime(rev.createdAt)}</div>
               </div>
 
-              {/* Indicator */}
+              {/* Indicator bars */}
               <div className="rvs-indicator">
                 {Array.from({length: listLen}, (_, i) => (
                   <div
                     key={i}
-                    className={`rvs-bar ${i === activeIdx ? 'rvs-bar-active' : 'rvs-bar-inactive'}`}
+                    ref={el => { barRefs.current[i] = el; }}
+                    className="rvs-bar"
+                    style={{
+                      width: i === activeIdx ? 32 : 22,
+                      height: i === activeIdx ? 3.5 : 1.8,
+                      backgroundColor: i === activeIdx ? '#155BA9' : 'rgba(151,151,151,0.34)',
+                      borderRadius: 6,
+                    }}
                     onClick={() => handleDot(i)}
-                    role="button" aria-label={`Review ${i + 1}`}
+                    role="button"
+                    aria-label={`Review ${i + 1}`}
                   />
                 ))}
               </div>
@@ -628,34 +700,5 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
 
       </div>
     </section>
-  );
-}
-
-/* ─── Green wave dots ─── */
-function GreenDots({ inView }: { inView: boolean }) {
-  const dots = [
-    {left:0,top:22},{left:28,top:4},{left:63,top:22},{left:90,top:10},
-    {left:118,top:22},{left:139,top:16},{left:170,top:22},{left:196,top:19},
-    {left:219,top:22},{left:244,top:22},
-  ];
-  return (
-    <div className="rvs-dots">
-      {dots.map((d, i) => (
-        <div
-          key={i}
-          className={`rvs-dot${inView ? ' rvs-dot-in' : ''}`}
-          style={{
-            left: d.left, top: d.top,
-            /*
-              Entrance stagger: each dot pops in 55ms after the previous.
-              Wave phase: --rvs-wi drives animation-delay so the
-              wave travels left → right continuously.
-            */
-            transitionDelay: `${i * 0.055}s`,
-            '--rvs-wi': String(i),
-          } as React.CSSProperties}
-        />
-      ))}
-    </div>
   );
 }

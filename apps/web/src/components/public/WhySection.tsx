@@ -4,27 +4,38 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 
-/* All CSS lives in globals.css under the "why-" prefix — no <style> tag here */
+const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 
 const CW = 237.6, CH = 238.48;
 const BRACKETS = [
-  { left: 89.39, top: 0,      w: 148.21, h: 147.66, entryDelay: 0.45, floatDelay: 1.15, floatDur: 3.4 },
-  { left: 44.23, top: 86.59,  w: 107.92, h: 107.52, entryDelay: 0.62, floatDelay: 1.35, floatDur: 2.9 },
-  { left: 0,     top: 151.64, w: 87.16,  h: 86.83,  entryDelay: 0.79, floatDelay: 1.55, floatDur: 3.7 },
+  { left: 89.39, top: 0,      w: 148.21, h: 147.66, entryDelay: 0.55, floatDelay: 1.2,  floatDur: 3.4 },
+  { left: 44.23, top: 86.59,  w: 107.92, h: 107.52, entryDelay: 0.70, floatDelay: 1.4,  floatDur: 2.9 },
+  { left: 0,     top: 151.64, w: 87.16,  h: 86.83,  entryDelay: 0.85, floatDelay: 1.55, floatDur: 3.7 },
 ];
 
 const BRAND_TEXT = 'GrowMedLink';
+
+const WHY_POINTS = [
+  { icon: '🎓', text: 'Expert-led training by internationally licensed nurses' },
+  { icon: '🌍', text: 'Personalised pathway support for 20+ countries' },
+  { icon: '📋', text: 'Step-by-step licensure guidance from day one' },
+  { icon: '🏆', text: '96% first-attempt pass rate across all programmes' },
+];
 
 export default function WhySection() {
   const sectionRef    = useRef<HTMLElement>(null);
   const cardRef       = useRef<HTMLDivElement>(null);
   const imgWrapRef    = useRef<HTMLDivElement>(null);
+  const wipeRef       = useRef<HTMLDivElement>(null);
+  const imgInnerRef   = useRef<HTMLDivElement>(null);
   const bracketRefs   = useRef<(HTMLDivElement | null)[]>([]);
   const bracketsWrap  = useRef<HTMLDivElement>(null);
+  const whyLabelRef   = useRef<HTMLDivElement>(null);
   const whyWordRef    = useRef<HTMLSpanElement>(null);
   const charRefs      = useRef<(HTMLSpanElement | null)[]>([]);
   const underlineRef  = useRef<HTMLSpanElement>(null);
   const bodyRef       = useRef<HTMLParagraphElement>(null);
+  const pointRefs     = useRef<(HTMLDivElement | null)[]>([]);
   const triggeredRef  = useRef(false);
 
   /* ── Cursor trail ── */
@@ -159,21 +170,25 @@ export default function WhySection() {
     };
   }, []);
 
-  /* ── Scroll-triggered entrance (works on all screen sizes) ── */
+  /* ── Scroll-triggered entrance ── */
   useEffect(() => {
-    const card    = cardRef.current;
-    const imgWrap = imgWrapRef.current;
-    if (!card || !imgWrap) return;
+    const card  = cardRef.current;
+    const wipe  = wipeRef.current;
+    const inner = imgInnerRef.current;
+    if (!card || !wipe || !inner) return;
 
-    /* Set initial hidden states via GSAP */
-    gsap.set(card, { opacity: 0, scale: 0.96 });
-    gsap.set(whyWordRef.current, { opacity: 0, y: 36 });
-    gsap.set(charRefs.current.filter(Boolean), { opacity: 0, y: 28 });
-    gsap.set(underlineRef.current, { width: '0%' });
-    gsap.set(bodyRef.current, { opacity: 0, y: 14 });
+    /* Hide everything via GSAP before viewport enters */
+    gsap.set(card,  { opacity: 0, y: 80, scale: 0.94 });
+    gsap.set(wipe,  { scaleX: 1, transformOrigin: 'right center' });
+    gsap.set(inner, { scale: 1.14 });
+    gsap.set(whyLabelRef.current,  { opacity: 0, x: -36 });
+    gsap.set(whyWordRef.current,   { opacity: 0, y: 36 });
+    gsap.set(charRefs.current.filter(Boolean), { opacity: 0, y: 32 });
+    gsap.set(underlineRef.current, { scaleX: 0, transformOrigin: 'left center' });
+    gsap.set(bodyRef.current,      { opacity: 0, y: 20 });
+    gsap.set(pointRefs.current.filter(Boolean), { opacity: 0, x: 32 });
     bracketRefs.current.forEach(el => { if (el) gsap.set(el, { scale: 0, transformOrigin: 'top right' }); });
 
-    /* Use a low threshold (0.08) so it fires early on mobile small viewports */
     const io = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || triggeredRef.current) return;
       triggeredRef.current = true;
@@ -181,49 +196,45 @@ export default function WhySection() {
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      /* 1. Card fades + scales in */
-      tl.to(card, { opacity: 1, scale: 1, duration: 0.75, ease: 'back.out(1.2)' }, 0);
+      /* 1. Card rises from below */
+      tl.to(card, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'back.out(1.15)' }, 0);
 
-      /* 2. Image wipe — add .revealed class which drives CSS transition on ::after */
-      tl.call(() => { imgWrap.classList.add('revealed'); }, [], 0.05);
+      /* 2. Image wipe: scaleX 1→0 sweeps left revealing photo + Ken Burns */
+      tl.to(wipe,  { scaleX: 0, duration: 1.15, ease: 'power3.inOut' }, 0.18);
+      tl.to(inner, { scale: 1,  duration: 1.5,  ease: 'power2.out'   }, 0.18);
 
-      /* 3. "Why" word */
-      tl.to(whyWordRef.current, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
+      /* 3. Handwritten "Why choose us" label slides in */
+      tl.to(whyLabelRef.current, { opacity: 1, x: 0, duration: 0.6, ease: 'back.out(1.4)' }, 0.42);
 
-      /* 4. "GrowMedLink" character wave */
+      /* 4. "Why" word drops in */
+      tl.to(whyWordRef.current, { opacity: 1, y: 0, duration: 0.55, ease: 'back.out(1.3)' }, 0.58);
+
+      /* 5. "GrowMedLink" character wave */
       tl.to(charRefs.current.filter(Boolean), {
-        opacity: 1, y: 0, duration: 0.42,
-        stagger: 0.038,
-        ease: 'back.out(1.4)',
-      }, 0.36);
+        opacity: 1, y: 0, duration: 0.42, stagger: 0.038, ease: 'back.out(1.5)',
+      }, 0.72);
 
-      /* 5. Underline draws across */
-      tl.to(underlineRef.current, { width: '100%', duration: 0.9, ease: 'power2.inOut' }, 0.82);
+      /* 6. Underline draws left → right */
+      tl.to(underlineRef.current, { scaleX: 1, duration: 0.9, ease: 'power2.inOut' }, 1.1);
 
-      /* 6. Body text */
-      tl.to(bodyRef.current, { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' }, 0.74);
+      /* 7. Body text */
+      tl.to(bodyRef.current, { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' }, 0.92);
 
-      /* 7. Brackets spring in, then float */
+      /* 8. Why points stagger in from right */
+      tl.to(pointRefs.current.filter(Boolean), {
+        opacity: 1, x: 0, duration: 0.48, stagger: 0.1, ease: 'back.out(1.3)',
+      }, 1.05);
+
+      /* 9. Brackets spring in then float */
       bracketRefs.current.forEach((el, i) => {
         if (!el) return;
         const b = BRACKETS[i];
-        tl.to(el, {
-          scale: 1,
-          duration: 0.65,
-          ease: 'back.out(1.6)',
-          delay: 0,
-        }, b.entryDelay);
-
-        /* Float loop — starts after entry */
+        tl.to(el, { scale: 1, duration: 0.62, ease: 'back.out(1.7)' }, b.entryDelay);
         tl.call(() => {
-          gsap.to(el, {
-            y: -5, duration: b.floatDur / 2,
-            ease: 'sine.inOut', yoyo: true, repeat: -1,
-            delay: b.floatDelay - b.entryDelay,
-          });
+          gsap.to(el, { y: -5, duration: b.floatDur / 2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
         }, [], b.entryDelay + 0.65);
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
 
     io.observe(card);
     return () => io.disconnect();
@@ -239,13 +250,26 @@ export default function WhySection() {
 
         {/* ── IMAGE: D-shape, wipe-reveal + Ken Burns + parallax ── */}
         <div ref={imgWrapRef} className="why-img-wrap">
-          <Image
-            src="/why-image.png"
-            alt="Why GrowMedLink"
-            fill
-            className="object-cover object-center"
-            priority
-            onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
+          {/* Ken Burns inner wrapper */}
+          <div ref={imgInnerRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+            <Image
+              src="/why-image.png"
+              alt="Why GrowMedLink"
+              fill
+              className="object-cover object-center"
+              priority
+              onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
+            />
+          </div>
+          {/* GSAP wipe overlay — slides away on scroll entrance */}
+          <div
+            ref={wipeRef}
+            style={{
+              position: 'absolute', inset: 0,
+              background: '#F0F0F0',
+              zIndex: 3,
+              willChange: 'transform',
+            }}
           />
         </div>
 
@@ -288,10 +312,30 @@ export default function WhySection() {
           style={{
             flex: 1,
             padding: 'clamp(20px,3vw,48px) clamp(20px,4.5vw,64px) clamp(20px,3vw,48px) clamp(12px,2.5vw,32px)',
-            /* on mobile this is the bottom section */
             minWidth: 0,
           }}
         >
+          {/* Handwritten "Why choose us" label */}
+          <div
+            ref={whyLabelRef}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              marginBottom: 'clamp(4px,0.6vw,8px)',
+            }}
+          >
+            <span style={{
+              display: 'inline-block', width: 'clamp(22px,2.2vw,32px)',
+              height: '2px', background: '#96CA45', borderRadius: '1px', flexShrink: 0,
+            }} />
+            <span style={{
+              fontFamily: FS,
+              fontSize: 'clamp(15px,1.8vw,26px)',
+              color: '#96CA45',
+            }}>
+              Why choose us
+            </span>
+          </div>
+
           {/* "Why" */}
           <span
             ref={whyWordRef}
@@ -318,7 +362,7 @@ export default function WhySection() {
               lineHeight: 1.15,
               letterSpacing: '-0.03em',
               color: '#96CA45',
-              marginBottom: 'clamp(8px,1.5vw,18px)',
+              marginBottom: 'clamp(8px,1.2vw,14px)',
             }}
           >
             {BRAND_TEXT.split('').map((char, i) => (
@@ -330,15 +374,13 @@ export default function WhySection() {
                 {char}
               </span>
             ))}
-            {/* underline draws left → right */}
+            {/* underline draws left → right via GSAP scaleX */}
             <span
               ref={underlineRef}
               style={{
-                display: 'block',
-                height: '2px',
-                background: '#96CA45',
-                borderRadius: '1px',
-                width: '0%',
+                display: 'block', height: '2px',
+                background: '#96CA45', borderRadius: '1px',
+                width: '100%',
               }}
             />
           </span>
@@ -348,18 +390,40 @@ export default function WhySection() {
             ref={bodyRef}
             style={{
               fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-              fontSize: 'clamp(11px,1.2vw,15px)',
-              lineHeight: 1.65,
-              letterSpacing: '0.01em',
-              color: '#333',
+              fontSize: 'clamp(11px,1.1vw,14px)',
+              lineHeight: 1.7,
+              color: '#555',
               fontWeight: 400,
-              maxWidth: '420px',
+              maxWidth: '400px',
+              textAlign: 'justify',
+              marginBottom: 'clamp(12px,1.5vw,20px)',
             }}
           >
-            GrowMedLink gives nurses more than exam coaching: expert training, clinical skill building, personalised guidance, and career-focused support.
-
-Our integrated pathway strengthens confidence, improves readiness, and helps nurses move closer to rewarding international healthcare opportunities worldwide with clarity, preparation, and purpose.
+            GrowMedLink transforms nursing ambition into international careers. Through
+            expert-led training, personalised mentorship, and step-by-step pathway support,
+            we've helped thousands of nurses achieve licensure abroad.
           </p>
+
+          {/* Why points */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,0.8vw,12px)' }}>
+            {WHY_POINTS.map((pt, i) => (
+              <div
+                key={i}
+                ref={el => { pointRefs.current[i] = el; }}
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(7px,0.8vw,10px)' }}
+              >
+                <span style={{ fontSize: 'clamp(12px,1.2vw,16px)', lineHeight: 1, flexShrink: 0, marginTop: '2px' }}>
+                  {pt.icon}
+                </span>
+                <span style={{
+                  fontSize: 'clamp(10px,0.88vw,13px)', color: '#333', lineHeight: 1.55,
+                  fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
+                }}>
+                  {pt.text}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
