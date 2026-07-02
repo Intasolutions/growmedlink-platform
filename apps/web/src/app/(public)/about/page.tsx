@@ -337,190 +337,13 @@ const STYLES = `
 .abt-vmq-dn { animation: abt-vmq-dn 24s linear infinite; }
 .abt-vmq-up:hover,.abt-vmq-dn:hover { animation-play-state: paused; }
 
-/* ── core value stagger & spotlight experience ── */
+/* core values — GSAP handles all sizing; only the scroll-reveal helper remains */
 .abt-cv-s {
   opacity: 0;
   transform: translateY(48px);
   transition: opacity 0.65s ease, transform 0.65s cubic-bezier(.22,.68,0,1.2);
 }
 .abt-cv-s.abt-in { opacity: 1; transform: translateY(0); }
-
-/* Icon spin+pulse animation on card activation */
-@keyframes abt-cv-icon-activate {
-  0%   { transform: rotate(0deg)   scale(1);    }
-  30%  { transform: rotate(180deg) scale(1.18); }
-  60%  { transform: rotate(320deg) scale(0.92); }
-  80%  { transform: rotate(355deg) scale(1.06); }
-  100% { transform: rotate(360deg) scale(1);    }
-}
-@keyframes abt-cv-icon-idle {
-  0%,100% { transform: rotate(0deg)   scale(1);    }
-  50%     { transform: rotate(8deg)   scale(1.04); }
-}
-
-/* Spotlight row container */
-.abt-cv-row {
-  display: flex;
-  gap: 28px;
-  align-items: stretch;
-  width: 100%;
-  flex-flow: row nowrap;
-  transition: all 0.8s cubic-bezier(0.25, 1, 0.22, 1);
-}
-
-.abt-cv-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-radius: 11px;
-  padding: 38px 38px 33px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: flex-grow 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              flex-shrink 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              transform 0.32s cubic-bezier(.22,.68,0,1.2),
-              box-shadow 0.32s ease,
-              height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
-  will-change: flex-grow, flex-shrink, height, transform, box-shadow;
-  min-height: 352px;
-}
-
-.abt-cv-card.abt-cv-inactive {
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: 0%;
-}
-
-.abt-cv-card.abt-cv-active {
-  flex-grow: 2.29;
-  flex-shrink: 1;
-  flex-basis: 0%;
-  box-shadow: 0 15px 36px rgba(0,0,0,0.18);
-}
-
-.abt-cv-icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 5px solid rgba(255,255,255,0.9);
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: margin-bottom 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              width 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
-  overflow: hidden;
-}
-.abt-cv-icon-wrap svg {
-  animation: abt-cv-icon-idle 4s ease-in-out infinite;
-  will-change: transform;
-}
-.abt-cv-card.abt-cv-active .abt-cv-icon-wrap {
-  margin-bottom: 30px;
-}
-.abt-cv-card.abt-cv-active .abt-cv-icon-wrap svg {
-  animation: abt-cv-icon-activate 0.75s cubic-bezier(0.34, 1.4, 0.64, 1) both,
-             abt-cv-icon-idle 4s ease-in-out 0.75s infinite;
-}
-
-.abt-cv-title {
-  font-family: 'Haffer XH Mono-TRIAL', 'Courier New', monospace;
-  font-size: 27px;
-  font-weight: 500;
-  color: #fff;
-  line-height: 32px;
-  white-space: pre-line;
-  margin-bottom: 0;
-  transition: margin-bottom 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              font-size 0.8s cubic-bezier(0.25, 1, 0.22, 1),
-              line-height 0.8s cubic-bezier(0.25, 1, 0.22, 1);
-}
-.abt-cv-card.abt-cv-active .abt-cv-title {
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-.abt-cv-desc-wrap {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transform: translateY(12px);
-  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.22, 1),
-              max-height 0.6s cubic-bezier(0.25, 1, 0.22, 1),
-              transform 0.5s cubic-bezier(0.25, 1, 0.22, 1),
-              margin-top 0.5s cubic-bezier(0.25, 1, 0.22, 1);
-  will-change: opacity, max-height, transform;
-}
-.abt-cv-card.abt-cv-active .abt-cv-desc-wrap {
-  opacity: 1;
-  max-height: 220px;
-  transform: translateY(0);
-  margin-top: 12px;
-  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.22, 1) 0.15s,
-              max-height 0.7s cubic-bezier(0.25, 1, 0.22, 1),
-              transform 0.6s cubic-bezier(0.25, 1, 0.22, 1) 0.15s,
-              margin-top 0.6s cubic-bezier(0.25, 1, 0.22, 1);
-}
-
-.abt-cv-desc {
-  font-family: 'Haffer XH-TRIAL', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 18px;
-  line-height: 169%;
-  letter-spacing: 0.01em;
-  text-transform: capitalize;
-  color: #fff;
-  max-width: 423px;
-  margin-top: 0;
-  transition: font-size 0.8s cubic-bezier(0.25, 1, 0.22, 1);
-}
-
-@media (max-width: 1023px) {
-  .abt-cv-row {
-    flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    gap: 18px !important;
-  }
-  .abt-cv-card {
-    width: 100% !important;
-    min-height: unset !important;
-    flex-grow: 1 !important;
-    flex-shrink: 0 !important;
-    flex-basis: auto !important;
-    padding: 27px 27px 24px !important;
-  }
-  .abt-cv-card.abt-cv-inactive {
-    height: 135px !important;
-  }
-  .abt-cv-card.abt-cv-active {
-    height: 285px !important;
-  }
-  .abt-cv-icon-wrap {
-    width: 45px;
-    height: 45px;
-    border-width: 4px;
-    margin-bottom: 12px;
-  }
-  .abt-cv-card.abt-cv-active .abt-cv-icon-wrap {
-    margin-bottom: 18px;
-  }
-  .abt-cv-title {
-    font-size: 21px;
-    line-height: 25px;
-  }
-  .abt-cv-desc {
-    font-size: 13px;
-  }
-}
-@media (max-width: 767px) {
-  .abt-cv-card.abt-cv-inactive {
-    height: 120px !important;
-  }
-  .abt-cv-card.abt-cv-active {
-    height: 315px !important;
-  }
-}
 
 /* ── team vertical scroll strip (kept for reduced-motion) ── */
 @keyframes abt-team-up { from { transform:translateY(0); } to { transform:translateY(-50%); } }
@@ -1719,18 +1542,26 @@ function LogoRenderer({ name, src }: { name: string; src: string }) {
   );
 }
 
+/* aspect ratio: 8:5 landscape (width > height) — same on both sizes */
+const CARD_SM_W = 'clamp(140px,16vw,200px)';
+const CARD_SM_H = 'clamp(87px,10vw,125px)';
+const CARD_LG_W = 'clamp(320px,38vw,520px)';
+const CARD_LG_H = 'clamp(200px,23.75vw,325px)';
+/* circle: roughly 60% of large card width */
+const CIRCLE_LG  = 'clamp(180px,22vw,300px)';
+
 function CertHoverCard() {
+  const wrapRef   = useRef<HTMLDivElement>(null);
   const cardRef   = useRef<HTMLDivElement>(null);
   const circleRef = useRef<HTMLDivElement>(null);
   const hoveredRef = useRef(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tlRef = useRef<any>(null);
 
+  /* hide circle on mount */
   useEffect(() => {
     import('gsap').then(({ gsap }) => {
-      /* default state — small, straight */
-      gsap.set(cardRef.current,   { width: 160, height: 104, rotation: 0, scale: 1, transformOrigin: 'center center' });
-      gsap.set(circleRef.current, { scale: 0.55, opacity: 0.7, x: 30, y: 20 });
+      gsap.set(circleRef.current, { scale: 0, opacity: 0 });
     });
   }, []);
 
@@ -1741,20 +1572,22 @@ function CertHoverCard() {
     if (tlRef.current) tlRef.current.kill();
     const tl = gsap.timeline();
     tlRef.current = tl;
-    /* enlarge card with tilt */
+
+    /* scale card up — same ratio, tilt */
     tl.to(cardRef.current, {
-      width: 'clamp(260px,32vw,380px)',
-      height: 'clamp(340px,42vw,500px)',
+      width: CARD_LG_W,
+      height: CARD_LG_H,
       rotation: -8,
-      scale: 1,
-      boxShadow: '0 32px 80px rgba(0,0,0,0.28)',
-      duration: 0.65, ease: 'power3.out',
+      borderRadius: 24,
+      boxShadow: '0 28px 72px rgba(0,0,0,0.26)',
+      duration: 0.62, ease: 'power3.out',
     }, 0);
-    /* green circle blooms behind card */
+
+    /* green circle blooms from behind bottom-right */
     tl.to(circleRef.current, {
-      scale: 1, opacity: 1, x: 60, y: -20,
-      duration: 0.65, ease: 'power3.out',
-    }, 0);
+      scale: 1, opacity: 1,
+      duration: 0.55, ease: 'back.out(1.3)',
+    }, 0.08);
   };
 
   const onLeave = async () => {
@@ -1764,19 +1597,28 @@ function CertHoverCard() {
     if (tlRef.current) tlRef.current.kill();
     const tl = gsap.timeline();
     tlRef.current = tl;
-    tl.to(cardRef.current, {
-      width: 160, height: 104, rotation: 0,
-      boxShadow: '0 8px 24px rgba(0,0,0,0.14)',
-      duration: 0.5, ease: 'power3.inOut',
-    }, 0);
+
+    /* circle shrinks first */
     tl.to(circleRef.current, {
-      scale: 0.55, opacity: 0.7, x: 30, y: 20,
-      duration: 0.5, ease: 'power3.inOut',
+      scale: 0, opacity: 0,
+      duration: 0.3, ease: 'power2.in',
     }, 0);
+
+    /* card back to small */
+    tl.to(cardRef.current, {
+      width: CARD_SM_W,
+      height: CARD_SM_H,
+      rotation: 0,
+      borderRadius: 14,
+      boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
+      duration: 0.48, ease: 'power3.inOut',
+    }, 0.06);
   };
 
   return (
+    /* outer wrapper reserves space so surrounding layout never jumps */
     <div
+      ref={wrapRef}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       style={{
@@ -1784,24 +1626,26 @@ function CertHoverCard() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        /* reserve enough room so the enlarged card doesn't shift layout */
-        width: 'clamp(300px,38vw,440px)',
-        height: 'clamp(380px,48vw,560px)',
+        width: `calc(${CARD_LG_W} + 100px)`,
+        height: `calc(${CARD_LG_H} + 120px)`,
         cursor: 'default',
       }}
     >
-      {/* green blob circle — sits behind card */}
+      {/* green circle — bottom-right of card, hidden by default */}
       <div
         ref={circleRef}
         style={{
           position: 'absolute',
-          width: 'clamp(200px,26vw,320px)',
-          height: 'clamp(200px,26vw,320px)',
+          width: CIRCLE_LG,
+          height: CIRCLE_LG,
           borderRadius: '50%',
           background: GREEN,
+          bottom: 'clamp(-40px,-4vw,-20px)',
+          right: 'clamp(-40px,-4vw,-20px)',
           zIndex: 1,
           willChange: 'transform, opacity',
           pointerEvents: 'none',
+          transformOrigin: 'center center',
         }}
       />
 
@@ -1811,21 +1655,22 @@ function CertHoverCard() {
         style={{
           position: 'relative',
           zIndex: 2,
-          width: 160,
-          height: 104,
-          borderRadius: 20,
+          width: CARD_SM_W,
+          height: CARD_SM_H,
+          borderRadius: 14,
           overflow: 'hidden',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.14)',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
           background: '#ddd',
-          willChange: 'transform, width, height, box-shadow',
+          willChange: 'transform, width, height, box-shadow, border-radius',
           flexShrink: 0,
+          transformOrigin: 'center center',
         }}
       >
         <Image
           src="/about/4.jpg"
           alt="Trusted Partner"
           fill
-          sizes="(max-width:768px) 260px, 380px"
+          sizes="(max-width:640px) 180px, (max-width:1024px) 300px, 400px"
           style={{ objectFit: 'cover', objectPosition: 'top center' }}
           onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
         />
@@ -2018,106 +1863,301 @@ function CertificationSection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   §5  OUR CORE VALUES — staggered card reveals
+   §5  OUR CORE VALUES — pure GSAP spotlight expansion
 ══════════════════════════════════════════════════════════════════════════ */
 function CoreValuesSection() {
-  const secRef = useRef<HTMLDivElement>(null);
+  const secRef     = useRef<HTMLDivElement>(null);
+  const rowRef     = useRef<HTMLDivElement>(null);
   const [vis, setVis] = useState(false);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [clickPaused, setClickPaused] = useState(false);
-  const [allowTransitionDelay, setAllowTransitionDelay] = useState(true);
-  const clickResumeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const descRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const activeRef      = useRef(-1); // -1 = not yet activated
+  const isHoveredRef   = useRef(false);
+  const pausedRef      = useRef(false);
+  const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gsapRef        = useRef<any>(null);
+  const revealedRef    = useRef(false);
+
+  const N   = CORE_VALUES.length;
+  const GAP = 16; // px gap between cards
+
+  /* responsive sizes — recalculated from live DOM */
+  const getSizes = () => {
+    const row = rowRef.current;
+    if (!row) return { active: 0, inactive: 0, h: 400, mobile: false };
+    const totalW  = row.offsetWidth;
+    const vw      = window.innerWidth;
+    const mobile  = vw <= 767;
+    const tablet  = vw <= 1023;
+
+    if (mobile) {
+      const hAct  = Math.round(Math.max(300, vw * 0.85));
+      const hInact = Math.round(Math.max(110, vw * 0.25));
+      return { active: totalW, inactive: totalW, h: hAct, hInact, mobile: true, tablet: false };
+    }
+    if (tablet) {
+      const hAct  = Math.round(Math.max(300, vw * 0.5));
+      const hInact = Math.round(Math.max(140, vw * 0.2));
+      return { active: totalW, inactive: totalW, h: hAct, hInact, mobile: false, tablet: true };
+    }
+
+    /* desktop: active=52%, two inactive split remainder minus gaps */
+    const active   = Math.round(totalW * 0.52);
+    const inactive = Math.round((totalW - active - GAP * (N - 1)) / (N - 1));
+    const h        = Math.round(Math.max(340, vw * 0.26));
+    return { active, inactive, h, hInact: h, mobile: false, tablet: false };
+  };
+
+  /* snap without animation */
+  const applySnap = (idx: number, g: any) => {
+    const s = getSizes();
+    const row = rowRef.current;
+    if (!row) return;
+
+    if (s.mobile || s.tablet) {
+      row.style.flexDirection = 'column';
+      cardRefs.current.forEach((card, i) => {
+        if (!card) return;
+        const isAct = i === idx;
+        g.set(card, { width: '100%', height: isAct ? s.h : s.hInact, clearProps: 'flex' });
+        const desc = descRefs.current[i];
+        if (desc) g.set(desc, { opacity: isAct ? 1 : 0, height: isAct ? 'auto' : 0, y: 0, overflow: 'hidden' });
+      });
+    } else {
+      row.style.flexDirection = 'row';
+      cardRefs.current.forEach((card, i) => {
+        if (!card) return;
+        const isAct = i === idx;
+        g.set(card, { width: isAct ? s.active : s.inactive, height: s.h, flex: 'none' });
+        const desc = descRefs.current[i];
+        if (desc) g.set(desc, { opacity: isAct ? 1 : 0, height: isAct ? 'auto' : 0, y: 0, overflow: 'hidden' });
+      });
+    }
+  };
+
+  /* smooth animated spotlight */
+  const goTo = (idx: number, g: any) => {
+    if (idx === activeRef.current) return;
+    activeRef.current = idx;
+    const s = getSizes();
+    const row = rowRef.current;
+    if (!row) return;
+
+    const isMobTab = s.mobile || s.tablet;
+    if (isMobTab) row.style.flexDirection = 'column';
+    else row.style.flexDirection = 'row';
+
+    cardRefs.current.forEach((card, i) => {
+      if (!card) return;
+      const isAct = i === idx;
+
+      if (isMobTab) {
+        g.to(card, { width: '100%', height: isAct ? s.h : s.hInact, duration: 0.65, ease: 'power3.inOut', clearProps: 'flex' });
+      } else {
+        g.to(card, { width: isAct ? s.active : s.inactive, height: s.h, flex: 'none', duration: 0.72, ease: 'power3.inOut' });
+      }
+
+      /* icon spin on activation */
+      const icon = iconRefs.current[i];
+      if (icon && isAct) {
+        g.fromTo(icon,
+          { rotation: 0, scale: 1 },
+          { rotation: 360, scale: 1.18, duration: 0.55, ease: 'back.out(1.6)',
+            onComplete: () => g.to(icon, { scale: 1, duration: 0.2, ease: 'power2.out' }) }
+        );
+      }
+
+      /* desc reveal / hide */
+      const desc = descRefs.current[i];
+      if (!desc) return;
+      if (isAct) {
+        g.to(desc, { opacity: 1, height: 'auto', y: 0, duration: 0.42, ease: 'power2.out', delay: 0.16, overflow: 'hidden' });
+      } else {
+        g.to(desc, { opacity: 0, height: 0, y: 6, duration: 0.25, ease: 'power2.in', overflow: 'hidden' });
+      }
+    });
+  };
 
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: 0.1 });
-    if (secRef.current) obs.observe(secRef.current);
+    let cancelled = false;
+    import('gsap').then(({ gsap }) => {
+      if (cancelled) return;
+      gsapRef.current = gsap;
+
+      /* hide all descs + set initial equal widths */
+      const row = rowRef.current;
+      if (row) row.style.flexDirection = 'row';
+      descRefs.current.forEach(d => {
+        if (d) gsap.set(d, { opacity: 0, height: 0, y: 10, overflow: 'hidden' });
+      });
+      cardRefs.current.forEach(card => {
+        if (card) gsap.set(card, { opacity: 0, y: 48, scale: 0.96 });
+      });
+
+      /* scroll reveal */
+      const obs = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting || revealedRef.current) return;
+        obs.disconnect();
+        revealedRef.current = true;
+
+        gsap.to(cardRefs.current, {
+          y: 0, opacity: 1, scale: 1,
+          duration: 0.68, ease: 'power3.out', stagger: 0.11,
+          onComplete: () => {
+            applySnap(-1, gsap); // reset widths equal first
+            activeRef.current = -1;
+            setTimeout(() => goTo(0, gsap), 60);
+          },
+        });
+      }, { threshold: 0.12 });
+      if (secRef.current) obs.observe(secRef.current);
+
+      /* auto-rotate */
+      timerRef.current = setInterval(() => {
+        if (isHoveredRef.current || pausedRef.current || !revealedRef.current) return;
+        goTo((activeRef.current + 1) % N, gsap);
+      }, 4000);
+
+      /* resize: re-snap to current active */
+      const onResize = () => {
+        if (!revealedRef.current) return;
+        const idx = activeRef.current < 0 ? 0 : activeRef.current;
+        applySnap(idx, gsap);
+      };
+      window.addEventListener('resize', onResize, { passive: true });
+
+      return () => window.removeEventListener('resize', onResize);
+    });
+
+    return () => {
+      cancelled = true;
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* reveal vis for heading CSS animation */
+  useEffect(() => {
+    const sec = secRef.current;
+    if (!sec) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
+    }, { threshold: 0.1 });
+    obs.observe(sec);
     return () => obs.disconnect();
   }, []);
 
-  // Clear transition delay after initial stagger completes
-  useEffect(() => {
-    if (vis) {
-      const t = setTimeout(() => {
-        setAllowTransitionDelay(false);
-      }, 1200);
-      return () => clearTimeout(t);
-    }
-  }, [vis]);
-
-  // Spotlight rotation effect
-  useEffect(() => {
-    if (isHovered || clickPaused) return;
-
-    const timer = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % CORE_VALUES.length);
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [isHovered, clickPaused]);
-
-  // Click card handler
   const handleCardClick = (idx: number) => {
-    setActiveIdx(idx);
-    setClickPaused(true);
-    if (clickResumeTimerRef.current) clearTimeout(clickResumeTimerRef.current);
-    clickResumeTimerRef.current = setTimeout(() => {
-      setClickPaused(false);
-    }, 4000);
+    const g = gsapRef.current;
+    if (!g || !revealedRef.current) return;
+    goTo(idx, g);
+    pausedRef.current = true;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => { pausedRef.current = false; }, 6000);
   };
 
-  // Clean up click resume timer on unmount
-  useEffect(() => {
-    return () => {
-      if (clickResumeTimerRef.current) clearTimeout(clickResumeTimerRef.current);
-    };
-  }, []);
-
   return (
-    <section style={{ background:'#fff', padding:'60px 30px 72px' }} ref={secRef}>
-      <div style={{ maxWidth:1440, margin:'0 auto' }}>
+    <section style={{ background: '#fff', padding: 'clamp(48px,6vw,80px) clamp(16px,4vw,48px) clamp(56px,7vw,96px)' }} ref={secRef}>
+      <div style={{ maxWidth: 1440, margin: '0 auto' }}>
 
-        <div className={`abt-rv${vis?' abt-in':''}`} style={{ textAlign:'center', marginBottom:42 }}>
-          <p style={{ fontFamily:FH, fontSize:20, lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#000', maxWidth:1361, margin:'0 auto 24px' }}>
-            Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec.
+        <div className={`abt-rv${vis ? ' abt-in' : ''}`} style={{ textAlign: 'center', marginBottom: 'clamp(28px,4vw,52px)' }}>
+          <p style={{ fontFamily: FH, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000', maxWidth: 900, margin: '0 auto 20px' }}>
+            Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
           </p>
-          <h2 className="abt-sh" style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(36px,4.7vw,68px)', color:DARK, textTransform:'uppercase', lineHeight:'81px' }}>
-            OUR <span style={{ color:GREEN }}>CORE VALUES</span>
+          <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(32px,4.7vw,68px)', color: DARK, textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
+            OUR <span style={{ color: GREEN }}>CORE VALUES</span>
           </h2>
         </div>
 
+        {/* Card row — GSAP controls widths/heights; flex is just a scaffold */}
         <div
-          className="abt-cv-row"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          ref={rowRef}
+          onMouseEnter={() => { isHoveredRef.current = true; }}
+          onMouseLeave={() => { isHoveredRef.current = false; }}
+          style={{
+            display: 'flex',
+            gap: GAP,
+            alignItems: 'stretch',
+            width: '100%',
+          }}
         >
-          {CORE_VALUES.map((v_, i) => {
-            const isActive = activeIdx === i;
-            return (
+          {CORE_VALUES.map((v_, i) => (
+            <div
+              key={i}
+              ref={el => { cardRefs.current[i] = el; }}
+              onClick={() => handleCardClick(i)}
+              style={{
+                background: v_.bg,
+                borderRadius: 'clamp(12px,1.2vw,18px)',
+                padding: 'clamp(22px,2.8vw,40px) clamp(18px,2.2vw,36px)',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                /* GSAP takes over width+height after reveal */
+                flex: '1 1 0%',
+                willChange: 'transform, width, height, opacity',
+                boxShadow: '0 4px 28px rgba(0,0,0,0.13)',
+              }}
+            >
+              {/* icon */}
               <div
-                key={i}
-                onClick={() => handleCardClick(i)}
-                className={`abt-cv-card abt-cv-s ${isActive ? 'abt-cv-active' : 'abt-cv-inactive'}${vis?' abt-in':''}`}
+                ref={el => { iconRefs.current[i] = el; }}
                 style={{
-                  background: v_.bg,
-                  transitionDelay: (allowTransitionDelay && vis) ? `${i * 0.15}s` : '0s',
+                  width: 'clamp(42px,4.5vw,60px)',
+                  height: 'clamp(42px,4.5vw,60px)',
+                  borderRadius: '50%',
+                  border: '4px solid rgba(255,255,255,0.85)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'clamp(16px,2vw,28px)',
+                  willChange: 'transform',
+                  flexShrink: 0,
                 }}
               >
-                <div>
-                  <div className="abt-cv-icon-wrap">
-                    <svg width={27} height={27} viewBox="0 0 36 36" fill="none">
-                      <circle cx={18} cy={18} r={14} stroke="rgba(255,255,255,0.4)" strokeWidth={3}/>
-                      <path d="M18 4 A14 14 0 0 1 32 18" stroke="#fff" strokeWidth={3} strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <h3 className="abt-cv-title">{v_.title}</h3>
-                  <div className="abt-cv-desc-wrap">
-                    <p className="abt-cv-desc">{v_.desc}</p>
-                  </div>
-                </div>
+                <svg width={22} height={22} viewBox="0 0 36 36" fill="none">
+                  <circle cx={18} cy={18} r={14} stroke="rgba(255,255,255,0.4)" strokeWidth={3} />
+                  <path d="M18 4 A14 14 0 0 1 32 18" stroke="#fff" strokeWidth={3} strokeLinecap="round" />
+                </svg>
               </div>
-            );
-          })}
+
+              {/* title */}
+              <h3 style={{
+                fontFamily: FM,
+                fontSize: 'clamp(20px,2.2vw,30px)',
+                fontWeight: 500,
+                color: '#fff',
+                lineHeight: 1.2,
+                whiteSpace: 'pre-line',
+                marginBottom: 0,
+                flexShrink: 0,
+              }}>
+                {v_.title}
+              </h3>
+
+              {/* description — GSAP controls height + opacity */}
+              <div ref={el => { descRefs.current[i] = el; }} style={{ overflow: 'hidden' }}>
+                <p style={{
+                  fontFamily: FH,
+                  fontSize: 'clamp(13px,1.15vw,17px)',
+                  lineHeight: '1.72',
+                  color: 'rgba(255,255,255,0.92)',
+                  marginTop: 'clamp(12px,1.4vw,20px)',
+                  maxWidth: 460,
+                }}>
+                  {v_.desc}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
