@@ -118,7 +118,7 @@ const STYLES = `
 }
 
 /* ── arch carousel ── */
-.abt-arch { position:relative; height:400px; overflow:hidden; cursor:grab; user-select:none; }
+.abt-arch { position:relative; height:clamp(180px,28vw,340px); overflow:hidden; cursor:grab; user-select:none; }
 .abt-arch:active { cursor:grabbing; }
 
 /* ── mission stagger ── */
@@ -567,25 +567,19 @@ const STYLES = `
 
 /* ── responsive ── */
 @media (max-width: 1199px) {
-  .abt-arch { height: 340px; }
   .abt-miss-grid { flex-direction: column !important; }
   .abt-bg-grid  { flex-direction: column !important; }
   .abt-team-grid { flex-direction: column !important; }
   .abt-footer-grid { flex-direction: column !important; }
   .abt-footer-r  { display: none !important; }
 }
-@media (max-width: 1023px) {
-  .abt-arch { height: 280px; }
-}
 @media (max-width: 767px) {
-  .abt-arch   { height: 220px; }
   .abt-h1-big { font-size: clamp(38px,8vw,80px) !important; }
   .abt-sh     { font-size: clamp(28px,6vw,52px) !important; line-height: 1.2 !important; }
   .abt-pill   { border-radius: 40px !important; }
   .abt-cert-h { font-size: clamp(28px,6vw,44px) !important; }
 }
 @media (max-width: 479px) {
-  .abt-arch   { height: 180px; }
   .abt-h1-big { font-size: 32px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -655,211 +649,291 @@ function BracketIcon({ size = '100%' }: { size?: string }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   ARCH CAROUSEL — continuous auto-rotation + drag/swipe along circle line
+   ARCH CAROUSEL — GSAP ticker, fully responsive radius/card size
 ══════════════════════════════════════════════════════════════════════════ */
 function ArchCarousel() {
-  const RADIUS = 1080;
-  const CONT_H = 400;
-  const CTR_DY = 950; // Manual vertical adjustment to push it downwards
-  const STEP = 360 / ARCH_ITEMS.length; // Perfect distribution around the circle for seamless loop
-  const CARD_W = 297;
-  const CARD_H = 214;
+  const wrapRef   = useRef<HTMLDivElement>(null);
+  const pivotRef  = useRef<HTMLDivElement>(null);
+  const cardRefs  = useRef<(HTMLDivElement | null)[]>([]);
+  const angleRef  = useRef(-75);
+  const velRef    = useRef(0.02);
+  const isDrag    = useRef(false);
+  const lastX     = useRef(0);
+  const STEP      = 360 / ARCH_ITEMS.length;
 
-  const angleRef = useRef(-75);
-  const velRef   = useRef(0.02);
-  const isDrag   = useRef(false);
-  const lastX    = useRef(0);
-  const rafRef   = useRef<number | undefined>(undefined);
-  const pivotRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  /* read responsive values from live DOM */
+  const getDims = () => {
+    const vw     = window.innerWidth;
+    const contH  = wrapRef.current ? wrapRef.current.offsetHeight : Math.min(400, vw * 0.38);
+    const radius = Math.round(Math.max(360, vw * 0.78));
+    /* push centre of circle down so the top arc sits nicely inside contH */
+    const ctrDy  = Math.round(contH * 0.18 + radius * 0.82);
+    const cardW  = Math.round(Math.min(Math.max(120, vw * 0.23), 297));
+    const cardH  = Math.round(cardW * 0.72);
+    return { contH, radius, ctrDy, cardW, cardH };
+  };
 
   useEffect(() => {
-    const loop = () => {
-      if (!isDrag.current) {
-        velRef.current = velRef.current * 0.993 + 0.02 * 0.007;
-        angleRef.current += velRef.current;
-      } else {
-        velRef.current *= 0.96;
-      }
+    let gsapInst: any = null;
+    let ticker: any   = null;
 
-      // Clamp angle within [0, 360] range
-      angleRef.current = angleRef.current % 360;
+    import('gsap').then(({ gsap }) => {
+      gsapInst = gsap;
 
-      if (pivotRef.current) {
-        pivotRef.current.style.transform = `rotate(${angleRef.current}deg)`;
-      }
-
-      ARCH_ITEMS.forEach((_, i) => {
-        const card = cardRefs.current[i];
-        if (card) {
-          // Normalize relative angles to [-180, 180] range
-          let cardAngle = (angleRef.current + i * STEP) % 360;
-          if (cardAngle > 180) cardAngle -= 360;
-          if (cardAngle < -180) cardAngle += 360;
-
-          const absAngle = Math.abs(cardAngle);
-          // Fade out cards when they move beyond +/- 75 degrees of the top center
-          const alpha = Math.max(0, Math.min(1, (75 - absAngle) / 25));
-          card.style.opacity = String(alpha);
-          card.style.visibility = alpha === 0 ? 'hidden' : 'visible';
+      /* set initial card sizes from DOM */
+      const applyCardSizes = () => {
+        const { cardW, cardH, radius } = getDims();
+        cardRefs.current.forEach((card, i) => {
+          if (!card) return;
+          card.style.width  = cardW + 'px';
+          card.style.height = cardH + 'px';
+          card.style.transform = `rotate(${i * STEP}deg) translateY(${-radius}px) translate(-50%,-50%)`;
+        });
+        if (pivotRef.current) {
+          const { contH, ctrDy } = getDims();
+          pivotRef.current.style.top = (contH + ctrDy) + 'px';
         }
+      };
+
+      applyCardSizes();
+      window.addEventListener('resize', applyCardSizes, { passive: true });
+
+      ticker = gsap.ticker.add(() => {
+        if (!isDrag.current) {
+          velRef.current = velRef.current * 0.993 + 0.02 * 0.007;
+          angleRef.current += velRef.current;
+        } else {
+          velRef.current *= 0.96;
+        }
+        angleRef.current = angleRef.current % 360;
+
+        if (pivotRef.current) {
+          pivotRef.current.style.transform = `rotate(${angleRef.current}deg)`;
+        }
+
+        cardRefs.current.forEach((card, i) => {
+          if (!card) return;
+          let cardAngle = (angleRef.current + i * STEP) % 360;
+          if (cardAngle > 180)  cardAngle -= 360;
+          if (cardAngle < -180) cardAngle += 360;
+          const alpha = Math.max(0, Math.min(1, (75 - Math.abs(cardAngle)) / 25));
+          card.style.opacity    = String(alpha);
+          card.style.visibility = alpha === 0 ? 'hidden' : 'visible';
+        });
       });
 
-      rafRef.current = requestAnimationFrame(loop);
+      return () => window.removeEventListener('resize', applyCardSizes);
+    });
+
+    return () => {
+      if (ticker && gsapInst) gsapInst.ticker.remove(ticker);
     };
-    rafRef.current = requestAnimationFrame(loop);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onDown = (e: React.MouseEvent | React.TouchEvent) => {
     isDrag.current = true;
-    lastX.current = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    lastX.current  = 'touches' in e ? e.touches[0].clientX : e.clientX;
     velRef.current = 0;
   };
   const onMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrag.current) return;
     const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    velRef.current = (cx - lastX.current) * 0.055;
+    velRef.current  = (cx - lastX.current) * 0.055;
     angleRef.current += velRef.current;
-    lastX.current = cx;
+    lastX.current   = cx;
   };
   const onUp = () => { isDrag.current = false; };
 
-  const centreY = CONT_H + CTR_DY;
   return (
-    <div className="abt-arch"
+    <div
+      ref={wrapRef}
+      className="abt-arch"
       onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp}
-      onTouchStart={onDown} onTouchMove={onMove} onTouchEnd={onUp}>
-      <div ref={pivotRef} style={{ position:'absolute', left:'50%', top:centreY, transformOrigin:'center center', willChange:'transform' }}>
-        {ARCH_ITEMS.map((item, i) => {
-          return (
-            <div key={i}
-              ref={el => { cardRefs.current[i] = el; }}
-              style={{
-                position:'absolute',
-                left:0, top:0,
-                width:CARD_W, height:CARD_H,
-                borderWidth:'4.5px 4.5px 28px 4.5px', borderStyle:'solid', borderColor:item.border,
-                borderRadius:'10.5px', overflow:'hidden',
-                transform:`rotate(${i * STEP}deg) translateY(${-RADIUS}px) translate(-50%, -50%)`,
-                transformOrigin:'center center',
-                background:ARCH_COLORS[i%ARCH_COLORS.length],
-                willChange:'transform, opacity',
-                pointerEvents:'none',
-                opacity: 0,
-              }}>
-              <Image src={item.src} alt="" fill sizes="297px" style={{ objectFit:'cover' }}
-                onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
-            </div>
-          );
-        })}
+      onTouchStart={onDown} onTouchMove={onMove} onTouchEnd={onUp}
+    >
+      <div ref={pivotRef} style={{ position: 'absolute', left: '50%', transformOrigin: 'center center', willChange: 'transform' }}>
+        {ARCH_ITEMS.map((item, i) => (
+          <div
+            key={i}
+            ref={el => { cardRefs.current[i] = el; }}
+            style={{
+              position: 'absolute', left: 0, top: 0,
+              borderWidth: 'clamp(2px,0.4vw,4.5px) clamp(2px,0.4vw,4.5px) clamp(12px,1.8vw,28px) clamp(2px,0.4vw,4.5px)',
+              borderStyle: 'solid', borderColor: item.border,
+              borderRadius: 'clamp(6px,0.8vw,10px)', overflow: 'hidden',
+              transformOrigin: 'center center',
+              background: ARCH_COLORS[i % ARCH_COLORS.length],
+              willChange: 'transform, opacity',
+              pointerEvents: 'none',
+              opacity: 0,
+            }}
+          >
+            <Image src={item.src} alt="" fill sizes="(max-width:640px) 40vw, (max-width:1024px) 28vw, 297px"
+              style={{ objectFit: 'cover' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   §1  HERO — dark #141414, arch carousel, parallax decorations
+   §1  HERO — GSAP entrance, fully responsive
 ══════════════════════════════════════════════════════════════════════════ */
 function HeroSection() {
-  const [heroVisible, setHeroVisible] = useState(false);
-  useEffect(() => { setHeroVisible(true); }, []);
+  const h1Ref      = useRef<HTMLHeadingElement>(null);
+  const subRef     = useRef<HTMLDivElement>(null);
+  const bodyRef    = useRef<HTMLParagraphElement>(null);
+  const ctaRef     = useRef<HTMLButtonElement>(null);
+  const calloutRef = useRef<HTMLDivElement>(null);
+  const burstRef   = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    import('gsap').then(({ gsap }) => {
+      if (cancelled) return;
+
+      /* entrance stagger */
+      gsap.fromTo(
+        [h1Ref.current, subRef.current, bodyRef.current, ctaRef.current],
+        { opacity: 0, y: 28 },
+        { opacity: 1, y: 0, duration: 0.72, ease: 'power3.out', stagger: 0.13, delay: 0.1 }
+      );
+
+      /* callout reveal + float loop */
+      if (calloutRef.current) {
+        gsap.fromTo(calloutRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.75, ease: 'back.out(1.3)', delay: 0.76,
+            onComplete: () => {
+              gsap.to(calloutRef.current, {
+                y: -8, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1,
+              });
+            },
+          }
+        );
+      }
+
+      /* sunburst slow spin */
+      if (burstRef.current) {
+        gsap.to(burstRef.current, {
+          rotation: 360, duration: 80, ease: 'none', repeat: -1, transformOrigin: '50% 50%',
+        });
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
-    <section style={{ background:'#000000', position:'relative', overflow:'hidden', paddingTop:'clamp(110px, 15vh, 170px)', paddingBottom:0 }}>
-      {/* Wave background image covering only the first screen height */}
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'100vh', zIndex:0, opacity:1.0 }}>
-        <Image src="/about-bg-wave.png" alt="" fill style={{ objectFit:'cover' }} priority />
+    <section style={{ background: '#000', position: 'relative', overflowX: 'hidden', overflowY: 'visible', paddingTop: 'clamp(80px,10vh,130px)', paddingBottom: 0 }}>
+
+      {/* Wave bg */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100vh', zIndex: 0 }}>
+        <Image src="/about-bg-wave.png" alt="" fill style={{ objectFit: 'cover' }} priority />
       </div>
+      <div className="abt-grad-bar" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5 }} />
 
-      <div className="abt-grad-bar" style={{ position:'absolute', top:0, left:0, right:0, zIndex:5 }} />
-
-      {/* heading + avatars */}
-      <div style={{ textAlign:'center', padding:'0 24px 24px', position:'relative', zIndex:5 }}>
+      {/* Heading block */}
+      <div style={{ textAlign: 'center', padding: '0 clamp(16px,4vw,40px) clamp(16px,2.5vw,28px)', position: 'relative', zIndex: 5 }}>
         <div style={{ position: 'relative', display: 'inline-block' }}>
-          {/* Rotating sunburst lines (the halo thing) centered behind the heading */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            width: 'clamp(320px, 80vw, 750px)',
-            height: 'clamp(320px, 80vw, 750px)',
-            opacity: 0.25,
-            pointerEvents: 'none',
-            zIndex: -1,
-            animation: 'abt-sunburst-spin 80s linear infinite',
-            willChange: 'transform'
-          }}>
+          {/* Sunburst halo — GSAP spins it */}
+          <div
+            ref={burstRef}
+            style={{
+              position: 'absolute',
+              top: '50%', left: '50%',
+              width: 'clamp(260px,70vw,750px)',
+              height: 'clamp(260px,70vw,750px)',
+              marginTop: 'calc(clamp(260px,70vw,750px) / -2)',
+              marginLeft: 'calc(clamp(260px,70vw,750px) / -2)',
+              opacity: 0.22,
+              pointerEvents: 'none',
+              zIndex: -1,
+              willChange: 'transform',
+            }}
+          >
             <Image src="/sunburst-lines.png" alt="" fill style={{ objectFit: 'contain' }} priority />
           </div>
-          <h1 className="abt-h1-big" style={{ fontFamily:FH, fontWeight:500, fontSize:'clamp(44px,8.5vw,123px)', letterSpacing:'-0.03em', color:'#fff', lineHeight:1.19, marginBottom:28 }}>
-            About GroMedLink
+
+          <h1
+            ref={h1Ref}
+            className="abt-h1-big"
+            style={{
+              fontFamily: FH, fontWeight: 500,
+              fontSize: 'clamp(32px,7vw,96px)',
+              letterSpacing: '-0.03em', color: '#fff',
+              lineHeight: 1.15, marginBottom: 'clamp(12px,1.8vw,20px)',
+              opacity: 0,
+            }}
+          >
+            About GrowMedLink
           </h1>
         </div>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:18, marginBottom:32 }}>
-          <Image src="/avatars-group.png" alt="Students" width={221} height={38} style={{ height:38, width:'auto' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
-          <span style={{ fontFamily:FP, fontSize:16, color:'#CACACA', lineHeight:'22px' }}>1600 + Trusted Students</span>
+
+        <div
+          ref={subRef}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(10px,1.5vw,18px)', marginBottom: 'clamp(12px,2vw,20px)', flexWrap: 'wrap', opacity: 0 }}
+        >
+          <Image src="/avatars-group.png" alt="Students" width={221} height={38}
+            style={{ height: 'clamp(28px,3.5vw,38px)', width: 'auto' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+          <span style={{ fontFamily: FP, fontSize: 'clamp(13px,1.4vw,16px)', color: '#CACACA', lineHeight: '1.4' }}>1600 + Trusted Students</span>
         </div>
       </div>
 
-      {/* Arch image carousel */}
+      {/* Arch carousel */}
       <ArchCarousel />
 
-      {/* body text + CTA */}
-      <div style={{ maxWidth:807, margin:'0 auto', padding:'48px 24px 0', textAlign:'center', position:'relative', zIndex:5 }}>
-        <p style={{ fontFamily:FH, fontSize:20, color:'#fff', lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize', marginBottom:40 }}>
-          Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec.
+      {/* Body text + CTA */}
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: 'clamp(16px,3vw,36px) clamp(16px,4vw,32px) 0', textAlign: 'center', position: 'relative', zIndex: 5 }}>
+        <p
+          ref={bodyRef}
+          style={{
+            fontFamily: FH, fontSize: 'clamp(14px,1.4vw,20px)', color: '#fff',
+            lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize',
+            marginBottom: 'clamp(24px,3.5vw,40px)', opacity: 0,
+          }}
+        >
+          Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
         </p>
-        <button style={{ width:228, height:54, background:GREEN, borderRadius:6, border:'none', cursor:'pointer', fontFamily:FM, fontSize:18, fontWeight:600, color:'#000' }}>
+        <button
+          ref={ctaRef}
+          style={{
+            width: 'clamp(180px,20vw,228px)', height: 'clamp(44px,5vw,54px)',
+            background: GREEN, borderRadius: 6, border: 'none', cursor: 'pointer',
+            fontFamily: FM, fontSize: 'clamp(14px,1.2vw,18px)', fontWeight: 600, color: '#000',
+            opacity: 0,
+          }}
+        >
           Become a Member
         </button>
       </div>
 
-      {/* wave dots + script callout */}
-      <div style={{ maxWidth:1440, margin:'0 auto', padding:'52px 40px 60px', display:'flex', justifyContent:'space-between', alignItems:'flex-end', position:'relative', zIndex:5 }}>
+      {/* Wave dots + script callout */}
+      <div style={{
+        maxWidth: 1440, margin: '0 auto',
+        padding: 'clamp(20px,3vw,40px) clamp(16px,3vw,40px) clamp(28px,4vw,52px)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+        position: 'relative', zIndex: 5, flexWrap: 'wrap', gap: 16,
+      }}>
         <WaveDots flip />
-        <div style={{
-          position: 'relative',
-          width: '300px',
-          pointerEvents: 'none',
-          opacity: heroVisible ? 1 : 0,
-          animation: heroVisible
-            ? `abt-hero-reveal 0.75s cubic-bezier(.22,.68,0,1.2) 760ms both,
-               abt-arrow-float 2.6s ease-in-out 1.5s infinite`
-            : 'none',
-          willChange: 'transform, opacity',
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transformStyle: 'preserve-3d',
-        }}>
-          {/* Static rotation wrapper for the arrow */}
-          <div style={{ transform: 'rotate(-20.36deg)', transformOrigin: 'top left', display: 'inline-block', position: 'absolute', left: -96, top: -56 }}>
-            <Image
-              src="/curly-arrow.png"
-              alt="Arrow decoration"
-              width={82}
-              height={77}
-              style={{ width: '82px', height: 'auto', display: 'block' }}
-              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-            />
-          </div>
 
-          {/* Handwritten text */}
-          <span
-            style={{
-              fontFamily: FS,
-              fontSize: '28px',
-              lineHeight: '1.3',
-              color: GREEN,
-              display: 'block',
-              transform: 'rotate(-4deg)',
-              transformOrigin: 'left top',
-              whiteSpace: 'nowrap',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              paddingBottom: '8px',
-            }}
-          >
+        <div
+          ref={calloutRef}
+          style={{ position: 'relative', pointerEvents: 'none', opacity: 0, flexShrink: 0 }}
+        >
+          {/* Curly arrow */}
+          <div style={{ transform: 'rotate(-20.36deg)', transformOrigin: 'top left', display: 'inline-block', position: 'absolute', left: 'clamp(-70px,-7vw,-48px)', top: 'clamp(-40px,-4vw,-28px)' }}>
+            <Image src="/curly-arrow.png" alt="" width={82} height={77}
+              style={{ width: 'clamp(52px,6vw,82px)', height: 'auto', display: 'block' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
+          </div>
+          <span style={{
+            fontFamily: FS, fontSize: 'clamp(18px,2.2vw,28px)', lineHeight: 1.35, color: GREEN,
+            display: 'block', transform: 'rotate(-4deg)', transformOrigin: 'left top',
+            WebkitFontSmoothing: 'antialiased', paddingBottom: 8,
+          }}>
             Finally, your kind<br />of group chat
           </span>
         </div>
