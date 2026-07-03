@@ -70,6 +70,11 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+      required: false,
+    },
   },
   {
     timestamps: true,

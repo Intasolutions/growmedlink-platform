@@ -678,7 +678,10 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                     <label htmlFor="service" className="block text-sm font-bold text-gray-700 mb-1">Service / Course (Optional)</label>
                     <select name="service" id="service" value={formData.service} onChange={handleInput} disabled={isSubmitting} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[rgba(150,202,69,1)] text-sm bg-white text-black">
                       <option value="">-- Select Service --</option>
-                      {services.map(s=><option key={s._id} value={s._id}>[{s.category.toUpperCase()}] {s.title}</option>)}
+                      {services.map(s => {
+                        const catName = s.category ? (typeof s.category === 'object' ? (s.category as any).name : s.category) : '';
+                        return <option key={s._id} value={s._id}>[{catName.toUpperCase()}] {s.title}</option>;
+                      })}
                     </select>
                   </div>
                   <div>

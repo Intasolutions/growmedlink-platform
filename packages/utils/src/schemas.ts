@@ -29,10 +29,15 @@ export const ServiceFeatureSchema = z.object({
   description: z.string().min(1, 'Feature description is required').max(500),
 });
 
+export const CategorySchema = z.object({
+  name: z.string().min(2, 'Category name must be at least 2 characters long'),
+  slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. immigration-prep)').optional().or(z.literal('')),
+});
+
 export const ServiceSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. canada-student-visa)'),
-  category: z.enum([SERVICE_CATEGORIES.IMMIGRATION, SERVICE_CATEGORIES.LANGUAGE]),
+  category: z.string().min(1, 'Please select a category'), // Category MongoID
   description: z.string().min(10, 'Short description must be at least 10 characters long'),
   content: z.record(z.any(), { message: 'Content must be a valid Tiptap JSON object' }),
   features: z.array(ServiceFeatureSchema).max(6, 'Maximum 6 features allowed').optional(),
@@ -50,6 +55,7 @@ export const ServiceSchema = z.object({
 export const ProductSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters long'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. ielts-coaching-package)'),
+  category: z.string().min(1, 'Please select a category'), // Category MongoID
   image: z.string().min(1, 'Please select an image from media library'), // ObjectId of Media
   details: z.record(z.any(), { message: 'Details must be a valid Tiptap JSON object' }),
   fees: z.string().min(1, 'Fees is required'),

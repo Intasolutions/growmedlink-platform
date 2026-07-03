@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import MediaSelectorModal from '../../../../components/MediaSelectorModal';
-import { IMedia } from '@intelligen/types';
+import { IMedia, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -34,7 +34,27 @@ export default function NewProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categoryId, setCategoryId] = useState('');
   const [mediaTarget, setMediaTarget] = useState(false);
+
+  // Fetch categories on load
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/categories`, {
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -67,6 +87,7 @@ export default function NewProductPage() {
     const payload = {
       name,
       slug,
+      category: categoryId,
       image: selectedImage._id,
       details: { text: detailsText },
       fees,
@@ -189,6 +210,34 @@ export default function NewProductPage() {
             </div>
             {fieldErrors.slug && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.slug[0]}</p>
+            )}
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest">
+              Category
+            </label>
+            <div className="relative">
+              <select
+                required
+                value={categoryId}
+                onChange={e => setCategoryId(e.target.value)}
+                className="w-full px-4 py-3 bg-[#020C1B]/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-secondary transition-all text-sm appearance-none"
+              >
+                <option value="" disabled className="bg-[#020C1B] text-gray-500">Select a category...</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id} className="bg-[#020C1B] text-white">
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                ▼
+              </div>
+            </div>
+            {fieldErrors.category && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.category[0]}</p>
             )}
           </div>
 

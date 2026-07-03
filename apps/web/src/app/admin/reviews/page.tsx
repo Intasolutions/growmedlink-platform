@@ -672,11 +672,14 @@ export default function AdminReviewsPage() {
                   disabled={isSubmitting}
                 >
                   <option value="">-- No linked service (General review) --</option>
-                  {services.map((svc) => (
-                    <option key={svc._id} value={svc._id}>
-                      [{svc.category.toUpperCase()}] {svc.title}
-                    </option>
-                  ))}
+                  {services.map((svc) => {
+                    const catName = svc.category ? (typeof svc.category === 'object' ? (svc.category as any).name : svc.category) : '';
+                    return (
+                      <option key={svc._id} value={svc._id}>
+                        [{catName.toUpperCase()}] {svc.title}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

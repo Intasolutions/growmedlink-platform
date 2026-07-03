@@ -28,12 +28,9 @@ const serviceSchema = new Schema(
       lowercase: true,
     },
     category: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: [true, 'Category is required'],
-      enum: {
-        values: [SERVICE_CATEGORIES.IMMIGRATION, SERVICE_CATEGORIES.LANGUAGE],
-        message: '{VALUE} is not a valid service category',
-      },
     },
     description: {
       type: String,

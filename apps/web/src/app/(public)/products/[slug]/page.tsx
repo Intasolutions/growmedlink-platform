@@ -1,5 +1,5 @@
-import React from 'react';
 import { getProductBySlug, getProducts } from '@/lib/api/products';
+import { getServices } from '@/lib/api/services';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import ProductDetailPage from '@/components/ProductDetailPage';
@@ -33,6 +33,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     .filter((p: any) => p._id !== product._id)
     .slice(0, 2);
 
+  const catParam = product.category 
+    ? (typeof product.category === 'object' ? (product.category as any)._id : product.category) 
+    : undefined;
+  const relatedServicesAll = catParam ? await getServices(catParam) : [];
+  const relatedServices = relatedServicesAll.slice(0, 2);
+
   const mappedProduct = {
     id: product._id,
     name: product.name,
@@ -49,6 +55,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       fees: rp.fees,
       duration: rp.duration,
       image: rp.image?.secureUrl || rp.image,
+    })),
+    relatedServices: relatedServices.map((rs: any) => ({
+      id: rs._id,
+      name: rs.title,
+      slug: rs.slug,
+      shortDescription: rs.description,
+      image: rs.image?.secureUrl || rs.image,
     })),
   };
 

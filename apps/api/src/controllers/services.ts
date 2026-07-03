@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Service } from '../models/Service.js';
+import { Category } from '../models/Category.js';
 import { ServiceSchema } from '@intelligen/utils';
 
 /**
@@ -10,7 +11,22 @@ export const listServices = async (req: Request, res: Response, next: NextFuncti
     const filter: any = {};
     
     if (req.query.category) {
-      filter.category = req.query.category;
+      const cat = req.query.category.toString();
+      if (cat.match(/^[0-9a-fA-F]{24}$/)) {
+        filter.category = cat;
+      } else {
+        const foundCat = await Category.findOne({ slug: cat });
+        if (foundCat) {
+          filter.category = foundCat._id;
+        } else {
+          // Category slug not found, return empty list
+          res.status(200).json({
+            success: true,
+            data: [],
+          });
+          return;
+        }
+      }
     }
     
     if (req.query.isFeatured) {
@@ -19,7 +35,7 @@ export const listServices = async (req: Request, res: Response, next: NextFuncti
 
     // Soft-deleted documents are automatically excluded by mongoose middleware plugin
     const services = await Service.find(filter)
-      .populate(['image', 'secondaryImage'])
+      .populate(['image', 'secondaryImage', 'category'])
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -37,7 +53,7 @@ export const listServices = async (req: Request, res: Response, next: NextFuncti
 export const getServiceBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { slug } = req.params;
-    const service = await Service.findOne({ slug }).populate(['image', 'secondaryImage']);
+    const service = await Service.findOne({ slug }).populate(['image', 'secondaryImage', 'category']);
     
     if (!service) {
       res.status(404).json({
@@ -62,7 +78,7 @@ export const getServiceBySlug = async (req: Request, res: Response, next: NextFu
 export const getServiceById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const service = await Service.findById(id).populate(['image', 'secondaryImage']);
+    const service = await Service.findById(id).populate(['image', 'secondaryImage', 'category']);
     
     if (!service) {
       res.status(404).json({
@@ -110,7 +126,7 @@ export const createService = async (req: Request, res: Response, next: NextFunct
     const service = new Service(validationResult.data);
     await service.save();
 
-    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage']);
+    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage', 'category']);
 
     res.status(201).json({
       success: true,
@@ -161,7 +177,7 @@ export const updateService = async (req: Request, res: Response, next: NextFunct
     Object.assign(service, validationResult.data);
     await service.save();
 
-    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage']);
+    const populated = await Service.findById(service._id).populate(['image', 'secondaryImage', 'category']);
 
     res.status(200).json({
       success: true,

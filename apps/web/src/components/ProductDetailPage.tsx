@@ -21,6 +21,16 @@ interface RelatedProduct {
   imageUrl?: string;
 }
 
+interface RelatedService {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  description?: string;
+  image?: string | { url: string } | null;
+  imageUrl?: string;
+}
+
 export interface ProductDetail {
   id: string;
   name: string;
@@ -32,6 +42,7 @@ export interface ProductDetail {
   duration?: string;
   otherDetails?: string;
   relatedProducts?: RelatedProduct[];
+  relatedServices?: RelatedService[];
 }
 
 function resolveImg(src?: string | { url: string } | null): string | null {
@@ -173,6 +184,36 @@ const STYLES = `
   .pdt-exc-img::after { transform:scaleX(0) !important; transition:none !important; }
   .pdt-rc { transition:none !important; }
 }
+
+/* ── Related service card (imported from ServiceDetailPage) ── */
+.svc-rc-wrap {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; width: 100%;
+}
+.svc-rc {
+  transition:transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
+  will-change:transform,box-shadow;
+}
+.svc-rc:hover {
+  transform:translateY(-8px);
+  box-shadow:0 24px 56px rgba(0,0,0,0.22);
+}
+.svc-rc-img-inner {
+  transition:transform 0.55s cubic-bezier(.22,.68,0,1.2);
+  will-change:transform; width:100%; height:100%;
+}
+.svc-rc:hover .svc-rc-img-inner { transform:scale(1.05); }
+.svc-rc-arrow {
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:transform 0.28s cubic-bezier(.22,.68,0,1.2);
+  will-change:transform;
+}
+.svc-rc:hover .svc-rc-arrow { transform:translate(3px,-3px); }
+.svc-rv {
+  opacity:0; transform:translateY(32px);
+  transition:opacity 0.72s cubic-bezier(.22,.68,0,1.2), transform 0.72s cubic-bezier(.22,.68,0,1.2);
+  will-change:opacity,transform;
+}
+.svc-rv.svc-in { opacity:1; transform:translateY(0); }
 `;
 
 function useReveal(threshold = 0.08) {
@@ -545,6 +586,123 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
   );
 }
 
+function RelativeServicesSection({ services }: { services: RelatedService[] }) {
+  const secRef = useRef<HTMLDivElement>(null);
+  const [vis, setVis] = useState(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
+    }, { threshold: 0.05 });
+    if (secRef.current) obs.observe(secRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  if (!services?.length) return null;
+
+  const CARD_COLORS = [DARK, '#D9D9D9'] as const;
+
+  return (
+    <section ref={secRef} style={{ background: '#fff', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px)' }}>
+      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+        {/* Heading */}
+        <div className={`svc-rv${vis ? ' svc-in' : ''}`} style={{ marginBottom: 40 }}>
+          <h2 style={{
+            fontFamily: FH, fontWeight: 400,
+            fontSize: 'clamp(24px,4vw,48px)',
+            lineHeight: '1.19', letterSpacing: '-0.03em',
+          }}>
+            <span style={{ color: DARK }}>Related </span>
+            <span style={{ color: GREEN }}>Services</span>
+          </h2>
+        </div>
+
+        {/* Cards row */}
+        <div className="svc-rc-wrap">
+          {services.slice(0, 2).map((svc, i) => {
+            const img = resolveImg(svc.image) ?? svc.imageUrl ?? null;
+            const desc = svc.shortDescription ?? svc.description ?? '';
+            const bg = CARD_COLORS[i % CARD_COLORS.length];
+            const isDark = bg === DARK;
+
+            return (
+              <div key={svc.id ?? i}
+                className={`svc-rc svc-rv${vis ? ' svc-in' : ''}`}
+                style={{
+                  background: bg, borderRadius: 32,
+                  display: 'flex', flexDirection: 'column',
+                  padding: 24, position: 'relative', overflow: 'hidden',
+                  transitionDelay: `${i * 0.15}s`,
+                }}>
+
+                {/* Photo */}
+                <div className="svc-rc-img-h" style={{
+                  position: 'relative', width: '100%', height: 235,
+                  borderRadius: 14, overflow: 'hidden', flexShrink: 0,
+                }}>
+                  <div className="svc-rc-img-inner" style={{ position: 'absolute', inset: 0 }}>
+                    {img ? (
+                      <Image src={img} alt={svc.name} fill sizes="(max-width: 768px) 100vw, 50vw"
+                        style={{ objectFit: 'cover', borderRadius: 14 }} />
+                    ) : (
+                      <div style={{
+                        width: '100%', height: '100%', borderRadius: 14,
+                        background: isDark ? 'rgba(150,202,69,0.12)' : 'rgba(0,0,0,0.08)',
+                      }} />
+                    )}
+                  </div>
+                </div>
+
+                {/* Service name */}
+                <h3 style={{
+                  fontFamily: FM, fontWeight: 500, fontSize: 24, lineHeight: '1.2',
+                  color: isDark ? '#fff' : '#000', marginTop: 24,
+                }}>
+                  {svc.name}
+                </h3>
+
+                {/* Description */}
+                <p style={{
+                  fontFamily: FH, fontWeight: 400, fontSize: 16, lineHeight: '150%',
+                  letterSpacing: '0.01em', textTransform: 'capitalize', textAlign: 'justify',
+                  color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
+                }}>
+                  {desc}
+                </p>
+
+                {/* CTA button */}
+                <div style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>
+                  <Link href={`/services/${svc.slug}`} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      background: '#fff', borderRadius: 6,
+                      padding: '0 24px', height: 48, width: 'fit-content',
+                    }}>
+                      <span style={{
+                        fontFamily: FM, fontWeight: 600, fontSize: 16,
+                        color: '#000', textAlign: 'center',
+                      }}>
+                        Explore Service
+                      </span>
+                      <span className="svc-rc-arrow">
+                        <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                          <path d="M7 17L17 7M17 7H7M17 7V17"
+                            stroke="#000" strokeWidth={2.2}
+                            strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ ROOT EXPORT ══════════════════════ */
 export default function ProductDetailPage({ product }: { product: ProductDetail }) {
   return (
@@ -556,6 +714,10 @@ export default function ProductDetailPage({ product }: { product: ProductDetail 
 
       {!!product.otherDetails && (
         <OtherDetailsSection text={product.otherDetails} />
+      )}
+
+      {!!product.relatedServices?.length && (
+        <RelativeServicesSection services={product.relatedServices} />
       )}
 
       {!!product.relatedProducts?.length && (

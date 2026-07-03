@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react';
 import MediaSelectorModal from '../../../../components/MediaSelectorModal';
-import { IMedia, IService } from '@intelligen/types';
+import { IMedia, IService, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -21,7 +21,26 @@ export default function EditServicePage({ params }: EditServiceProps) {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [autoSlug, setAutoSlug] = useState(false); // default false on edit so we don't accidentally rename
-  const [category, setCategory] = useState<'Immigration' | 'Language'>('Immigration');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<ICategory[]>([]);
+
+  // Fetch categories list on load
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/categories`, {
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    };
+    loadCategories();
+  }, []);
   const [description, setDescription] = useState('');
   const [contentText, setContentText] = useState('');
   const [selectedImage, setSelectedImage] = useState<IMedia | null>(null);
@@ -58,7 +77,7 @@ export default function EditServicePage({ params }: EditServiceProps) {
           const service: IService = data.data;
           setTitle(service.title);
           setSlug(service.slug);
-          setCategory(service.category);
+          setCategory(service.category ? (typeof service.category === 'object' ? (service.category as any)._id : service.category) : '');
           setDescription(service.description);
           setContentText(service.content?.text || '');
           setSelectedImage(service.image as IMedia);
@@ -229,11 +248,13 @@ export default function EditServicePage({ params }: EditServiceProps) {
               </label>
               <select
                 value={category}
-                onChange={e => setCategory(e.target.value as any)}
+                onChange={e => setCategory(e.target.value)}
                 className="w-full px-4 py-3.5 bg-[#020C1B]/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-secondary transition-all text-sm"
               >
-                <option value="Immigration">Immigration</option>
-                <option value="Language">Language</option>
+                <option value="" disabled>Select a category...</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
               </select>
               {fieldErrors.category && (
                 <p className="text-red-400 text-xs mt-1">{fieldErrors.category[0]}</p>

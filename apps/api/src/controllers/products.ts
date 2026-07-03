@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Product } from '../models/Product.js';
+import { Category } from '../models/Category.js';
 import { ProductSchema } from '@intelligen/utils';
 
 /**
@@ -13,9 +14,29 @@ export const listProducts = async (req: Request, res: Response, next: NextFuncti
       filter.isFeatured = req.query.isFeatured === 'true';
     }
 
+    if (req.query.category) {
+      const cat = req.query.category.toString();
+      if (cat.match(/^[0-9a-fA-F]{24}$/)) {
+        filter.category = cat;
+      } else {
+        const foundCat = await Category.findOne({ slug: cat });
+        if (foundCat) {
+          filter.category = foundCat._id;
+        } else {
+          // Category slug not found, return empty list
+          res.status(200).json({
+            success: true,
+            data: [],
+          });
+          return;
+        }
+      }
+    }
+
     // Soft-deleted documents are automatically excluded by mongoose middleware plugin
     const products = await Product.find(filter)
       .populate('image')
+      .populate('category')
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -33,7 +54,7 @@ export const listProducts = async (req: Request, res: Response, next: NextFuncti
 export const getProductBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { slug } = req.params;
-    const product = await Product.findOne({ slug }).populate('image');
+    const product = await Product.findOne({ slug }).populate('image').populate('category');
 
     if (!product) {
       res.status(404).json({
@@ -58,7 +79,7 @@ export const getProductBySlug = async (req: Request, res: Response, next: NextFu
 export const getProductById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id).populate('image');
+    const product = await Product.findById(id).populate('image').populate('category');
 
     if (!product) {
       res.status(404).json({
@@ -106,7 +127,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     const product = new Product(validationResult.data);
     await product.save();
 
-    const populated = await Product.findById(product._id).populate('image');
+    const populated = await Product.findById(product._id).populate('image').populate('category');
 
     res.status(201).json({
       success: true,
@@ -157,7 +178,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     Object.assign(product, validationResult.data);
     await product.save();
 
-    const populated = await Product.findById(product._id).populate('image');
+    const populated = await Product.findById(product._id).populate('image').populate('category');
 
     res.status(200).json({
       success: true,

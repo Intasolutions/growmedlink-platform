@@ -28,7 +28,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     notFound();
   }
 
-  const relatedServicesAll = await getServices(service.category);
+  const catParam = service.category 
+    ? (typeof service.category === 'object' ? (service.category as any)._id : service.category) 
+    : undefined;
+  const relatedServicesAll = catParam ? await getServices(catParam) : [];
   const relatedServices = relatedServicesAll
     .filter((s: any) => s._id !== service._id)
     .slice(0, 2);

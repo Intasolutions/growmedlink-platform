@@ -28,6 +28,14 @@ export interface IMedia {
   createdAt: string;
 }
 
+export interface ICategory {
+  _id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IServiceFeature {
   title: string;
   description: string;
@@ -37,7 +45,7 @@ export interface IService {
   _id: string;
   title: string;
   slug: string;
-  category: ServiceCategory;
+  category?: string | ICategory;
   description: string;
   content: Record<string, any>; // Tiptap JSON content object
   features?: IServiceFeature[]; // Up to 6 features
@@ -60,6 +68,7 @@ export interface IProduct {
   _id: string;
   name: string;
   slug: string;
+  category?: string | ICategory;
   image: string | IMedia; // Media ID or full object reference
   details: Record<string, any>; // Tiptap JSON content object
   fees: string;

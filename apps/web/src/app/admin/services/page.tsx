@@ -154,13 +154,19 @@ export default function AdminServicesPage() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        service.category === 'Immigration' 
-                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/15'
-                          : 'bg-green-500/10 text-green-400 border border-green-500/15'
-                      }`}>
-                        {service.category}
-                      </span>
+                      {(() => {
+                        const catName = service.category ? (typeof service.category === 'object' ? (service.category as any).name : service.category) : '';
+                        const isImmigration = catName.toLowerCase().includes('immigration');
+                        return (
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            isImmigration 
+                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/15'
+                              : 'bg-green-500/10 text-green-400 border border-green-500/15'
+                          }`}>
+                            {catName}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="py-4 px-6 text-center">
                       <div className="flex justify-center">

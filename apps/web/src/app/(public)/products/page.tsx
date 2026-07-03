@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import FAQSection from '@/components/FAQSection';
 import { getProducts } from '@/lib/api/products';
-import { IProduct, IMedia } from '@intelligen/types';
+import { IProduct, IMedia, ICategory } from '@intelligen/types';
 
 const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
@@ -13,6 +13,7 @@ const FP = "'Power Grotesk','Helvetica Neue',Arial,sans-serif";
 const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 const GREEN = '#96CA45';
 const DARK = '#252525';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const STYLES = `
 .prd * { box-sizing: border-box; }
@@ -148,7 +149,6 @@ function HeroSection() {
       >
         <Image src="/sunburst-lines.png" alt="" fill style={{ objectFit: 'contain' }} priority />
       </div>
-
       <div className="relative mx-auto max-w-4xl text-center">
         <div className="relative mx-auto" style={{ width: 'clamp(280px, 45vw, 480px)' }}>
           {/* Handwritten callout + arrow */}
@@ -214,24 +214,39 @@ function HeroSection() {
   );
 }
 
-/* ══════════════════════ FILTER PILLS (visual only — single category for now) ══════════════════════ */
-function FilterPills() {
-  const pills = ['All Products', 'Option 1', 'Option 2', 'Option 3', 'Option 4'];
-  const [active, setActive] = useState(0);
+/* ══════════════════════ FILTER PILLS ══════════════════════ */
+interface FilterPillsProps {
+  categories: ICategory[];
+  activeCategory: string;
+  setActiveCategory: (id: string) => void;
+}
+
+function FilterPills({ categories, activeCategory, setActiveCategory }: FilterPillsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1 px-4 py-10">
-      {pills.map((p, i) => (
+    <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-10">
+      <button
+        onClick={() => setActiveCategory('all')}
+        className="prd-pill rounded-full px-6 py-3 text-sm font-semibold transition-all"
+        style={{
+          fontFamily: FM,
+          background: activeCategory === 'all' ? GREEN : '#E4E4E4',
+          color: '#252525',
+        }}
+      >
+        All Products
+      </button>
+      {categories.map((cat) => (
         <button
-          key={p}
-          onClick={() => setActive(i)}
-          className="prd-pill rounded-full px-6 py-3 text-sm font-semibold"
+          key={cat._id}
+          onClick={() => setActiveCategory(cat._id)}
+          className="prd-pill rounded-full px-6 py-3 text-sm font-semibold transition-all"
           style={{
             fontFamily: FM,
-            background: active === i ? GREEN : '#E4E4E4',
+            background: activeCategory === cat._id ? GREEN : '#E4E4E4',
             color: '#252525',
           }}
         >
-          {p}
+          {cat.name}
         </button>
       ))}
     </div>
@@ -285,7 +300,7 @@ function ProductsGrid({ products }: { products: ProductItem[] }) {
   if (!products.length) {
     return (
       <div className="mx-auto max-w-6xl px-4 pb-24 text-center text-sm text-[#666]">
-        No products available yet. Check back soon.
+        No products available in this category yet. Check back soon.
       </div>
     );
   }
@@ -302,19 +317,43 @@ function ProductsGrid({ products }: { products: ProductItem[] }) {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
   useEffect(() => {
+    // Fetch products
     getProducts()
       .then((data: any) => setProducts(Array.isArray(data) ? data : data?.data ?? []))
-      .catch((err: unknown) => console.error('[ProductsPage]', err));
+      .catch((err: unknown) => console.error('[ProductsPage] Load products error:', err));
+
+    // Fetch categories
+    fetch(`${API_BASE_URL}/api/categories`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setCategories(data.data);
+        }
+      })
+      .catch(err => console.error('[ProductsPage] Load categories error:', err));
   }, []);
+
+  const filteredProducts = activeCategory === 'all'
+    ? products
+    : products.filter(p => {
+        const catId = p.category ? (typeof p.category === 'object' ? (p.category as any)._id : p.category) : '';
+        return catId === activeCategory;
+      });
 
   return (
     <main className="prd">
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <HeroSection />
-      <FilterPills />
-      <ProductsGrid products={products} />
+      <FilterPills 
+        categories={categories} 
+        activeCategory={activeCategory} 
+        setActiveCategory={setActiveCategory} 
+      />
+      <ProductsGrid products={filteredProducts} />
       <FAQSection />
     </main>
   );
