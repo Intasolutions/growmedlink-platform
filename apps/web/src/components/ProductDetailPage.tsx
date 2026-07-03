@@ -56,12 +56,14 @@ function resolveImg(src?: string | { url: string } | null): string | null {
 
 function extractYouTubeId(url: string): string | null {
   if (!url) return null;
-  // Handle youtu.be/ID
-  const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
-  if (shortMatch) return shortMatch[1];
-  // Handle youtube.com/watch?v=ID or /embed/ID
-  const longMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/))([^?&]+)/);
-  if (longMatch) return longMatch[1];
+  // youtu.be/ID
+  const short = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if (short) return short[1];
+  // youtube.com/watch?v=ID  /embed/ID  /v/ID  /shorts/ID
+  const long = url.match(/youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  if (long) return long[1];
+  // bare 11-char ID
+  if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
   return null;
 }
 

@@ -48,6 +48,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     fees: product.fees,
     duration: product.duration,
     otherDetails: product.otherDetails?.text || '',
+    videoUrl: product.videoUrl || '',
     relatedProducts: relatedProducts.map((rp: any) => ({
       id: rp._id,
       name: rp.name,
