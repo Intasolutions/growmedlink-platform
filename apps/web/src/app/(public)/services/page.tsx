@@ -70,7 +70,6 @@ const G_SMALL = [
   { cx:841, cy:119, R:58, r:43, n:8,  hr:30, color:'#474747', dir:'cw'  as const, dur:'5s' },
 ];
 const G_PATHS_MAIN  = G_MAIN.map(g  => gearPath(g.cx, g.cy, g.R, g.r, g.n, g.hr));
-const G_PATHS_SMALL = G_SMALL.map(g => gearPath(g.cx, g.cy, g.R, g.r, g.n, g.hr));
 
 /* ══════════════════════════════════════════════════════════════════════
    STYLES
@@ -210,30 +209,21 @@ const STYLES = `
 .srv-gear-group path.srv-gear-shape { transition:filter 0.25s ease; }
 .srv-gear-group:hover path.srv-gear-shape { filter:brightness(1.2); }
 
-/* ── responsive
-   Non-hero responsive overrides also scaled × 0.7:
-   srv-wide-img  was 260px  → 182px
-   srv-apart-left was 360px → 252px                        */
-@media (max-width:1199px) {
-  .srv-wide-inner  { flex-direction:column !important; }
-  .srv-wide-img    { width:100% !important; height:182px !important; }
-  .srv-narrow-row  { flex-wrap:wrap !important; }
-  .srv-narrow-card { width:100% !important; flex:unset !important; }
-  .srv-apart-grid  { flex-direction:column !important; gap:28px !important; }
-  .srv-apart-left  { width:100% !important; max-width:100% !important; height:252px !important; }
-}
+/* ── responsive ── */
 @media (max-width:1023px) {
   .srv-gears-svg   { display:none !important; }
   .srv-gears-pills { display:flex !important; }
 }
 @media (max-width:767px) {
-  .srv-h1          { font-size:clamp(38px,8vw,80px) !important; }
-  .srv-sh          { font-size:clamp(16px,4.2vw,27px) !important; line-height:1.2 !important; }
-  .srv-apart-right { padding:0 !important; }
+  .srv-h1          { font-size:clamp(32px,8vw,64px) !important; }
+  .srv-sh          { font-size:clamp(15px,4vw,22px) !important; line-height:1.25 !important; }
+  .srv-wide-inner  { flex-direction:column !important; }
+  .srv-wide-img    { width:calc(100% - 36px) !important; aspect-ratio:16/9 !important; min-height:unset !important; }
+  .srv-narrow-card { flex:1 1 100% !important; }
   .srv-cards-wrap  { padding:0 14px !important; }
 }
 @media (max-width:479px) {
-  .srv-h1 { font-size:32px !important; }
+  .srv-h1 { font-size:28px !important; }
 }
 @media (prefers-reduced-motion:reduce) {
   .srv-rv,.srv-spring,.srv-word,.srv-char {
@@ -248,19 +238,6 @@ const STYLES = `
 /* ══════════════════════════════════════════════════════════════════════
    UTILITIES
 ══════════════════════════════════════════════════════════════════════ */
-function useReveal(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { el.classList.add('srv-in'); obs.disconnect(); }
-    }, { threshold });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return ref;
-}
 
 function WaveDots({ flip = false }: { flip?: boolean }) {
   const dots = [
@@ -530,7 +507,7 @@ function WhatSetsUsApart() {
   }, []);
 
   return (
-    <section ref={secRef} style={{ background:'#fff', padding:'64px 22px', overflow:'hidden' }}>
+    <section ref={secRef} style={{ background:'#fff', padding:'clamp(32px,5vw,64px) clamp(16px,3vw,40px)', overflow:'hidden' }}>
       <style>{`
         .wsa-offset { margin-left: 0; }
         @media(min-width: 900px) {
@@ -727,15 +704,6 @@ function CardReveal({ children, delay }: { children:React.ReactNode; delay:numbe
   );
 }
 
-/* ── Wide Card  ×0.7
-   height     491 → 344
-   radius     32  → 22
-   img width  600 → 420   margin 32 → 22   img-radius 14 → 10
-   text pad   53/32/32 → 37/22/22
-   title      36px → 25px  lh 43px → 30px  mb 24 → 17
-   desc       24px → 17px
-   btn bottom 32   → 22
-────────────────────────────────────────────────────────────────── */
 function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:number }) {
   const img     = resolveImage(service);
   const desc    = resolveDesc(service);
@@ -743,17 +711,15 @@ function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:numbe
 
   return (
     <CardReveal delay={0}>
-      <div className="srv-card" style={{
+      <div className="srv-card srv-wide-card" style={{
         background:bg, borderRadius:22,
-        width:'100%', height:344,
-        position:'relative', overflow:'hidden',
+        width:'100%', position:'relative', overflow:'hidden',
       }}>
-        <div className="srv-wide-inner" style={{ display:'flex', height:'100%' }}>
-
-          {/* Photo: 600 → 420px, margin 32 → 22, radius 14 → 10 */}
+        <div className="srv-wide-inner" style={{ display:'flex', minHeight:280 }}>
+          {/* Image */}
           <div className="srv-card-img srv-wide-img" style={{
-            width:420, flexShrink:0,
-            margin:22, borderRadius:10, position:'relative',
+            width:'clamp(160px,35%,420px)', flexShrink:0,
+            margin:18, borderRadius:10, position:'relative', minHeight:200,
           }}>
             <div className="srv-card-img-inner" style={{ position:'absolute', inset:0 }}>
               {img ? (
@@ -765,30 +731,26 @@ function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:numbe
               )}
             </div>
           </div>
-
-          {/* Text: padding 53/32/32 → 37/22/22 */}
+          {/* Text */}
           <div style={{
-            flex:1, padding:'37px 22px 22px 0',
-            display:'flex', flexDirection:'column', position:'relative',
+            flex:1, padding:'clamp(20px,3vw,37px) clamp(16px,2vw,22px) clamp(20px,3vw,37px) 0',
+            display:'flex', flexDirection:'column', minWidth:0,
           }}>
-            {/* title: 36→25 lh:43→30 mb:24→17 */}
             <h3 style={{
-              fontFamily:FM, fontWeight:500, fontSize:25, lineHeight:'30px',
-              color: isGreen ? '#000' : '#fff', marginBottom:17,
+              fontFamily:FM, fontWeight:500,
+              fontSize:'clamp(18px,2vw,25px)', lineHeight:1.3,
+              color: isGreen ? '#000' : '#fff', marginBottom:12,
             }}>
               {service.name}
             </h3>
-            {/* desc: 24→17 */}
             <p style={{
-              fontFamily:FH, fontSize:17, lineHeight:'169%',
+              fontFamily:FH, fontSize:'clamp(13px,1.3vw,17px)', lineHeight:'165%',
               letterSpacing:'0.01em', textTransform:'capitalize',
-              color: isGreen ? DARK : '#fff',
-              maxWidth:595, flex:1,
+              color: isGreen ? DARK : '#fff', flex:1,
             }}>
-              {desc || 'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur.'}
+              {desc || 'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit.'}
             </p>
-            {/* btn bottom: 32 → 22 */}
-            <div style={{ position:'absolute', right:0, bottom:22 }}>
+            <div style={{ marginTop:18 }}>
               <CardButton href={`/services/${service.slug}`} />
             </div>
           </div>
@@ -798,15 +760,6 @@ function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:numbe
   );
 }
 
-/* ── Narrow Card  ×0.7
-   height         568 → 398
-   radius         32  → 22
-   width          647 → 453   flex 0 0 453px
-   img            599×235 → 419×165   margin 24→17  radius 14→10
-   title top      286 → 200   font 36→25  lh 43→30  maxW 404→283
-   desc top       337 → 236   font 24→17  width 564→395
-   btn right/bot  24/32 → 17/22
-────────────────────────────────────────────────────────────────── */
 function NarrowCard({ service, bg, delay }: { service:ServiceItem; bg:string; delay:number }) {
   const img  = resolveImage(service);
   const desc = resolveDesc(service);
@@ -816,17 +769,18 @@ function NarrowCard({ service, bg, delay }: { service:ServiceItem; bg:string; de
     <CardReveal delay={delay}>
       <div className="srv-card srv-narrow-card" style={{
         background:bg, borderRadius:22,
-        width:453, height:398, flex:'0 0 453px',
+        flex:'1 1 300px', minWidth:0,
         position:'relative', overflow:'hidden',
+        display:'flex', flexDirection:'column',
       }}>
-        {/* Photo: 419×165, margin 17, radius 10 */}
+        {/* Image */}
         <div className="srv-card-img" style={{
-          width:419, height:165, margin:17,
-          borderRadius:10, position:'relative',
+          margin:17, borderRadius:10, position:'relative',
+          aspectRatio:'5/2', flexShrink:0,
         }}>
           <div className="srv-card-img-inner" style={{ position:'absolute', inset:0 }}>
             {img ? (
-              <Image src={img} alt={service.name} fill sizes="419px"
+              <Image src={img} alt={service.name} fill sizes="453px"
                 style={{ objectFit:'cover', borderRadius:10 }} />
             ) : (
               <div style={{ width:'100%', height:'100%', borderRadius:10,
@@ -834,50 +788,40 @@ function NarrowCard({ service, bg, delay }: { service:ServiceItem; bg:string; de
             )}
           </div>
         </div>
-
-        {/* Title: top 200, font 25, lh 30, maxW 283 */}
-        <h3 style={{
-          position:'absolute', top:200, left:17,
-          fontFamily:FM, fontWeight:500, fontSize:25, lineHeight:'30px',
-          color: dark ? '#fff' : '#000', maxWidth:283,
-        }}>
-          {service.name}
-        </h3>
-
-        {/* Desc: top 236, font 17, width 395 */}
-        <p style={{
-          position:'absolute', top:236, left:17,
-          fontFamily:FH, fontSize:17, lineHeight:'169%',
-          letterSpacing:'0.01em', textTransform:'capitalize',
-          color: dark ? '#fff' : '#000',
-          width:395,
-        }}>
-          {desc || 'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit.'}
-        </p>
-
-        {/* Button: right 17, bottom 22 */}
-        <div style={{ position:'absolute', right:17, bottom:22 }}>
-          <CardButton href={`/services/${service.slug}`} />
+        {/* Text */}
+        <div style={{ padding:'12px 17px 22px', flex:1, display:'flex', flexDirection:'column' }}>
+          <h3 style={{
+            fontFamily:FM, fontWeight:500,
+            fontSize:'clamp(16px,1.8vw,22px)', lineHeight:1.3,
+            color: dark ? '#fff' : '#000', marginBottom:10,
+          }}>
+            {service.name}
+          </h3>
+          <p style={{
+            fontFamily:FH, fontSize:'clamp(13px,1.2vw,15px)', lineHeight:'165%',
+            letterSpacing:'0.01em', textTransform:'capitalize',
+            color: dark ? '#fff' : '#000', flex:1,
+          }}>
+            {desc || 'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit.'}
+          </p>
+          <div style={{ marginTop:18, display:'flex', justifyContent:'flex-end' }}>
+            <CardButton href={`/services/${service.slug}`} />
+          </div>
         </div>
       </div>
     </CardReveal>
   );
 }
 
-/* ── Cards Section  ×0.7 on padding & gap
-   section padding   40/80 → 28/56
-   container pad     0 60px → 0 42px
-   card gap          26    → 18
-────────────────────────────────────────────────────────────────── */
 function ServiceCardsSection({ services }: { services:ServiceItem[] }) {
   if (!services.length) return null;
   const groups = groupServices(services);
 
   return (
-    <section style={{ background:'#fff', padding:'28px 0 56px' }}>
+    <section style={{ background:'#fff', padding:'clamp(20px,3vw,40px) 0 clamp(40px,5vw,72px)' }}>
       <div className="srv-cards-wrap" style={{
         maxWidth:1320, margin:'0 auto',
-        padding:'0 42px',
+        padding:'0 clamp(16px,3vw,42px)',
         display:'flex', flexDirection:'column', gap:18,
       }}>
         {groups.map((g, gi) => {
@@ -887,14 +831,12 @@ function ServiceCardsSection({ services }: { services:ServiceItem[] }) {
               <WideCard service={g.wide} bg={wideBg} index={gi} />
               {g.pair.length > 0 && (
                 <div className="srv-narrow-row"
-                  style={{ display:'flex', gap:18, justifyContent:'space-between' }}>
+                  style={{ display:'flex', gap:18, flexWrap:'wrap' }}>
                   {g.pair.map((svc,pi) => (
                     <NarrowCard key={svc.id ?? pi} service={svc}
                       bg={NARROW_BG[pi % NARROW_BG.length]}
                       delay={0.15*(pi+1)} />
                   ))}
-                  {/* Single-card pair: spacer keeps card left-aligned */}
-                  {g.pair.length === 1 && <div style={{ flex:'0 0 453px' }} />}
                 </div>
               )}
             </React.Fragment>
