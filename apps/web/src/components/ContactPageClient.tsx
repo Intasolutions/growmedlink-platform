@@ -244,6 +244,85 @@ const KEYFRAMES = `
     .cnt-grid { grid-template-columns: 1fr; }
   }
 
+  /* ── WhatsApp "Join Now" button ── */
+  @keyframes cnt-wa-ping {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    70%  { transform: scale(2.2); opacity: 0;   }
+    100% { transform: scale(2.2); opacity: 0;   }
+  }
+  @keyframes cnt-wa-shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
+  @keyframes cnt-wa-bounce {
+    0%,100% { transform: translateY(0);   }
+    30%     { transform: translateY(-4px);}
+    60%     { transform: translateY(2px); }
+  }
+  .cnt-wa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    margin-top: 4px;
+    padding: 9px 18px 9px 12px;
+    border-radius: 999px;
+    background: #25D366;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(37,211,102,0.35);
+  }
+  .cnt-wa-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.38) 50%, transparent 100%);
+    background-size: 200% 100%;
+    background-position: -200% center;
+    transition: none;
+    pointer-events: none;
+  }
+  .cnt-wa-btn:hover::before {
+    animation: cnt-wa-shimmer 0.6s ease forwards;
+  }
+  .cnt-wa-btn:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 8px 24px rgba(37,211,102,0.45);
+  }
+  .cnt-wa-btn:active {
+    animation: cnt-wa-bounce 0.35s ease;
+    transform: scale(0.96);
+  }
+  .cnt-wa-icon {
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .cnt-wa-btn:hover .cnt-wa-icon {
+    transform: rotate(-15deg) scale(1.15);
+  }
+  .cnt-wa-label {
+    position: relative; z-index: 1;
+  }
+  .cnt-wa-ping {
+    position: absolute;
+    top: 8px; right: 10px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    animation: cnt-wa-ping 1.8s ease-out infinite;
+    pointer-events: none;
+  }
+
   /* state group divider */
   .cnt-state-group {
     padding-bottom: 48px;
@@ -316,12 +395,22 @@ function BranchCard({ branch }: { branch: Branch }) {
           </div>
         )}
         {branch.whatsapp && (
-          <div className="cnt-contact-row">
-            <div className="cnt-icon-box">
-              <MessageCircle size={15} color="#252525" />
-            </div>
-            <span className="cnt-contact-text">{branch.whatsapp}</span>
-          </div>
+          <a
+            href={`https://wa.me/${branch.whatsapp.replace(/[^0-9]/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cnt-wa-btn"
+          >
+            <span className="cnt-wa-icon">
+              {/* WhatsApp SVG */}
+              <svg width="17" height="17" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.676 4.8 1.854 6.79L2 30l7.418-1.83A13.93 13.93 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2Z" fill="#25D366"/>
+                <path d="M22.5 19.3c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.68-1.64-.93-2.24-.24-.59-.5-.51-.68-.52h-.58c-.2 0-.52.07-.79.37-.27.3-1.03 1-1.03 2.45s1.05 2.84 1.2 3.04c.15.2 2.07 3.16 5.02 4.43.7.3 1.25.48 1.67.62.7.22 1.34.19 1.84.11.56-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" fill="#fff"/>
+              </svg>
+            </span>
+            <span className="cnt-wa-label">Join Now</span>
+            <span className="cnt-wa-ping" />
+          </a>
         )}
       </div>
     </div>

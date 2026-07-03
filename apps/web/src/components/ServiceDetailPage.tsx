@@ -17,6 +17,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS — same design tokens as the rest of the site
@@ -753,6 +754,7 @@ export default function ServiceDetailPage({ service }: { service: ServiceDetail 
       )}
 
       <FAQSection />
+      <WhatsAppButton pageType="service_detail" itemName={service.name} />
     </main>
   );
 }

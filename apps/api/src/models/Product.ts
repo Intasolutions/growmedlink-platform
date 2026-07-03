@@ -70,6 +70,11 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    videoUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     category: {
       type: Schema.Types.ObjectId,
       ref: 'Category',

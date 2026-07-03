@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getServices } from '@/lib/api/services';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -881,6 +882,7 @@ export default function ServicesPage() {
       <Suspense fallback={null}>
         <ServicesInner />
       </Suspense>
+      <WhatsAppButton pageType="services" />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { getProducts } from '@/lib/api/products';
 import { IProduct, IMedia, ICategory } from '@intelligen/types';
 
@@ -580,6 +581,7 @@ export default function ProductsPage() {
       />
       <ProductsGrid products={filteredProducts} />
       <FAQSection />
+      <WhatsAppButton pageType="products" />
     </main>
   );
 }

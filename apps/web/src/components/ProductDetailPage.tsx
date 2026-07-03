@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
@@ -43,12 +44,24 @@ export interface ProductDetail {
   otherDetails?: string;
   relatedProducts?: RelatedProduct[];
   relatedServices?: RelatedService[];
+  videoUrl?: string;
 }
 
 function resolveImg(src?: string | { url: string } | null): string | null {
   if (!src) return null;
   if (typeof src === 'string') return src;
   if ('url' in src) return src.url;
+  return null;
+}
+
+function extractYouTubeId(url: string): string | null {
+  if (!url) return null;
+  // Handle youtu.be/ID
+  const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+  if (shortMatch) return shortMatch[1];
+  // Handle youtube.com/watch?v=ID or /embed/ID
+  const longMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/))([^?&]+)/);
+  if (longMatch) return longMatch[1];
   return null;
 }
 
@@ -281,6 +294,41 @@ function HeroSection({ product }: { product: ProductDetail }) {
               {product.duration}
             </span>
           )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ §1b VIDEO OVERVIEW ══════════════════════ */
+function VideoSection({ videoUrl }: { videoUrl: string }) {
+  const videoId = extractYouTubeId(videoUrl);
+  if (!videoId) return null;
+  return (
+    <section style={{ background: '#f8f8f8', padding: 'clamp(40px,7vw,80px) clamp(20px,5vw,60px)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <h2 style={{
+          fontFamily: FH, fontWeight: 400, fontSize: 'clamp(22px,3.5vw,40px)',
+          letterSpacing: '-0.03em', marginBottom: 'clamp(20px,3vw,40px)', color: DARK,
+        }}>
+          Watch <span style={{ color: GREEN }}>Overview</span>
+        </h2>
+        {/* 16:9 responsive wrapper */}
+        <div style={{
+          position: 'relative', paddingBottom: '56.25%', height: 0,
+          borderRadius: 14, overflow: 'hidden',
+          boxShadow: '0 12px 48px rgba(0,0,0,0.12)',
+        }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+            title="Product Overview Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{
+              position: 'absolute', top: 0, left: 0,
+              width: '100%', height: '100%', border: 0,
+            }}
+          />
         </div>
       </div>
     </section>
@@ -710,6 +758,11 @@ export default function ProductDetailPage({ product }: { product: ProductDetail 
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <HeroSection product={product} />
+
+      {!!product.videoUrl && (
+        <VideoSection videoUrl={product.videoUrl} />
+      )}
+
       <DetailsSection product={product} />
 
       {!!product.otherDetails && (
@@ -725,6 +778,7 @@ export default function ProductDetailPage({ product }: { product: ProductDetail 
       )}
 
       <FAQSection />
+      <WhatsAppButton pageType="product_detail" itemName={product.name} />
     </main>
   );
 }

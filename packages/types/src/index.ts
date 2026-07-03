@@ -80,6 +80,7 @@ export interface IProduct {
   canonicalUrl: string;
   ogImage: string;
   isFeatured: boolean;
+  videoUrl?: string;
   isDeleted?: boolean;
   deletedAt?: string;
   createdAt: string;
