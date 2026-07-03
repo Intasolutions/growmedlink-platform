@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Briefcase,
   FileText,
-  Image,
   Inbox,
   BookOpen,
   Settings,
@@ -64,12 +63,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       name: 'Reviews',
       path: '/admin/reviews',
       icon: MessageSquare,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
-    },
-    {
-      name: 'Media Library',
-      path: '/admin/media',
-      icon: Image,
       roles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
     },
     {

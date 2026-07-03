@@ -1,8 +1,10 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import authRouter from './routes/auth.js';
 import mediaRouter from './routes/media.js';
@@ -17,8 +19,6 @@ import dashboardRouter from './routes/dashboard.js';
 import reviewsRouter from './routes/reviews.js';
 import categoriesRouter from './routes/categories.js';
 import { connectDatabase } from './config/database.js';
-
-dotenv.config();
 
 // Connect to Database
 connectDatabase();

@@ -144,14 +144,22 @@ export default function FeaturedServices({ services }: { services: any[] }) {
   return (
     <section
       ref={sectionRef}
-      style={{ background: '#fff', padding: '32px 0 64px', overflow: 'hidden' }}
+      style={{ background: '#fff', padding: 'clamp(24px,4vw,32px) 0 clamp(40px,6vw,64px)', overflow: 'hidden' }}
     >
+      <style>{`
+        @media (max-width: 767px) {
+          .fs-row { flex-direction: column !important; }
+          .fs-left  { width: 100% !important; flex: none !important; }
+          .fs-right { min-width: 0 !important; height: clamp(380px,90vw,500px) !important; }
+        }
+      `}</style>
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,4vw,48px)' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
+        <div className="fs-row" style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
 
           {/* ════ LEFT PANEL ════ */}
           <div
             ref={leftPanelRef}
+            className="fs-left"
             style={{
               width: 'clamp(280px,42%,600px)',
               flex: '0 0 auto',
@@ -258,6 +266,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
           {/* ════ RIGHT PANEL ════ */}
           <div
             ref={rightPanelRef}
+            className="fs-right"
             style={{
               flex: 1, minWidth: 'clamp(280px,40%,600px)',
               borderRadius: '28px', position: 'relative',

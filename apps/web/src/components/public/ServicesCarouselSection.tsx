@@ -138,6 +138,17 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
       <style>{`
         .scs-scrollbar::-webkit-scrollbar { display: none; }
         .scs-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* hide callout arrow on small screens */
+        @media (max-width: 599px) {
+          .scs-callout { display: none !important; }
+        }
+
+        /* split layout: stack left col on mobile */
+        @media (max-width: 767px) {
+          .scs-split { flex-direction: column !important; }
+          .scs-left  { flex: none !important; width: 100% !important; }
+        }
       `}</style>
 
       <div
@@ -147,46 +158,45 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
 
         {/* ════ HEADER ════ */}
         <div
-          className="relative flex justify-center"
-          style={{ marginBottom: 'clamp(40px,6vw,80px)' }}
+          style={{ marginBottom: 'clamp(40px,6vw,80px)', position: 'relative' }}
         >
-          <div style={{ display: 'inline-block', position: 'relative' }}>
+          {/* Heading + callout row — flex so callout stays beside heading on wide, hides on narrow */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'clamp(12px,2vw,28px)', flexWrap: 'wrap' }}>
             <h2
               ref={headingRef}
               style={{
-                fontSize: 'clamp(36px,6.5vw,88px)',
+                fontSize: 'clamp(32px,6.5vw,88px)',
                 fontWeight: 500,
                 color: '#252525',
                 letterSpacing: '-0.03em',
                 lineHeight: 1,
                 margin: 0,
-                display: 'inline-block',
+                flexShrink: 0,
               }}
             >
               OUR{' '}
               <span style={{ color: '#96CA45' }}>SERVICES</span>
             </h2>
 
-            {/* Arrow + label */}
+            {/* Arrow + label — inline with heading, hidden below 600px */}
             <div
               style={{
-                position: 'absolute',
-                top: '75%',
-                right: 0,
-                transform: 'translateX(calc(100% + 10px))',
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
                 pointerEvents: 'none',
                 whiteSpace: 'nowrap',
+                paddingBottom: 'clamp(4px,0.5vw,10px)',
+                overflow: 'hidden',
               }}
+              className="scs-callout"
             >
               <div
                 ref={arrowWrapRef}
                 style={{
                   position: 'relative',
-                  width: 'clamp(44px,4.5vw,72px)',
-                  height: 'clamp(34px,3.5vw,58px)',
+                  width: 'clamp(36px,4vw,60px)',
+                  height: 'clamp(28px,3vw,48px)',
                   flexShrink: 0,
                   marginRight: '6px',
                 }}
@@ -197,9 +207,8 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
                 ref={labelRef}
                 style={{
                   fontFamily: FS,
-                  fontSize: 'clamp(20px,2.8vw,40px)',
+                  fontSize: 'clamp(18px,2.4vw,34px)',
                   color: '#c94141',
-                  marginTop: 'clamp(8px,1.5vw,20px)',
                   display: 'inline-block',
                   rotate: '-4deg',
                 }}
@@ -212,6 +221,7 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
 
         {/* ════ SPLIT LAYOUT ════ */}
         <div
+          className="scs-split"
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -224,8 +234,9 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
           {/* ── LEFT ── */}
           <div
             ref={leftColRef}
+            className="scs-left"
             style={{
-              flex: '0 0 clamp(220px,30%,380px)',
+              flex: '0 0 clamp(200px,28%,360px)',
               minWidth: 0,
             }}
           >
@@ -306,8 +317,8 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
                     ref={el => { cardRefs.current[idx] = el; }}
                     style={{
                       flexShrink: 0,
-                      width: 'clamp(240px,28vw,320px)',
-                      height: 'clamp(320px,34vw,400px)',
+                      width: 'clamp(200px,70vw,320px)',
+                      height: 'clamp(280px,34vw,400px)',
                       scrollSnapAlign: 'start',
                     }}
                   >
@@ -404,7 +415,7 @@ function ServiceCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'clamp(320px,34vw,400px)',
+        height: 'clamp(280px,34vw,400px)',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',

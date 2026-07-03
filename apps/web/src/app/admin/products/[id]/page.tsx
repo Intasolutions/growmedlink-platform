@@ -3,8 +3,8 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Loader2 } from 'lucide-react';
-import MediaSelectorModal from '../../../../components/MediaSelectorModal';
+import { ArrowLeft, Save, AlertCircle, Loader2 } from 'lucide-react';
+import ImageUploader from '../../../../components/ImageUploader';
 import { IMedia, IProduct, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -62,7 +62,6 @@ export default function EditProductPage({ params }: EditProductProps) {
     loadCategories();
   }, []);
 
-  const [mediaTarget, setMediaTarget] = useState(false);
 
   // Fetch product details on load
   useEffect(() => {
@@ -307,31 +306,13 @@ export default function EditProductPage({ params }: EditProductProps) {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Product Image
             </label>
-            {selectedImage ? (
-              <div className="relative group max-w-sm rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#020C1B]">
-                <img
-                  src={selectedImage.secureUrl}
-                  alt={selectedImage.filename}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMediaTarget(true)}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
-                >
-                  Change Image
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setMediaTarget(true)}
-                className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
-              >
-                <ImageIcon className="h-8 w-8 text-gray-500" />
-                <span className="text-xs font-semibold tracking-wider uppercase">Select from Media Library</span>
-              </button>
-            )}
+            <ImageUploader
+              value={selectedImage}
+              onUpload={setSelectedImage}
+              onClear={() => setSelectedImage(null)}
+              label="Upload Product Image"
+              folder="products"
+            />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
             )}
@@ -562,17 +543,6 @@ export default function EditProductPage({ params }: EditProductProps) {
           </button>
         </div>
       </form>
-
-      {/* Media Selector Modal */}
-      <MediaSelectorModal
-        isOpen={mediaTarget}
-        onClose={() => setMediaTarget(false)}
-        selectedId={selectedImage?._id}
-        onSelect={(img) => {
-          setSelectedImage(img);
-          setMediaTarget(false);
-        }}
-      />
     </div>
   );
 }

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
-import MediaSelectorModal from '../../../../components/MediaSelectorModal';
+import { ArrowLeft, Save, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import ImageUploader from '../../../../components/ImageUploader';
 import { IMedia, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -58,7 +58,6 @@ export default function NewServicePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const [mediaTarget, setMediaTarget] = useState<'primary' | 'secondary' | null>(null);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -282,31 +281,13 @@ export default function NewServicePage() {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Featured Image
             </label>
-            {selectedImage ? (
-              <div className="relative group max-w-sm rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#020C1B]">
-                <img
-                  src={selectedImage.secureUrl}
-                  alt={selectedImage.filename}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMediaTarget('primary')}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
-                >
-                  Change Image
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setMediaTarget('primary')}
-                className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
-              >
-                <ImageIcon className="h-8 w-8 text-gray-500 animate-pulse" />
-                <span className="text-xs font-semibold tracking-wider uppercase">Select from Media Library</span>
-              </button>
-            )}
+            <ImageUploader
+              value={selectedImage}
+              onUpload={setSelectedImage}
+              onClear={() => setSelectedImage(null)}
+              label="Upload Featured Image"
+              folder="services"
+            />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
             )}
@@ -334,31 +315,13 @@ export default function NewServicePage() {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Secondary Image
             </label>
-            {secondaryImage ? (
-              <div className="relative group max-w-sm rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#020C1B]">
-                <img
-                  src={secondaryImage.secureUrl}
-                  alt={secondaryImage.filename}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMediaTarget('secondary')}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
-                >
-                  Change Secondary Image
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setMediaTarget('secondary')}
-                className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
-              >
-                <ImageIcon className="h-8 w-8 text-gray-500" />
-                <span className="text-xs font-semibold tracking-wider uppercase">Select Secondary Image</span>
-              </button>
-            )}
+            <ImageUploader
+              value={secondaryImage}
+              onUpload={setSecondaryImage}
+              onClear={() => setSecondaryImage(null)}
+              label="Upload Secondary Image"
+              folder="services"
+            />
             {fieldErrors.secondaryImage && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.secondaryImage[0]}</p>
             )}
@@ -576,18 +539,6 @@ export default function NewServicePage() {
           </button>
         </div>
       </form>
-
-      {/* Media Selector Modal */}
-      <MediaSelectorModal
-        isOpen={mediaTarget !== null}
-        onClose={() => setMediaTarget(null)}
-        selectedId={mediaTarget === 'primary' ? selectedImage?._id : mediaTarget === 'secondary' ? secondaryImage?._id : undefined}
-        onSelect={(img) => {
-          if (mediaTarget === 'primary') setSelectedImage(img);
-          else if (mediaTarget === 'secondary') setSecondaryImage(img);
-          setMediaTarget(null);
-        }}
-      />
     </div>
   );
 }

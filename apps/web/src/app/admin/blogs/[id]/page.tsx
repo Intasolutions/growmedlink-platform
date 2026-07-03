@@ -3,8 +3,8 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, Loader2 } from 'lucide-react';
-import MediaSelectorModal from '../../../../components/MediaSelectorModal';
+import { ArrowLeft, Save, AlertCircle, Loader2 } from 'lucide-react';
+import ImageUploader from '../../../../components/ImageUploader';
 import TiptapEditor from '../../../../components/TiptapEditor';
 import { IMedia, IBlog } from '@intelligen/types';
 
@@ -42,7 +42,6 @@ export default function EditBlogPage({ params }: EditBlogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const [isMediaOpen, setIsMediaOpen] = useState(false);
 
   // Fetch blog post details on load
   useEffect(() => {
@@ -351,31 +350,13 @@ export default function EditBlogPage({ params }: EditBlogProps) {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Featured Image
             </label>
-            {selectedImage ? (
-              <div className="relative group max-w-sm rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#020C1B]">
-                <img
-                  src={selectedImage.secureUrl}
-                  alt={selectedImage.filename}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => setIsMediaOpen(true)}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm font-bold text-white transition-opacity"
-                >
-                  Change Image
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsMediaOpen(true)}
-                className="w-full max-w-sm aspect-video bg-[#020C1B]/80 hover:bg-[#020C1B] border border-dashed border-white/15 hover:border-secondary/35 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all"
-              >
-                <ImageIcon className="h-8 w-8 text-gray-500 animate-pulse" />
-                <span className="text-xs font-semibold tracking-wider uppercase">Select from Media Library</span>
-              </button>
-            )}
+            <ImageUploader
+              value={selectedImage}
+              onUpload={setSelectedImage}
+              onClear={() => setSelectedImage(null)}
+              label="Upload Featured Image"
+              folder="blogs"
+            />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
             )}
@@ -521,14 +502,6 @@ export default function EditBlogPage({ params }: EditBlogProps) {
           </button>
         </div>
       </form>
-
-      {/* Media Selector Modal */}
-      <MediaSelectorModal
-        isOpen={isMediaOpen}
-        onClose={() => setIsMediaOpen(false)}
-        selectedId={selectedImage?._id}
-        onSelect={setSelectedImage}
-      />
     </div>
   );
 }

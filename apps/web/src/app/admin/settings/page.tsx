@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Image as ImageIcon, X, AlertCircle } from 'lucide-react';
-import MediaSelectorModal from '@/components/MediaSelectorModal';
+import { Save, Loader2, AlertCircle } from 'lucide-react';
+import ImageUploader from '@/components/ImageUploader';
 import Image from 'next/image';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
@@ -30,7 +30,6 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   
-  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -89,10 +88,6 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleMediaSelect = (media: any) => {
-    setFormData({ ...formData, logo: media });
-    setIsMediaModalOpen(false);
-  };
 
   if (isLoading) {
     return (
@@ -222,39 +217,13 @@ export default function AdminSettingsPage() {
             <h3 className="font-bold text-white text-lg border-b border-white/5 pb-4">Company Logo</h3>
             
             <div className="space-y-4">
-              {formData.logo ? (
-                <div className="relative group rounded-xl overflow-hidden border border-white/10 bg-[#020C1B] aspect-video flex items-center justify-center p-4">
-                  <Image 
-                    src={typeof formData.logo === 'object' ? formData.logo.secureUrl : formData.logo} 
-                    alt="Logo"
-                    width={200}
-                    height={100}
-                    className="object-contain max-h-full"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                    <button
-                      onClick={() => setIsMediaModalOpen(true)}
-                      className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
-                    >
-                      <ImageIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => setFormData({ ...formData, logo: null as any })}
-                      className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsMediaModalOpen(true)}
-                  className="w-full aspect-video rounded-xl border-2 border-dashed border-white/10 bg-[#020C1B] flex flex-col items-center justify-center gap-3 text-gray-500 hover:text-white hover:border-white/30 transition-colors"
-                >
-                  <ImageIcon className="h-8 w-8" />
-                  <span className="text-sm font-medium">Select Logo</span>
-                </button>
-              )}
+              <ImageUploader
+                value={formData.logo}
+                onUpload={(media) => setFormData({ ...formData, logo: media })}
+                onClear={() => setFormData({ ...formData, logo: null as any })}
+                label="Upload Logo"
+                folder="settings"
+              />
             </div>
           </div>
 
@@ -306,13 +275,6 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
-
-      <MediaSelectorModal
-        isOpen={isMediaModalOpen}
-        onClose={() => setIsMediaModalOpen(false)}
-        onSelect={handleMediaSelect}
-        selectedId={typeof formData.logo === 'object' ? formData.logo?._id : formData.logo}
-      />
       </div>
     </ProtectedRoute>
   );

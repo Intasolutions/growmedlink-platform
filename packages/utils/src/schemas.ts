@@ -67,6 +67,7 @@ export const ProductSchema = z.object({
   canonicalUrl: z.string().url('Please enter a valid canonical URL').optional().or(z.literal('')),
   ogImage: z.string().url('Please enter a valid Open Graph image URL').optional().or(z.literal('')),
   isFeatured: z.boolean().default(false),
+  videoUrl: z.string().optional().or(z.literal('')),
 });
 
 export const CreateBlogSchema = z.object({

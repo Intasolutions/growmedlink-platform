@@ -138,16 +138,26 @@
     flex-direction: column;
     border-radius: 48px;
     height: auto;
-    max-width: 480px;
+    max-width: 100%;
     padding-bottom: 36px;
-    overflow: hidden;
+    overflow: visible; /* allow brackets to show */
   }
   .why-img-wrap {
     width: 100%;
-    height: clamp(180px, 52vw, 260px);
-    border-radius: 0 0 120px 120px;
+    height: clamp(180px, 55vw, 260px);
+    border-radius: 0 0 80px 80px;
     align-self: unset;
     transform: none !important;
+  }
+}
+
+@media (max-width: 479px) {
+  .why-card {
+    border-radius: 28px;
+  }
+  .why-img-wrap {
+    height: clamp(160px, 60vw, 220px);
+    border-radius: 0 0 48px 48px;
   }
 }
 
