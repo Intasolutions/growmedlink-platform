@@ -1,68 +1,138 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GraduationCap, MapPin, Phone, Mail, Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 interface FooterProps {
   settings: any;
 }
 
+const FOOTER_STYLES = `
+.ft-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: stretch;
+}
+@media (min-width: 1024px) {
+  .ft-wrap { grid-template-columns: 1fr 2fr; }
+}
+
+/* Dark card inner: links panel + green panel side by side */
+.ft-dark-card {
+  border-radius: 24px;
+  background: rgba(37,37,37,1);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .ft-dark-card { flex-direction: row; }
+}
+
+.ft-links-panel {
+  flex: 1;
+  padding: clamp(16px, 3vw, 28px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ft-green-panel {
+  background: rgba(150,202,69,1);
+  border-radius: 16px;
+  padding: clamp(20px, 3vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+}
+@media (min-width: 640px) {
+  .ft-green-panel { width: 45%; flex-shrink: 0; }
+}
+@media (max-width: 639px) {
+  .ft-green-panel { width: 100%; min-height: 120px; }
+}
+
+.ft-link-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+@media (min-width: 480px) {
+  .ft-link-cols { grid-template-columns: 1fr 1fr; }
+}
+`;
+
 export default function Footer({ settings }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white font-['Power_Grotesk'] border-t-2 border-[rgba(150,202,69,1)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+    <footer style={{ background: '#fff', fontFamily: "'Power Grotesk','Helvetica Neue',Arial,sans-serif", borderTop: '2px solid rgba(150,202,69,1)' }}>
+      <style dangerouslySetInnerHTML={{ __html: FOOTER_STYLES }} />
+
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(32px,5vw,64px) clamp(16px,4vw,40px)' }}>
+        <div className="ft-wrap">
 
           {/* LEFT: Logo + Description + Contact */}
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-3">
-            {settings?.logo ? (
-              <Image
-                src={typeof settings.logo === 'object' ? settings.logo.secureUrl : settings.logo}
-                alt={settings.companyName || 'Intelligen'}
-                width={160}
-                height={40}
-                className="h-10 w-auto object-contain"
-              />
-            ) : (
-              <Image
-                src="/logo.png"
-                alt="GrowMedLink"
-                width={180}
-                height={48}
-                className="h-10 w-auto object-contain"
-              />
-            )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              {settings?.logo ? (
+                <Image
+                  src={typeof settings.logo === 'object' ? settings.logo.secureUrl : settings.logo}
+                  alt={settings.companyName || 'GrowMedLink'}
+                  width={160} height={40}
+                  style={{ height: 40, width: 'auto', objectFit: 'contain' }}
+                />
+              ) : (
+                <Image
+                  src="/logo.png"
+                  alt="GrowMedLink"
+                  width={180} height={48}
+                  style={{ height: 40, width: 'auto', objectFit: 'contain' }}
+                />
+              )}
             </Link>
 
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {settings?.seoDefaultDescription || "Empowering your global journey with expert immigration services and professional language training."}
+            <p style={{ color: '#555', fontSize: 'clamp(13px,1.2vw,15px)', lineHeight: '1.65' }}>
+              {settings?.seoDefaultDescription || 'Empowering your global journey with expert immigration services and professional language training.'}
             </p>
 
-            <ul className="space-y-4 pt-2">
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {settings?.address && (
-                <li className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-[rgba(150,202,69,1)] shrink-0 mt-0.5" />
+                <li style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <MapPin style={{ width: 18, height: 18, color: 'rgba(150,202,69,1)', flexShrink: 0, marginTop: 2 }} />
                   <div>
-                    <span className="text-[#1a5f97] font-semibold text-sm block mb-1">Bangalore</span>
-                    <span className="text-gray-700 text-sm leading-relaxed block">{settings.address}</span>
+                    <span style={{ color: '#1a5f97', fontWeight: 600, fontSize: 13, display: 'block', marginBottom: 2 }}>Bangalore</span>
+                    <span style={{ color: '#555', fontSize: 13, lineHeight: '1.55' }}>{settings.address}</span>
                   </div>
                 </li>
               )}
               {settings?.contactEmail && (
-                <li className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-[rgba(150,202,69,1)] shrink-0" />
-                  <a href={`mailto:${settings.contactEmail}`} className="text-gray-700 hover:text-[rgba(150,202,69,1)] text-sm transition-colors">
+                <li style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Mail style={{ width: 18, height: 18, color: 'rgba(150,202,69,1)', flexShrink: 0 }} />
+                  <a href={`mailto:${settings.contactEmail}`}
+                    style={{ color: '#555', fontSize: 13, textDecoration: 'none', wordBreak: 'break-all' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(150,202,69,1)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#555')}>
                     {settings.contactEmail}
                   </a>
                 </li>
               )}
               {settings?.contactPhone && (
-                <li className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-[rgba(150,202,69,1)] shrink-0" />
-                  <a href={`tel:${settings.contactPhone}`} className="text-gray-700 hover:text-[rgba(150,202,69,1)] text-sm transition-colors">
+                <li style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Phone style={{ width: 18, height: 18, color: 'rgba(150,202,69,1)', flexShrink: 0 }} />
+                  <a href={`tel:${settings.contactPhone}`}
+                    style={{ color: '#555', fontSize: 13, textDecoration: 'none' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(150,202,69,1)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#555')}>
                     {settings.contactPhone}
                   </a>
                 </li>
@@ -70,80 +140,114 @@ export default function Footer({ settings }: FooterProps) {
             </ul>
           </div>
 
-          {/* COMBINED: Dark card containing links and the inner Green card */}
-          <div className="lg:col-span-2 rounded-[24px] bg-[rgba(37,37,37,1)] flex border border-white/10 p-2 md:p-3">
+          {/* RIGHT: Dark card */}
+          <div className="ft-dark-card">
 
-            {/* Left panel: Dark with links */}
-            <div className="flex-1 p-6 relative overflow-hidden flex flex-col">
-              {/* Background Image Container */}
-              <div className="absolute inset-0 pointer-events-none opacity-50 bg-[url('/footer-bg-dark.png')] bg-cover bg-center bg-no-repeat" />
+            {/* Links panel */}
+            <div className="ft-links-panel">
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+                backgroundImage: "url('/footer-bg-dark.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
 
-              {/* Quick Links */}
-              <div className="mb-4">
-                <h3 className="text-[rgba(150,202,69,1)] font-['Power_Grotesk'] font-bold tracking-wide text-lg mb-2 relative z-10">Quick Links</h3>
-                <ul className="flex flex-col relative z-10">
-                  <li className="border-b border-white/5 py-1.5"><Link href="/" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Home</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/about" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">About Us</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/services" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Products</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/services" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Services</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/blog" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Blogs</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/talk-to-expert" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Talk to an Expert</Link></li>
-                </ul>
+              <div className="ft-link-cols" style={{ position: 'relative', zIndex: 1 }}>
+                {/* Quick Links */}
+                <div>
+                  <h3 style={{ color: 'rgba(150,202,69,1)', fontWeight: 700, fontSize: 'clamp(14px,1.3vw,17px)', marginBottom: 10, letterSpacing: '0.02em' }}>
+                    Quick Links
+                  </h3>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column' }}>
+                    {[
+                      { href: '/',              label: 'Home'            },
+                      { href: '/about',         label: 'About Us'        },
+                      { href: '/products',      label: 'Products'        },
+                      { href: '/services',      label: 'Services'        },
+                      { href: '/blog',          label: 'Blogs'           },
+                      { href: '/talk-to-expert',label: 'Talk to an Expert'},
+                    ].map(({ href, label }) => (
+                      <li key={href} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '7px 0' }}>
+                        <Link href={href} style={{ color: '#fff', fontSize: 'clamp(12px,1.1vw,14px)', textDecoration: 'none' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(150,202,69,1)')}
+                          onMouseLeave={e => (e.currentTarget.style.color = '#fff')}>
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Other */}
+                <div>
+                  <h3 style={{ color: 'rgba(150,202,69,1)', fontWeight: 700, fontSize: 'clamp(14px,1.3vw,17px)', marginBottom: 10, letterSpacing: '0.02em' }}>
+                    Other
+                  </h3>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column' }}>
+                    {[
+                      { href: '/terms',   label: 'Terms & Conditions' },
+                      { href: '/privacy', label: 'Privacy Policy'     },
+                      { href: '/contact', label: 'Contact Us'         },
+                    ].map(({ href, label }) => (
+                      <li key={href} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '7px 0' }}>
+                        <Link href={href} style={{ color: '#fff', fontSize: 'clamp(12px,1.1vw,14px)', textDecoration: 'none' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(150,202,69,1)')}
+                          onMouseLeave={e => (e.currentTarget.style.color = '#fff')}>
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
+            </div>
 
-              {/* Other */}
-              <div>
-                <h3 className="text-[rgba(150,202,69,1)] font-['Power_Grotesk'] font-bold tracking-wide text-lg mb-2 mt-4 relative z-10">Other</h3>
-                <ul className="flex flex-col relative z-10">
-                  <li className="border-b border-white/5 py-1.5"><Link href="/terms" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Terms &amp; Conditions</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/privacy" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Privacy Policy</Link></li>
-                  <li className="border-b border-white/5 py-1.5"><Link href="/contact" className="text-white hover:text-[rgba(150,202,69,1)] text-sm transition-colors">Contact us</Link></li>
-                </ul>
+            {/* Green panel */}
+            <div className="ft-green-panel">
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+                backgroundImage: "url('/footer-bg-green.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
+
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p style={{ color: 'rgba(0,0,0,0.75)', fontSize: 'clamp(13px,1.2vw,15px)', lineHeight: '1.5', marginBottom: 16, fontWeight: 500 }}>
+                  Follow us and stay connected for updates.
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  {settings?.socialLinks?.instagram && (
+                    <a href={settings.socialLinks.instagram} target="_blank" rel="noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
+                      <Instagram style={{ width: 16, height: 16 }} />
+                    </a>
+                  )}
+                  {settings?.socialLinks?.facebook && (
+                    <a href={settings.socialLinks.facebook} target="_blank" rel="noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
+                      <Facebook style={{ width: 16, height: 16 }} />
+                    </a>
+                  )}
+                  {settings?.socialLinks?.twitter && (
+                    <a href={settings.socialLinks.twitter} target="_blank" rel="noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
+                      <Twitter style={{ width: 16, height: 16 }} />
+                    </a>
+                  )}
+                  {settings?.socialLinks?.linkedin && (
+                    <a href={settings.socialLinks.linkedin} target="_blank" rel="noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
+                      <Linkedin style={{ width: 16, height: 16 }} />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Right panel: Green inner card */}
-            <div className="bg-[rgba(150,202,69,1)] rounded-[16px] w-[45%] p-6 flex flex-col justify-end relative overflow-hidden">
-              {/* Background Image Container */}
-              <div className="absolute inset-0 pointer-events-none opacity-50 bg-[url('/footer-bg-green.png')] bg-cover bg-center bg-no-repeat" />
-
-              {/* Social Icons */}
-              <div className="relative z-10 flex items-center gap-3">
-                {settings?.socialLinks?.instagram && (
-                  <a href={settings.socialLinks.instagram} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 rounded-md bg-black/10 flex items-center justify-center text-[#252525] hover:bg-black/20 transition-colors">
-                    <Instagram className="h-4 w-4" />
-                  </a>
-                )}
-                {settings?.socialLinks?.facebook && (
-                  <a href={settings.socialLinks.facebook} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 rounded-md bg-black/10 flex items-center justify-center text-[#252525] hover:bg-black/20 transition-colors">
-                    <Facebook className="h-4 w-4" />
-                  </a>
-                )}
-                {settings?.socialLinks?.twitter && (
-                  <a href={settings.socialLinks.twitter} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 rounded-md bg-black/10 flex items-center justify-center text-[#252525] hover:bg-black/20 transition-colors">
-                    <Twitter className="h-4 w-4" />
-                  </a>
-                )}
-                {settings?.socialLinks?.linkedin && (
-                  <a href={settings.socialLinks.linkedin} target="_blank" rel="noreferrer"
-                    className="w-8 h-8 rounded-md bg-black/10 flex items-center justify-center text-[#252525] hover:bg-black/20 transition-colors">
-                    <Linkedin className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
-            </div>
           </div>
-
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="bg-[rgba(37,37,37,1)] border-t border-white/10 py-5">
-        <p className="text-gray-300 text-sm text-center">
-          © {currentYear} {settings?.companyName || 'Bias Radar'}. All Rights Reserved.
+      {/* Bottom bar */}
+      <div style={{ background: 'rgba(37,37,37,1)', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '18px 16px' }}>
+        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 'clamp(12px,1.1vw,14px)', textAlign: 'center', margin: 0 }}>
+          © {currentYear} {settings?.companyName || 'GrowMedLink'}. All Rights Reserved.
         </p>
       </div>
     </footer>

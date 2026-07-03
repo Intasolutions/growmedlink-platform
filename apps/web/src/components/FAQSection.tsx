@@ -2,13 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-/* ─── Design tokens (kept local so this component is fully portable) ─── */
 const FH  = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FS  = "'Great Day Personal Use','Brush Script MT',cursive";
 const GREEN = '#96CA45';
 const DARK  = '#252525';
 
-/* ─── Scoped CSS ─────────────────────────────────────────────────────── */
 const FAQ_STYLES = `
 @keyframes faq-pulse {
   0%, 100% { opacity: 0.55; transform: scale(1);    }
@@ -27,10 +25,10 @@ const FAQ_STYLES = `
   overflow: hidden;
   transition: max-height 0.52s cubic-bezier(.22,.68,0,1.2), padding 0.35s ease;
 }
-.faq-body.faq-open { max-height: 210px; }
+.faq-body.faq-open { max-height: 600px; }
 
 .faq-icon {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   border: 1.5px solid rgba(255,255,255,0.3);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -43,18 +41,39 @@ const FAQ_STYLES = `
   border-color: #96CA45;
   background: rgba(150,202,69,0.18);
 }
+
+/* wave dots — clamp to viewport on small screens */
+.faq-wavedots {
+  position: absolute;
+  left: 16px;
+  top: 48px;
+  pointer-events: none;
+  max-width: calc(33vw);
+  overflow: hidden;
+}
+
+/* side note — hidden on small screens, shown from md up */
+.faq-sidenote {
+  position: absolute;
+  right: 26px;
+  top: 0;
+  width: 160px;
+}
+@media (max-width: 639px) {
+  .faq-wavedots  { display: none; }
+  .faq-sidenote  { display: none; }
+}
+@media (max-width: 767px) {
+  .faq-btn { padding: 0 14px !important; min-height: 54px !important; }
+  .faq-ans { padding: 0 14px 16px !important; padding-right: 14px !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   .faq-rv { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
 `;
 
-/* ─── Types ──────────────────────────────────────────────────────────── */
-export interface FAQItem {
-  q: string;
-  a: string;
-}
+export interface FAQItem { q: string; a: string; }
 
-/* ─── Default FAQ data (exported — callers can spread/extend it) ─────── */
 export const DEFAULT_FAQS: FAQItem[] = [
   { q: 'When does the next batch launch?',                 a: 'A new batch opens on the 1st of every month. Registration is available 30 days before the start date. Visit our Courses page for batch-specific dates and seat availability for each programme track.' },
   { q: 'How long is the NCLEX preparation programme?',    a: 'Our comprehensive NCLEX prep runs for 6 months with a flexible self-paced schedule. We also offer an intensive 3-month fast-track for candidates with a strong nursing foundation who are ready to accelerate.' },
@@ -66,19 +85,13 @@ export const DEFAULT_FAQS: FAQItem[] = [
   { q: 'Do you provide placement support?',               a: 'Yes. Our dedicated placement cell maintains active partnerships with hospitals and staffing agencies across the USA, UK, Canada, and Australia. Most of our graduates secure placements within 90 days of passing their exam.' },
 ];
 
-/* ─── Props ──────────────────────────────────────────────────────────── */
 export interface FAQSectionProps {
-  /** Custom FAQ list — defaults to DEFAULT_FAQS */
   faqs?: FAQItem[];
-  /** Override the heading node */
   heading?: React.ReactNode;
-  /** Override the sidebar annotation (newlines supported) */
   sideNote?: string;
-  /** Section background colour — defaults to #252525 */
   background?: string;
 }
 
-/* ─── Scroll-reveal hook ─────────────────────────────────────────────── */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -94,7 +107,6 @@ function useReveal() {
   return ref;
 }
 
-/* ─── Wave-dot decoration ────────────────────────────────────────────── */
 function WaveDots({ flip = false }: { flip?: boolean }) {
   const dots = [
     { l: 0, t: 29 }, { l: 31, t: 24 }, { l: 60, t: 29 }, { l: 93, t: 20 },
@@ -104,21 +116,17 @@ function WaveDots({ flip = false }: { flip?: boolean }) {
   return (
     <div style={{ position: 'relative', width: 318, height: 42, flexShrink: 0, transform: flip ? 'scaleX(-1)' : 'none' }}>
       {dots.map((d, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute', left: d.l, top: d.t,
-            width: 13, height: 13, borderRadius: '50%', background: GREEN,
-            animation: `faq-pulse ${1.4 + i * 0.12}s ease-in-out ${i * 0.08}s infinite`,
-            willChange: 'transform, opacity',
-          }}
-        />
+        <div key={i} style={{
+          position: 'absolute', left: d.l, top: d.t,
+          width: 13, height: 13, borderRadius: '50%', background: GREEN,
+          animation: `faq-pulse ${1.4 + i * 0.12}s ease-in-out ${i * 0.08}s infinite`,
+          willChange: 'transform, opacity',
+        }} />
       ))}
     </div>
   );
 }
 
-/* ─── Main component ─────────────────────────────────────────────────── */
 export default function FAQSection({
   faqs = DEFAULT_FAQS,
   heading,
@@ -128,35 +136,21 @@ export default function FAQSection({
   const [open, setOpen] = useState<number | null>(null);
   const rh = useReveal();
 
-  const headingNode = heading ?? (
-    <>Got questions?<br />We&apos;ve got answers.</>
-  );
+  const headingNode = heading ?? (<>Got questions?<br />We&apos;ve got answers.</>);
 
   return (
     <section style={{ background, padding: 'clamp(40px, 8vw, 80px) 0', position: 'relative', overflow: 'hidden' }}>
-      {/* Scoped styles injected once per mount */}
       <style dangerouslySetInnerHTML={{ __html: FAQ_STYLES }} />
 
-      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 clamp(20px, 5vw, 60px)', position: 'relative' }}>
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 clamp(16px, 5vw, 60px)', position: 'relative' }}>
 
-        {/* Wave dots – left */}
-        <div style={{ position: 'absolute', left: 26, top: 48, pointerEvents: 'none' }}>
+        {/* Wave dots — hidden on mobile via CSS */}
+        <div className="faq-wavedots">
           <WaveDots flip />
         </div>
 
-        {/* Heading */}
-        <div ref={rh} className="faq-rv" style={{ textAlign: 'center', marginBottom: 36 }}>
-          <h2 style={{
-            fontFamily: FH, fontWeight: 400, letterSpacing: '-0.03em',
-            fontSize: 'clamp(24px,4vw,48px)', color: '#fff',
-            lineHeight: '1.19', maxWidth: 455, margin: '0 auto',
-          }}>
-            {headingNode}
-          </h2>
-        </div>
-
-        {/* Side annotation */}
-        <div style={{ position: 'absolute', right: 26, top: 0, width: 180 }}>
+        {/* Side annotation — hidden on mobile via CSS */}
+        <div className="faq-sidenote">
           <span style={{ fontFamily: FS, fontSize: 18, color: GREEN, lineHeight: '22px', display: 'block', whiteSpace: 'pre-line' }}>
             {sideNote}
           </span>
@@ -166,18 +160,27 @@ export default function FAQSection({
           </svg>
         </div>
 
+        {/* Heading */}
+        <div ref={rh} className="faq-rv" style={{ textAlign: 'center', marginBottom: 'clamp(24px, 4vw, 40px)' }}>
+          <h2 style={{
+            fontFamily: FH, fontWeight: 400, letterSpacing: '-0.03em',
+            fontSize: 'clamp(26px, 4vw, 48px)', color: '#fff',
+            lineHeight: '1.19', maxWidth: 455, margin: '0 auto',
+          }}>
+            {headingNode}
+          </h2>
+        </div>
+
         {/* Accordion list */}
         <div style={{ maxWidth: 694, margin: '0 auto' }}>
           {faqs.map((f, i) => (
-            <div
-              key={i}
-              style={{
-                borderTop: '1px solid #3E3E3E',
-                borderBottom: i === faqs.length - 1 ? '1px solid #3E3E3E' : 'none',
-                marginTop: -1,
-              }}
-            >
+            <div key={i} style={{
+              borderTop: '1px solid #3E3E3E',
+              borderBottom: i === faqs.length - 1 ? '1px solid #3E3E3E' : 'none',
+              marginTop: -1,
+            }}>
               <button
+                className="faq-btn"
                 style={{
                   width: '100%', minHeight: 62, display: 'flex',
                   alignItems: 'center', justifyContent: 'space-between',
@@ -187,11 +190,16 @@ export default function FAQSection({
                 onClick={() => setOpen(open === i ? null : i)}
                 aria-expanded={open === i}
               >
-                <span style={{ fontFamily: FH, fontSize: 'clamp(10px,1.2vw,15px)', fontWeight: 400, letterSpacing: '-0.03em', color: '#fff', flex: 1 }}>
+                <span style={{
+                  fontFamily: FH,
+                  fontSize: 'clamp(13px, 1.5vw, 15px)',
+                  fontWeight: 400, letterSpacing: '-0.02em',
+                  color: '#fff', flex: 1,
+                }}>
                   {f.q}
                 </span>
                 <div className={`faq-icon${open === i ? ' faq-open' : ''}`} aria-hidden="true">
-                  <svg width={9} height={9} viewBox="0 0 14 14">
+                  <svg width={10} height={10} viewBox="0 0 14 14">
                     <line x1={7} y1={2} x2={7} y2={12} stroke="#fff" strokeWidth={1.8} strokeLinecap="round" />
                     <line x1={2} y1={7} x2={12} y2={7} stroke="#fff" strokeWidth={1.8} strokeLinecap="round" />
                   </svg>
@@ -199,7 +207,12 @@ export default function FAQSection({
               </button>
 
               <div className={`faq-body${open === i ? ' faq-open' : ''}`} role="region">
-                <p style={{ fontFamily: FH, fontSize: 11, color: 'rgba(255,255,255,0.72)', lineHeight: '170%', padding: '0 28px 18px', paddingRight: 52 }}>
+                <p className="faq-ans" style={{
+                  fontFamily: FH,
+                  fontSize: 'clamp(12px, 1.3vw, 14px)',
+                  color: 'rgba(255,255,255,0.72)', lineHeight: '170%',
+                  padding: '0 28px 18px', paddingRight: 52,
+                }}>
                   {f.a}
                 </p>
               </div>

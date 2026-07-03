@@ -27,13 +27,16 @@ interface ServiceItem {
   slug: string;
   shortDescription?: string;
   description?: string;
-  image?: string | { url: string; alt?: string } | null;
+  image?: string | { url?: string; secureUrl?: string; alt?: string } | null;
   imageUrl?: string;
   category?: string | { name: string; slug: string };
 }
 function resolveImage(s: ServiceItem): string | null {
   if (typeof s.image === 'string' && s.image) return s.image;
-  if (s.image && typeof s.image === 'object' && 'url' in s.image) return s.image.url;
+  if (s.image && typeof s.image === 'object') {
+    if ('secureUrl' in s.image && s.image.secureUrl) return s.image.secureUrl;
+    if ('url' in s.image && s.image.url) return s.image.url;
+  }
   if (s.imageUrl) return s.imageUrl;
   return null;
 }
@@ -859,7 +862,13 @@ function ServicesInner() {
   useEffect(() => {
     getServices(category as any)
       .then((data: any) => {
-        setServices(Array.isArray(data) ? data : (data?.data ?? []));
+        const raw: any[] = Array.isArray(data) ? data : (data?.data ?? []);
+        setServices(raw.map((s: any) => ({
+          ...s,
+          id: s._id ?? s.id,
+          name: s.name ?? s.title,
+          shortDescription: s.shortDescription ?? s.description,
+        })));
       })
       .catch((err: unknown) => { console.error('[ServicesPage]', err); });
   }, [category]);
