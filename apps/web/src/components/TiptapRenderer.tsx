@@ -13,7 +13,7 @@ export function renderTiptapNode(node: any, index: number): React.ReactNode {
       );
     case 'paragraph':
       return (
-        <p key={key} className="text-gray-300 text-sm md:text-base font-light leading-relaxed font-sans">
+        <p key={key} style={{ color: '#000' }}>
           {node.content?.map((child: any, idx: number) => renderTiptapNode(child, idx)) || '\u00A0'}
         </p>
       );
@@ -21,9 +21,9 @@ export function renderTiptapNode(node: any, index: number): React.ReactNode {
       const level = node.attrs?.level || 1;
       const HeadingTag = `h${level}` as any;
       const classMap: Record<number, string> = {
-        1: 'text-2xl md:text-3xl font-heading font-black tracking-wide text-white mt-10 mb-4 border-b border-white/5 pb-2',
-        2: 'text-xl md:text-2xl font-heading font-extrabold tracking-wide text-white mt-8 mb-3',
-        3: 'text-lg md:text-xl font-heading font-bold tracking-wide text-white mt-6 mb-2',
+        1: 'text-2xl md:text-3xl font-heading font-black tracking-wide mt-10 mb-4 pb-2',
+        2: 'text-xl md:text-2xl font-heading font-extrabold tracking-wide mt-8 mb-3',
+        3: 'text-lg md:text-xl font-heading font-bold tracking-wide mt-6 mb-2',
       };
       const className = classMap[level] || classMap[3];
       return (
@@ -37,7 +37,7 @@ export function renderTiptapNode(node: any, index: number): React.ReactNode {
       if (node.marks) {
         for (const mark of node.marks) {
           if (mark.type === 'bold') {
-            textNode = <strong key={key + '-bold'} className="font-bold text-white">{textNode}</strong>;
+            textNode = <strong key={key + '-bold'} className="font-bold" style={{ color: '#000' }}>{textNode}</strong>;
           } else if (mark.type === 'italic') {
             textNode = <em key={key + '-italic'}>{textNode}</em>;
           } else if (mark.type === 'underline') {
@@ -61,13 +61,13 @@ export function renderTiptapNode(node: any, index: number): React.ReactNode {
     }
     case 'bulletList':
       return (
-        <ul key={key} className="list-disc pl-6 space-y-2 text-gray-300 text-sm md:text-base font-light font-sans">
+        <ul key={key} className="list-disc pl-6 space-y-2" style={{ color: '#000' }}>
           {node.content?.map((child: any, idx: number) => renderTiptapNode(child, idx))}
         </ul>
       );
     case 'orderedList':
       return (
-        <ol key={key} className="list-decimal pl-6 space-y-2 text-gray-300 text-sm md:text-base font-light font-sans">
+        <ol key={key} className="list-decimal pl-6 space-y-2" style={{ color: '#000' }}>
           {node.content?.map((child: any, idx: number) => renderTiptapNode(child, idx))}
         </ol>
       );
@@ -79,7 +79,7 @@ export function renderTiptapNode(node: any, index: number): React.ReactNode {
       );
     case 'blockquote':
       return (
-        <blockquote key={key} className="border-l-4 border-secondary/40 pl-4 py-2 my-6 italic text-gray-400 bg-white/[0.02] rounded-r-lg font-sans">
+        <blockquote key={key} className="border-l-4 pl-4 py-2 my-6 italic rounded-r-lg" style={{ borderColor: '#96CA45', background: 'rgba(150,202,69,0.06)', color: '#444' }}>
           {node.content?.map((child: any, idx: number) => renderTiptapNode(child, idx))}
         </blockquote>
       );

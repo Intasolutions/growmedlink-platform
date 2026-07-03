@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link  from 'next/link';
 import FAQSection from '@/components/FAQSection';
-// Adjust this import path to match your project structure:
 import { TiptapRenderer } from '@/components/TiptapRenderer';
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -25,6 +24,7 @@ interface BlogAuthor {
 }
 export interface BlogDetail {
   title:            string;
+  subHeading?:      string;
   summary?:         string;
   content?:         any;
   image?:           string | { url: string; secureUrl?: string } | null;
@@ -62,7 +62,7 @@ function formatDate(d?: string): string {
 const STYLES = `
 .bld * { box-sizing:border-box; margin:0; padding:0; }
 .bld a  { text-decoration:none; }
-.bld img { display:block; }
+.bld img { display:block; max-width:100%; }
 
 /* ── keyframes ── */
 @keyframes bld-fadein {
@@ -72,6 +72,20 @@ const STYLES = `
 @keyframes bld-img-scale {
   from { transform:scale(1.06); }
   to   { transform:scale(1);    }
+}
+@keyframes bld-copy-pop {
+  0%   { transform:scale(1); }
+  35%  { transform:scale(0.88); }
+  70%  { transform:scale(1.12); }
+  100% { transform:scale(1); }
+}
+@keyframes bld-tick-in {
+  from { stroke-dashoffset:24; opacity:0; }
+  to   { stroke-dashoffset:0;  opacity:1; }
+}
+@keyframes bld-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
 }
 
 /* ── scroll reveal ── */
@@ -85,7 +99,7 @@ const STYLES = `
 .bld-rv.bld-d1 { transition-delay:0.14s; }
 .bld-rv.bld-d2 { transition-delay:0.28s; }
 
-/* ── tag pills (hero + article footer) ── */
+/* ── tag pills ── */
 .bld-tag {
   display:inline-flex; align-items:center;
   padding:4px 13px; border-radius:100px;
@@ -105,60 +119,100 @@ const STYLES = `
 }
 .bld-back:hover { transform:translateX(-4px); color:${GREEN}; }
 
-/* ── article prose  ──────────────────────────────────────────────────
-   Wraps whatever TiptapRenderer outputs with readable typography.    */
+/* ── article prose ── */
 .bld-prose {
-  font-family:${FH}; font-size:18px; line-height:1.78; color:#222;
+  font-family:${FH};
+  font-size:clamp(16px,1.5vw,18px);
+  line-height:1.82;
+  color:#000;
+  word-break:break-word;
 }
 .bld-prose h1,.bld-prose h2,.bld-prose h3,.bld-prose h4 {
   font-family:${FM}; letter-spacing:-0.025em; color:${DARK}; margin:2.2em 0 0.75em;
+  line-height:1.2;
 }
-.bld-prose h1 { font-size:clamp(26px,3.4vw,40px); }
-.bld-prose h2 { font-size:clamp(22px,2.8vw,32px); }
-.bld-prose h3 { font-size:clamp(18px,2.2vw,26px); }
-.bld-prose h4 { font-size:clamp(16px,1.8vw,22px); }
-.bld-prose p  { margin:0 0 1.35em; }
+.bld-prose h1 { font-size:clamp(24px,3.4vw,40px); }
+.bld-prose h2 { font-size:clamp(20px,2.8vw,32px); color:${GREEN}; }
+
+.bld-prose h3 { font-size:clamp(17px,2.2vw,26px); }
+.bld-prose h4 { font-size:clamp(15px,1.8vw,22px); }
+.bld-prose p  { margin:0 0 1.4em; }
 .bld-prose img { width:100%; border-radius:12px; margin:2em 0; }
 .bld-prose a { color:${GREEN}; text-decoration:underline; text-underline-offset:3px; }
 .bld-prose a:hover { opacity:0.78; }
+.bld-prose strong { color:${DARK}; font-weight:700; }
+.bld-prose em { font-style:italic; color:#444; }
 .bld-prose blockquote {
-  border-left:3px solid #7F56D9; padding-left:1.4em;
+  border-left:4px solid ${GREEN}; padding:1em 1.4em;
   margin:2em 0; color:#555; font-style:italic;
+  background:rgba(150,202,69,0.06); border-radius:0 10px 10px 0;
 }
 .bld-conclusion-box {
-  background: #f9fafb; border-radius: 12px; padding: 32px; margin: 3em 0;
+  background:linear-gradient(135deg,rgba(150,202,69,0.08) 0%,rgba(150,202,69,0.03) 100%);
+  border:1px solid rgba(150,202,69,0.2);
+  border-radius:14px; padding:clamp(20px,3vw,32px); margin:3em 0;
 }
-.bld-conclusion-box h2, .bld-conclusion-box h3 { margin-top: 0 !important; }
-.bld-prose ul,.bld-prose ol { padding-left:1.7em; margin:1.25em 0; }
-.bld-prose li { margin-bottom:0.55em; }
+.bld-conclusion-box h2,.bld-conclusion-box h3 { margin-top:0 !important; color:${DARK} !important; }
+.bld-prose ul,.bld-prose ol { padding-left:1.6em; margin:1.25em 0; }
+.bld-prose li { margin-bottom:0.6em; }
+.bld-prose li::marker { color:${GREEN}; }
 .bld-prose pre {
   background:#f4f4f4; border-radius:10px; padding:1.25em;
   overflow:auto; margin:2em 0; font-size:0.88em;
 }
 .bld-prose code {
-  background:#f0f0f0; padding:0.18em 0.44em;
-  border-radius:4px; font-size:0.88em;
+  background:rgba(150,202,69,0.12); color:#2a5a00;
+  padding:0.18em 0.44em; border-radius:4px; font-size:0.88em;
 }
 .bld-prose hr   { border:none; border-top:1px solid #eaeaea; margin:2.5em 0; }
-.bld-prose strong { color:${DARK}; }
-.bld-prose em { font-style:italic; }
-.bld-prose table { width:100%; border-collapse:collapse; margin:2em 0; }
-.bld-prose th,.bld-prose td {
-  padding:0.75em 1em; border:1px solid #e5e5e5; text-align:left;
-}
+.bld-prose table { width:100%; border-collapse:collapse; margin:2em 0; overflow-x:auto; display:block; }
+.bld-prose th,.bld-prose td { padding:0.75em 1em; border:1px solid #e5e5e5; text-align:left; white-space:nowrap; }
 .bld-prose th { background:#f7f7f7; font-family:${FM}; font-weight:500; }
 .bld-prose figure { margin:2em 0; }
 .bld-prose figcaption { font-size:14px; color:#888; margin-top:0.5em; text-align:center; }
 
+/* ── copy link button ── */
+.bld-copy-btn {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:11px 24px; border-radius:100px;
+  border:none; cursor:pointer;
+  font-family:${FM}; font-size:13px; font-weight:600;
+  background: linear-gradient(135deg,${GREEN} 0%,#72a832 100%);
+  color:#000;
+  box-shadow:0 4px 18px rgba(150,202,69,0.35);
+  transition:box-shadow 0.25s ease, transform 0.25s ease;
+  position:relative; overflow:hidden;
+}
+.bld-copy-btn::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.28) 50%,transparent 100%);
+  background-size:400px 100%;
+  opacity:0; transition:opacity 0.2s;
+}
+.bld-copy-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(150,202,69,0.5); }
+.bld-copy-btn:hover::after { opacity:1; animation:bld-shimmer 0.8s linear; }
+.bld-copy-btn.bld-copied { animation:bld-copy-pop 0.45s cubic-bezier(.34,1.56,.64,1); }
+.bld-copy-btn.bld-copied { background:linear-gradient(135deg,#5fad1b 0%,#3d8000 100%); color:#fff; }
+.bld-tick { stroke-dasharray:24; stroke-dashoffset:24; }
+.bld-tick-anim { animation:bld-tick-in 0.4s cubic-bezier(.22,.68,0,1.2) 0.05s forwards; }
+
+/* ── share row ── */
+.bld-share-row {
+  margin-top:48px; padding-top:28px;
+  border-top:1px solid #eaeaea;
+  display:flex; align-items:center;
+  justify-content:center;
+}
+
 /* ── responsive ── */
 @media (max-width:767px) {
-  .bld-hero-title   { font-size:clamp(28px,7vw,52px) !important; }
-  .bld-article-wrap { padding:40px 20px 60px !important; }
-  .bld-prose        { font-size:16px !important; }
+  .bld-hero-title   { font-size:clamp(26px,7vw,52px) !important; }
+  .bld-article-wrap { padding:32px 16px 56px !important; }
 }
 @media (prefers-reduced-motion:reduce) {
   .bld-rv  { opacity:1 !important; transform:none !important; transition:none !important; }
-  .bld-tag { transition:none !important; }
+  .bld-copy-btn { animation:none !important; }
 }
 `;
 
@@ -248,6 +302,52 @@ function HeroSection({ blog }: { blog: BlogDetail }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
+   COPY LINK BUTTON
+══════════════════════════════════════════════════════════════════════ */
+function CopyLinkButton() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href).catch(() => {});
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+
+  return (
+    <div className="bld-share-row">
+      <button
+        onClick={handleCopy}
+        className={`bld-copy-btn ${copied ? 'bld-copied' : ''}`}
+      >
+        {copied ? (
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <polyline
+                className="bld-tick bld-tick-anim"
+                points="4 12 9 17 20 6"
+                stroke="currentColor" strokeWidth="2.5"
+                strokeLinecap="round" strokeLinejoin="round"
+              />
+            </svg>
+            Copied!
+          </>
+        ) : (
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            Copy Link
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    §2  ARTICLE CONTENT
    White section wrapping TiptapRenderer with prose typography.
    Scroll-reveal on the content block.
@@ -277,46 +377,19 @@ function ArticleContent({ blog }: { blog: BlogDetail }) {
         {/* TiptapRenderer — do not modify the renderer itself */}
         <div ref={contentRef} className="bld-rv bld-d1">
           <div className="bld-prose">
+            {blog.subHeading && (
+              <h2 className="bld-subheading" style={{ fontFamily: FM, color: GREEN, marginTop: 0, marginBottom: '1.25em', fontSize: 'clamp(22px, 2.8vw, 32px)', lineHeight: '1.3' }}>
+                {blog.subHeading}
+              </h2>
+            )}
             {blog.content
               ? <TiptapRenderer content={blog.content} />
               : blog.summary && <p>{blog.summary}</p>
             }
           </div>
 
-          {/* Author and Share Footer */}
-          <div style={{ marginTop:56, paddingTop:28, borderTop:'1px solid #eaeaea', display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:20 }}>
-            {/* Left: Author Info */}
-            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              {blog.author?.avatar && (
-                <div style={{ width:48, height:48, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'#f0f0f0' }}>
-                  <Image src={resolveImg(blog.author.avatar) ?? ''} alt={blog.author.name ?? ''} width={48} height={48} style={{ objectFit:'cover' }} />
-                </div>
-              )}
-              {blog.author?.name && (
-                <div>
-                  <p style={{ fontFamily:FM, fontSize:14, fontWeight:600, color:'#000', marginBottom:2 }}>{blog.author.name}</p>
-                  <p style={{ fontFamily:FH, fontSize:13, color:'#666' }}>{blog.author.email ?? 'Author'}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Share Buttons */}
-            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              <button style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 12px', border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', fontFamily:FH, fontSize:14, fontWeight:500, cursor:'pointer' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                Copy link
-              </button>
-              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
-              </button>
-              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-              </button>
-              <button style={{ display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, border:'1px solid #d0d5dd', borderRadius:8, background:'#fff', color:'#344054', cursor:'pointer' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-              </button>
-            </div>
-          </div>
+          {/* Share Footer — copy link only */}
+          <CopyLinkButton />
         </div>
       </div>
     </section>

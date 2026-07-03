@@ -13,6 +13,11 @@ const blogSchema = new Schema(
       required: [true, 'Blog title is required'],
       trim: true,
     },
+    subHeading: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     slug: {
       type: String,
       required: [true, 'Blog slug is required'],

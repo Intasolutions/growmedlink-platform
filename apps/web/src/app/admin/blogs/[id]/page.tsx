@@ -28,6 +28,7 @@ export default function EditBlogPage({ params }: EditBlogProps) {
   const [tagsInput, setTagsInput] = useState('');
   const [status, setStatus] = useState<'draft' | 'published' | 'archived'>('draft');
   const [isFeatured, setIsFeatured] = useState(false);
+  const [subHeading, setSubHeading] = useState('');
 
   // SEO states
   const [metaTitle, setMetaTitle] = useState('');
@@ -68,6 +69,7 @@ export default function EditBlogPage({ params }: EditBlogProps) {
           setKeywordsInput(blog.keywords?.join(', ') || '');
           setCanonicalUrl(blog.canonicalUrl || '');
           setOgImage(blog.ogImage || '');
+          setSubHeading(blog.subHeading || '');
         } else {
           setErrorMsg(data.message || 'Failed to retrieve blog post parameter configurations.');
         }
@@ -126,6 +128,7 @@ export default function EditBlogPage({ params }: EditBlogProps) {
       tags,
       status,
       isFeatured,
+      subHeading,
       metaTitle: metaTitle || title.substring(0, 60),
       metaDescription: metaDescription || summary.substring(0, 160),
       keywords,
@@ -240,6 +243,23 @@ export default function EditBlogPage({ params }: EditBlogProps) {
                 <p className="text-red-400 text-xs mt-1">{fieldErrors.status[0]}</p>
               )}
             </div>
+          </div>
+
+          {/* Subheading */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest">
+              Sub-heading
+            </label>
+            <input
+              type="text"
+              value={subHeading}
+              onChange={e => setSubHeading(e.target.value)}
+              placeholder="e.g. Key take-aways and immigration program draw schedules"
+              className="w-full px-4 py-3 bg-[#020C1B]/80 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-secondary transition-all text-sm"
+            />
+            {fieldErrors.subHeading && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.subHeading[0]}</p>
+            )}
           </div>
 
           {/* Slug */}

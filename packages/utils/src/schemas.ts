@@ -71,6 +71,7 @@ export const ProductSchema = z.object({
 
 export const CreateBlogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long').max(200, 'Title cannot exceed 200 characters'),
+  subHeading: z.string().max(300, 'Subheading cannot exceed 300 characters').optional().or(z.literal('')),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe and lowercase (e.g. study-abroad-guide)'),
   summary: z.string().min(20, 'Summary must be at least 20 characters long').max(500, 'Summary cannot exceed 500 characters'),
   content: z.record(z.any(), { message: 'Content must be a valid Tiptap JSON object' }),

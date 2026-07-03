@@ -89,6 +89,7 @@ export interface IProduct {
 export interface IBlog {
   _id: string;
   title: string;
+  subHeading?: string;
   slug: string;
   summary: string;
   content: Record<string, any>; // Tiptap JSON content object
