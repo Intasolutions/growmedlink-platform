@@ -118,7 +118,7 @@ const STYLES = `
 }
 
 /* ── arch carousel ── */
-.abt-arch { position:relative; height:clamp(200px,32vw,380px); overflow:hidden; cursor:grab; user-select:none; }
+.abt-arch { position:relative; height:clamp(220px,30vw,360px); overflow:visible; cursor:grab; user-select:none; }
 .abt-arch:active { cursor:grabbing; }
 
 /* ── mission stagger ── */
@@ -657,7 +657,7 @@ function ArchCarousel() {
   const wrapRef  = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const offsetRef = useRef(0);   // current scroll offset in degrees
-  const velRef    = useRef(0.18); // auto-scroll speed deg/frame
+  const velRef    = useRef(0.08); // auto-scroll speed deg/frame
   const isDrag    = useRef(false);
   const lastX     = useRef(0);
   const N = ARCH_ITEMS.length;
@@ -668,18 +668,22 @@ function ArchCarousel() {
    *  - only the top arc is visible; cards sit on that arc
    *  - offsetRef is a continuous value that shifts all card angles together
    *  - STEP_DEG = angular gap between cards; visHalf = half the visible arc window
+   *  - Cards loop infinitely: we render SLOTS virtual slots spread across 360°,
+   *    each mapped to a real card via modulo so the stream never ends.
    */
-  const STEP_DEG = 11; // degrees between adjacent cards
-  const VIS_HALF = 38; // cards within ±38° of top are visible (≈ 7 cards max)
+  const STEP_DEG = 16; // degrees between adjacent cards (wider gap)
+  const VIS_HALF = 44; // cards within ±44° of top are visible
+  // Fill the full circle so looping is seamless: ceil(360/STEP_DEG) slots
+  const SLOTS    = Math.ceil(360 / STEP_DEG); // ~23 virtual positions
 
   const getDims = () => {
     const vw    = window.innerWidth;
     const contH = wrapRef.current ? wrapRef.current.offsetHeight : Math.round(vw * 0.25);
     // Radius large enough that the top arc spans the full container width
     const radius = Math.round(Math.max(520, vw * 0.85));
-    // Circle centre Y: apex of arc sits at ~22% from top of container
+    // Circle centre Y: apex of arc sits at ~28% from top of container
     // cy_apex = ctrY - radius  =>  ctrY = apex_y + radius
-    const apexY  = Math.round(contH * 0.22);
+    const apexY  = Math.round(contH * 0.28);
     const ctrY   = apexY + radius;
     const cardW  = Math.round(Math.min(Math.max(110, vw * 0.19), 260));
     const cardH  = Math.round(cardW * 0.70);
@@ -699,27 +703,29 @@ function ArchCarousel() {
         const { radius, ctrY, cardW, cardH } = getDims();
         const ctrX = wrap.offsetWidth / 2;
 
-        cardRefs.current.forEach((card, i) => {
-          if (!card) return;
+        // First hide all real card elements, then show only those in the visible window
+        cardRefs.current.forEach(c => { if (c) { c.style.visibility = 'hidden'; c.style.opacity = '0'; } });
 
-          // Each card has a base angle: card i sits at i * STEP_DEG degrees
-          // offsetRef shifts all cards together (continuous scroll)
-          // fromTop = 0 → card is at the very top of the circle
-          // Wrap angle into -180..+180 range
-          let fromTop = (i * STEP_DEG + offsetRef.current) % 360;
+        // Iterate over virtual slots spread evenly around 360°
+        for (let slot = 0; slot < SLOTS; slot++) {
+          // Which real card does this slot show? Loop via modulo.
+          const realIdx = ((slot % N) + N) % N;
+          const card = cardRefs.current[realIdx];
+          if (!card) continue;
+
+          // Angle of this slot on the circle, shifted by offsetRef
+          let fromTop = (slot * STEP_DEG + offsetRef.current) % 360;
           if (fromTop >  180) fromTop -= 360;
           if (fromTop < -180) fromTop += 360;
 
+          const absOff = Math.abs(fromTop);
+          if (absOff > VIS_HALF) continue; // outside visible window — skip
+
           const radA = (fromTop * Math.PI) / 180;
-          // Top of circle = ctrY - radius (straight up, sin=0, cos=1)
           const cx = ctrX + radius * Math.sin(radA);
           const cy = ctrY - radius * Math.cos(radA);
 
-          const absOff = Math.abs(fromTop);
-          // Full opacity in inner 60% of window, fade to 0 at edge
-          const alpha = Math.max(0, Math.min(1, 1 - (absOff - VIS_HALF * 0.55) / (VIS_HALF * 0.45)));
-
-          // Tilt cards along the tangent of the arc
+          const alpha   = Math.max(0, Math.min(1, 1 - (absOff - VIS_HALF * 0.5) / (VIS_HALF * 0.5)));
           const tiltDeg = fromTop * 0.5;
 
           card.style.width      = cardW + 'px';
@@ -727,17 +733,19 @@ function ArchCarousel() {
           card.style.left       = cx + 'px';
           card.style.top        = cy + 'px';
           card.style.transform  = `translate(-50%, -50%) rotate(${tiltDeg}deg)`;
-          card.style.opacity    = absOff > VIS_HALF ? '0' : String(Math.round(alpha * 100) / 100);
-          card.style.visibility = absOff > VIS_HALF ? 'hidden' : 'visible';
+          card.style.opacity    = String(Math.round(alpha * 100) / 100);
+          card.style.visibility = 'visible';
           card.style.zIndex     = String(Math.round((1 - absOff / VIS_HALF) * 10));
-        });
+        }
       };
 
       ticker = gsap.ticker.add(() => {
         if (!isDrag.current) {
+          // Bleed off drag momentum back toward base auto-scroll speed
+          velRef.current += (0.08 - velRef.current) * 0.015;
           offsetRef.current -= velRef.current;
         } else {
-          velRef.current *= 0.92; // decelerate drag momentum
+          velRef.current *= 0.92;
         }
         render();
       });
@@ -850,10 +858,10 @@ function HeroSection() {
   }, []);
 
   return (
-    <section style={{ background: '#000', position: 'relative', overflowX: 'hidden', overflowY: 'visible', paddingTop: 'clamp(80px,10vh,130px)', paddingBottom: 0 }}>
+    <section style={{ background: '#000', position: 'relative', overflowX: 'hidden', overflowY: 'visible', paddingTop: 'clamp(120px,14vh,180px)', paddingBottom: 0 }}>
 
-      {/* Wave bg */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100vh', zIndex: 0 }}>
+      {/* Wave bg — tall enough to cover the full hero including carousel overflow */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, minHeight: '100%', zIndex: 0 }}>
         <Image src="/about-bg-wave.png" alt="" fill style={{ objectFit: 'cover' }} priority />
       </div>
       <div className="abt-grad-bar" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5 }} />
@@ -906,11 +914,13 @@ function HeroSection() {
         </div>
       </div>
 
-      {/* Arch carousel */}
-      <ArchCarousel />
+      {/* Arch carousel — pushed down, bleeds over body text */}
+      <div style={{ marginTop: 'clamp(24px,4vw,56px)', position: 'relative', zIndex: 10 }}>
+        <ArchCarousel />
+      </div>
 
-      {/* Body text + CTA */}
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: 'clamp(16px,3vw,36px) clamp(16px,4vw,32px) 0', textAlign: 'center', position: 'relative', zIndex: 5 }}>
+      {/* Body text + CTA — z-index lower than arch so cards float above */}
+      <div style={{ maxWidth: 800, margin: 'clamp(-60px,-6vw,-20px) auto 0', padding: 'clamp(20px,3vw,36px) clamp(16px,4vw,32px) 0', textAlign: 'center', position: 'relative', zIndex: 4 }}>
         <p
           ref={bodyRef}
           style={{

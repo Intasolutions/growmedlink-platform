@@ -58,16 +58,16 @@ function gearPath(cx:number, cy:number, R:number, r:number, n:number, hr:number)
   return `${outer} ${hole}`;
 }
 const G_MAIN = [
-  { cx:124, cy:174, R:120, r:90,  n:14, hr:32, color:GREEN, dir:'cw'  as const, baseDur:12, icon:'search'    },
-  { cx:356, cy:311, R:155, r:118, n:18, hr:42, color:DARK,  dir:'ccw' as const, baseDur:9,  icon:'handshake' },
-  { cx:644, cy:232, R:155, r:118, n:18, hr:42, color:GREEN, dir:'cw'  as const, baseDur:10, icon:'bulb'      },
-  { cx:948, cy:208, R:155, r:118, n:18, hr:42, color:DARK,  dir:'ccw' as const, baseDur:11, icon:'check'     },
+  { cx:124, cy:174, R:120, r:90,  n:14, hr:62, color:GREEN, dir:'cw'  as const, baseDur:12, icon:'search'    },
+  { cx:356, cy:311, R:155, r:118, n:18, hr:82, color:DARK,  dir:'ccw' as const, baseDur:9,  icon:'handshake' },
+  { cx:644, cy:232, R:155, r:118, n:18, hr:82, color:GREEN, dir:'cw'  as const, baseDur:10, icon:'bulb'      },
+  { cx:948, cy:208, R:155, r:118, n:18, hr:82, color:DARK,  dir:'ccw' as const, baseDur:11, icon:'check'     },
 ];
 const G_SMALL = [
-  { cx:288, cy:79,  R:76, r:57, n:10, hr:20, color:'#3c3c3c', dir:'ccw' as const, dur:'8s' },
-  { cx:119, cy:400, R:76, r:57, n:10, hr:20, color:'#3c3c3c', dir:'cw'  as const, dur:'7s' },
-  { cx:814, cy:413, R:84, r:63, n:11, hr:22, color:'#3c3c3c', dir:'ccw' as const, dur:'6s' },
-  { cx:841, cy:119, R:58, r:43, n:8,  hr:16, color:'#474747', dir:'cw'  as const, dur:'5s' },
+  { cx:288, cy:79,  R:76, r:57, n:10, hr:38, color:'#3c3c3c', dir:'ccw' as const, dur:'8s' },
+  { cx:119, cy:400, R:76, r:57, n:10, hr:38, color:'#3c3c3c', dir:'cw'  as const, dur:'7s' },
+  { cx:814, cy:413, R:84, r:63, n:11, hr:42, color:'#3c3c3c', dir:'ccw' as const, dur:'6s' },
+  { cx:841, cy:119, R:58, r:43, n:8,  hr:30, color:'#474747', dir:'cw'  as const, dur:'5s' },
 ];
 const G_PATHS_MAIN  = G_MAIN.map(g  => gearPath(g.cx, g.cy, g.R, g.r, g.n, g.hr));
 const G_PATHS_SMALL = G_SMALL.map(g => gearPath(g.cx, g.cy, g.R, g.r, g.n, g.hr));
@@ -281,91 +281,82 @@ function WaveDots({ flip = false }: { flip?: boolean }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   GEAR ICONS — static SVG elements centred on each gear
+   GEAR ICONS — SVG <image> elements using the exact exported assets
+   Each icon is centred on the gear's cx,cy; size tuned per gear radius
 ══════════════════════════════════════════════════════════════════════ */
-function SearchIcon({ cx, cy }: { cx:number; cy:number }) {
+function GearIcon({ cx, cy, href, size }: { cx:number; cy:number; href:string; size:number }) {
+  const half = size / 2;
   return (
-    <g transform={`translate(${cx},${cy})`} style={{ pointerEvents:'none' }}>
-      <circle cx={-5} cy={-5} r={19} fill="none" stroke="#fff" strokeWidth={5} />
-      <line x1={10} y1={10} x2={24} y2={24} stroke="#fff" strokeWidth={5} strokeLinecap="round" />
-    </g>
-  );
-}
-function HandshakeIcon({ cx, cy }: { cx:number; cy:number }) {
-  return (
-    <g transform={`translate(${cx},${cy})`} style={{ pointerEvents:'none' }}>
-      <path d="M-30,4 C-22,-10 -6,-12 6,-2 C-2,10 -20,14 -30,4 Z" fill="#fff" opacity={0.9} />
-      <path d="M30,-4 C22,10 6,12 -6,2 C2,-10 20,-14 30,-4 Z" fill="#fff" opacity={0.9} />
-      <circle cx={0} cy={0} r={7} fill={DARK} />
-      <circle cx={0} cy={0} r={4} fill="#fff" opacity={0.6} />
-    </g>
-  );
-}
-function BulbIcon({ cx, cy }: { cx:number; cy:number }) {
-  return (
-    <g transform={`translate(${cx},${cy})`} style={{ pointerEvents:'none' }}>
-      <path d="M0,-28 C-16,-28 -26,-16 -26,0 C-26,14 -16,22 -7,24 L7,24 C16,22 26,14 26,0 C26,-16 16,-28 0,-28 Z"
-        fill="none" stroke="#fff" strokeWidth={4.5} />
-      <rect x={-9} y={24} width={18} height={5} rx={2} fill="#fff" />
-      <rect x={-7} y={30} width={14} height={4} rx={2} fill="#fff" />
-      <line x1={0} y1={-34} x2={0} y2={-40} stroke="#fff" strokeWidth={3} strokeLinecap="round" />
-      <line x1={20} y1={-22} x2={26} y2={-28} stroke="#fff" strokeWidth={3} strokeLinecap="round" />
-      <line x1={-20} y1={-22} x2={-26} y2={-28} stroke="#fff" strokeWidth={3} strokeLinecap="round" />
-    </g>
-  );
-}
-function CheckIcon({ cx, cy }: { cx:number; cy:number }) {
-  return (
-    <g transform={`translate(${cx},${cy})`} style={{ pointerEvents:'none' }}>
-      <circle cx={0} cy={0} r={30} fill="none" stroke="#fff" strokeWidth={4.5} />
-      <polyline points="-16,2 -5,14 20,-14"
-        fill="none" stroke="#fff" strokeWidth={5.5}
-        strokeLinecap="round" strokeLinejoin="round" />
-    </g>
+    <image
+      href={href}
+      x={cx - half} y={cy - half}
+      width={size} height={size}
+      style={{ pointerEvents:'none' }}
+    />
   );
 }
 
 /* ══════════════════════════════════════════════════════════════════════
    §0  GEAR ILLUSTRATION
+   Uses exact exported SVG gear + icon assets from /service/
+   Icon sizes: gear-1 (small, R=120) → 68px; gears 2-4 (R=155) → 90px
+   Handshake icon is wider than tall so gets extra width
 ══════════════════════════════════════════════════════════════════════ */
+const ICON_SRCS: Record<string, string> = {
+  search:    '/service/icon-search.svg',
+  handshake: '/service/icon-handshake.svg',
+  bulb:      '/service/icon-bulb.svg',
+  check:     '/service/icon-check.svg',
+};
+const ICON_SIZES: Record<string, number> = {
+  search:    68,
+  handshake: 100,
+  bulb:      72,
+  check:     88,
+};
+
 function GearIllustration() {
   const [hov, setHov] = useState<number|null>(null);
 
-  const renderIcon = (label:string, cx:number, cy:number) => {
-    if (label==='search')    return <SearchIcon    cx={cx} cy={cy} />;
-    if (label==='handshake') return <HandshakeIcon cx={cx} cy={cy} />;
-    if (label==='bulb')      return <BulbIcon      cx={cx} cy={cy} />;
-    if (label==='check')     return <CheckIcon     cx={cx} cy={cy} />;
-    return null;
-  };
-
   return (
-    <div style={{ width:'100%', maxWidth:1104, margin:'0 auto', position:'relative', userSelect:'none' }}>
+    <div style={{ width:'100%', maxWidth:900, margin:'0 auto', position:'relative', userSelect:'none' }}>
       {/* Desktop SVG */}
       <svg
         className="srv-gears-svg"
         viewBox="0 0 1104 498"
-        style={{ width:'100%', height:'auto', overflow:'visible', display:'block' }}
+        style={{ width:'100%', height:'auto', overflow:'hidden', display:'block' }}
         aria-label="Interactive service gear illustration" role="img"
       >
-        <circle cx={349} cy={67} r={12} fill={GREEN} />
-        <circle cx={349} cy={67} r={6}  fill="#fff" opacity={0.4} />
+        {/* Small connector gears — exact SVG assets, spinning */}
+        {[
+          { cx:312, cy:92,  size:152, href:'/service/gear-small-1-dark-dot.svg', dir:'ccw' as const, dur:'8s'  },
+          { cx:98,  cy:388, size:152, href:'/service/gear-small-2-dark.svg',     dir:'cw'  as const, dur:'7s'  },
+          { cx:798, cy:398, size:170, href:'/service/gear-small-3-dark-lg.svg',  dir:'ccw' as const, dur:'6s'  },
+          { cx:790, cy:82,  size:118, href:'/service/gear-small-4-dark-sm.svg',  dir:'cw'  as const, dur:'5s'  },
+        ].map((g,i) => {
+          const half = g.size / 2;
+          return (
+            <image key={`sg-${i}`}
+              href={g.href}
+              x={g.cx - half} y={g.cy - half}
+              width={g.size} height={g.size}
+              style={{
+                transformOrigin:`${g.cx}px ${g.cy}px`,
+                animation:`${g.dir==='cw'?'srv-cw':'srv-ccw'} ${g.dur} linear infinite`,
+              }}
+            />
+          );
+        })}
 
-        {/* Small connector gears */}
-        {G_SMALL.map((g,i) => (
-          <path key={`sg-${i}`}
-            d={G_PATHS_SMALL[i]} fill={g.color} fillRule="evenodd"
-            style={{ transformOrigin:`${g.cx}px ${g.cy}px`,
-              animation:`${g.dir==='cw'?'srv-cw':'srv-ccw'} ${g.dur} linear infinite` }} />
-        ))}
-
-        {/* Main gears */}
+        {/* Main gears — gear shape spins, icon stays fixed */}
         {G_MAIN.map((g,i) => {
           const isHov = hov===i;
           const dur   = `${isHov ? g.baseDur/2 : g.baseDur}s`;
+          const iconSize = ICON_SIZES[g.icon] ?? 80;
           return (
             <g key={`mg-${i}`} className="srv-gear-group"
               onMouseEnter={()=>setHov(i)} onMouseLeave={()=>setHov(null)}>
+              {/* Spinning gear shape */}
               <path className="srv-gear-shape"
                 d={G_PATHS_MAIN[i]} fill={g.color} fillRule="evenodd"
                 style={{
@@ -374,9 +365,8 @@ function GearIllustration() {
                   filter: isHov ? 'brightness(1.18)' : 'none',
                   transition:'filter 0.2s ease',
                 }} />
-              <circle cx={g.cx} cy={g.cy} r={g.hr*0.42} fill="rgba(0,0,0,0.25)" />
-              <circle cx={g.cx} cy={g.cy} r={g.hr*0.28} fill={g.color} opacity={0.7} />
-              {renderIcon(g.icon, g.cx, g.cy)}
+              {/* Static icon centred on gear */}
+              <GearIcon cx={g.cx} cy={g.cy} href={ICON_SRCS[g.icon]} size={iconSize} />
             </g>
           );
         })}
@@ -392,17 +382,13 @@ function GearIllustration() {
           { icon:'check',     label:'Results',      color:DARK  },
         ].map((item,i) => (
           <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
-            <div style={{ width:64, height:64, borderRadius:'50%', background:item.color,
+            <div style={{ width:72, height:72, borderRadius:'50%', background:item.color,
               display:'flex', alignItems:'center', justifyContent:'center',
               boxShadow:'0 6px 20px rgba(0,0,0,0.15)' }}>
-              <svg viewBox="-36 -36 72 72" width={36} height={36}>
-                {item.icon==='search'    && <SearchIcon    cx={0} cy={0} />}
-                {item.icon==='handshake' && <HandshakeIcon cx={0} cy={0} />}
-                {item.icon==='bulb'      && <BulbIcon      cx={0} cy={0} />}
-                {item.icon==='check'     && <CheckIcon     cx={0} cy={0} />}
-              </svg>
+              <img src={ICON_SRCS[item.icon]} alt={item.label}
+                width={40} height={40} style={{ objectFit:'contain' }} />
             </div>
-            <span style={{ fontFamily:FM, fontSize:12, fontWeight:600, color:DARK }}>{item.label}</span>
+            <span style={{ fontFamily:FM, fontSize:12, fontWeight:600, color:'#fff' }}>{item.label}</span>
           </div>
         ))}
       </div>
@@ -427,27 +413,30 @@ function HeroSection() {
   return (
     <section style={{
       background:'#000000', position:'relative',
-      overflow:'hidden', paddingTop:'clamp(110px,15vh,170px)', paddingBottom:0,
+      overflowX:'hidden', overflowY:'visible',
+      paddingTop:'clamp(120px,14vh,180px)', paddingBottom:0,
     }}>
-      {/* Wave background — same image & treatment as About page */}
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'100vh', zIndex:0 }}>
+      {/* Wave background */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0, minHeight:'100%', zIndex:0 }}>
         <Image src="/about-bg-wave.png" alt="" fill
           style={{ objectFit:'cover' }} priority
           onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
       </div>
 
-      {/* 4px gradient bar — top of page, identical to About page */}
+      {/* 4px gradient bar */}
       <div className="srv-grad-bar" style={{ position:'absolute', top:0, left:0, right:0, zIndex:5 }} />
 
       {/* Heading + sunburst halo + avatars */}
-      <div style={{ textAlign:'center', padding:'0 24px 24px', position:'relative', zIndex:5 }}>
+      <div style={{ textAlign:'center', padding:'0 clamp(16px,3vw,40px) clamp(12px,2vw,20px)', position:'relative', zIndex:5 }}>
         <div style={{ position:'relative', display:'inline-block' }}>
 
-          {/* Rotating sunburst — identical to About page, just srv- keyframe prefix */}
+          {/* Rotating sunburst */}
           <div style={{
             position:'absolute', top:'50%', left:'50%',
-            width:'clamp(320px,80vw,750px)', height:'clamp(320px,80vw,750px)',
-            opacity:0.25, pointerEvents:'none', zIndex:-1,
+            width:'clamp(260px,70vw,750px)', height:'clamp(260px,70vw,750px)',
+            marginTop:'calc(clamp(260px,70vw,750px) / -2)',
+            marginLeft:'calc(clamp(260px,70vw,750px) / -2)',
+            opacity:0.22, pointerEvents:'none', zIndex:-1,
             animation:'srv-sunburst-spin 80s linear infinite',
             willChange:'transform',
           }}>
@@ -458,35 +447,36 @@ function HeroSection() {
 
           <h1 className="srv-h1" style={{
             fontFamily:FH, fontWeight:500, letterSpacing:'-0.03em',
-            fontSize:'clamp(44px,8.5vw,123px)', color:'#fff',
-            lineHeight:1.19, marginBottom:28,
+            fontSize:'clamp(36px,7vw,96px)', color:'#fff',
+            lineHeight:1.15, marginBottom:'clamp(12px,1.8vw,20px)',
           }}>
             Our Services
           </h1>
         </div>
 
         {/* Avatar row */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:18, marginBottom:32 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'clamp(10px,1.5vw,18px)', marginBottom:'clamp(12px,2vw,20px)', flexWrap:'wrap' }}>
           <Image src="/avatars-group.png" alt="Students" width={221} height={38}
-            style={{ height:38, width:'auto' }}
+            style={{ height:'clamp(28px,3.5vw,38px)', width:'auto' }}
             onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
-          <span style={{ fontFamily:FP, fontSize:16, color:'#CACACA', lineHeight:'22px' }}>
+          <span style={{ fontFamily:FP, fontSize:'clamp(13px,1.4vw,16px)', color:'#CACACA', lineHeight:'1.4' }}>
             1600 + Trusted Students
           </span>
         </div>
       </div>
 
       {/* Gear illustration */}
-      <div style={{ padding:'0 40px', position:'relative', zIndex:5 }}>
+      <div style={{ padding:'0 clamp(16px,3vw,40px)', position:'relative', zIndex:5 }}>
         <GearIllustration />
       </div>
 
       {/* CTA */}
-      <div style={{ textAlign:'center', padding:'48px 24px 0', position:'relative', zIndex:5 }}>
+      <div style={{ textAlign:'center', padding:'clamp(20px,2.5vw,36px) 24px 0', position:'relative', zIndex:5 }}>
         <button style={{
-          width:228, height:54, background:GREEN, borderRadius:6,
+          width:'clamp(180px,20vw,228px)', height:'clamp(44px,5vw,54px)',
+          background:GREEN, borderRadius:6,
           border:'none', cursor:'pointer', fontFamily:FM,
-          fontSize:18, fontWeight:600, color:'#000',
+          fontSize:'clamp(14px,1.2vw,18px)', fontWeight:600, color:'#000',
         }}>
           Explore Services
         </button>
@@ -494,9 +484,10 @@ function HeroSection() {
 
       {/* Wave dots (left) + "What We Offer" script (right) */}
       <div style={{
-        maxWidth:1440, margin:'0 auto', padding:'52px 40px 60px',
+        maxWidth:1440, margin:'0 auto',
+        padding:'clamp(20px,3vw,40px) clamp(16px,3vw,40px) clamp(28px,4vw,52px)',
         display:'flex', justifyContent:'space-between', alignItems:'flex-end',
-        position:'relative', zIndex:5,
+        position:'relative', zIndex:5, flexWrap:'wrap', gap:16,
       }}>
         <WaveDots flip />
 
@@ -508,14 +499,14 @@ function HeroSection() {
             : 'none',
           willChange:'transform,opacity',
         }}>
-          <svg width={82} height={77} viewBox="0 0 82 77" fill="none"
-            style={{ position:'absolute', left:-96, top:-56, transform:'rotate(-20.36deg)', width:82 }}>
+          <svg viewBox="0 0 82 77" fill="none"
+            style={{ position:'absolute', left:'clamp(-80px,-7vw,-52px)', top:'clamp(-44px,-4vw,-30px)', width:'clamp(52px,6vw,82px)', transform:'rotate(-20.36deg)' }}>
             <path d="M5 72 C20 55 40 40 55 25 C65 15 73 7 77 3"
               stroke={GREEN} strokeWidth={2} fill="none" strokeLinecap="round"/>
             <path d="M65 3 L77 3 L77 15"
               stroke={GREEN} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span style={{ fontFamily:FS, fontSize:28, color:GREEN, lineHeight:'28px', display:'block' }}>
+          <span style={{ fontFamily:FS, fontSize:'clamp(18px,2.2vw,28px)', color:GREEN, lineHeight:1.35, display:'block', transform:'rotate(-4deg)', transformOrigin:'left top', paddingBottom:8 }}>
             What We Offer
           </span>
         </div>
