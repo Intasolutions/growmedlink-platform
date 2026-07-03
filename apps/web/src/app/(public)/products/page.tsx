@@ -12,13 +12,13 @@ const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
 const FP = "'Power Grotesk','Helvetica Neue',Arial,sans-serif";
 const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 const GREEN = '#96CA45';
-const DARK = '#252525';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const STYLES = `
 .prd * { box-sizing: border-box; }
 .prd a { text-decoration: none; }
-.prd img { display: block; }
+.prd img { display: block; max-width: 100%; }
 
 @keyframes prd-sunburst-spin {
   0%   { transform: translate3d(-50%,-50%,0) rotate(0deg);   }
@@ -62,8 +62,19 @@ const STYLES = `
 }
 .prd-pill:hover { transform: translateY(-2px); }
 
+/* ── hero sunburst: never wider than viewport ── */
+.prd-sunburst {
+  position: absolute; left: 50%; top: 50%;
+  width: min(110vw, 1300px); height: min(110vw, 1300px);
+  opacity: 0.5;
+  animation: prd-sunburst-spin 80s linear infinite;
+  will-change: transform;
+  transform: translate3d(-50%,-50%,0) rotate(0deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .prd-rv { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .prd-sunburst { animation: none !important; }
 }
 `;
 
@@ -101,7 +112,7 @@ function WaveDots() {
     { left: 305, top: 0 },
   ];
   return (
-    <div style={{ position: 'relative', width: 318, height: 42 }}>
+    <div style={{ position: 'relative', width: 'min(318px, 80vw)', height: 42, overflow: 'hidden' }}>
       {dots.map((d, i) => (
         <div
           key={i}
@@ -131,7 +142,7 @@ function HeroSection() {
   });
 
   return (
-    <section className="relative overflow-hidden bg-[#141414] px-4 pb-16 pt-24 sm:px-6 lg:px-8 lg:pb-20 lg:pt-28">
+    <section className="relative bg-[#141414] px-4 pb-16 pt-24 sm:px-6 lg:px-8 lg:pb-20 lg:pt-28" style={{ overflow: 'hidden', width: '100%' }}>
       <div className="pointer-events-none absolute top-0 left-0 right-0 h-1 opacity-20" style={{ background: 'linear-gradient(91deg,#155BA9 10%,#96CA45 82%)' }} />
 
       {/* Decorative glows */}
@@ -139,18 +150,11 @@ function HeroSection() {
       <div className="pointer-events-none absolute -right-10 top-20 h-[260px] w-[330px] rounded-full bg-[#96CA45]/20 blur-[90px]" />
 
       {/* Sunburst — full hero background */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/2"
-        style={{
-          width: 'clamp(700px, 110vw, 1300px)', height: 'clamp(700px, 110vw, 1300px)', opacity: 0.5,
-          animation: 'prd-sunburst-spin 80s linear infinite',
-          willChange: 'transform',
-        }}
-      >
+      <div className="prd-sunburst pointer-events-none">
         <Image src="/sunburst-lines.png" alt="" fill style={{ objectFit: 'contain' }} priority />
       </div>
       <div className="relative mx-auto max-w-4xl text-center">
-        <div className="relative mx-auto" style={{ width: 'clamp(280px, 45vw, 480px)' }}>
+        <div className="relative mx-auto" style={{ width: 'min(45vw, 480px)', minWidth: 240 }}>
           {/* Handwritten callout + arrow */}
           <div
             className="pointer-events-none absolute -right-8 -top-16 hidden sm:block lg:-right-24 lg:-top-20"
@@ -214,6 +218,222 @@ function HeroSection() {
   );
 }
 
+/* ══════════════════════ BUILT AROUND YOUR NEEDS ══════════════════════ */
+const BAN_STYLES = `
+.ban-section {
+  background: #fff;
+  padding: clamp(40px,6vw,88px) clamp(16px,4vw,72px);
+  overflow: hidden;
+}
+.ban-inner { max-width: 1160px; margin: 0 auto; width: 100%; }
+
+.ban-heading {
+  font-family: 'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+  font-size: clamp(28px,4vw,52px);
+  font-weight: 500;
+  color: #252525;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: clamp(32px,5vw,56px);
+}
+
+/* rows */
+.ban-row1, .ban-row2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(20px,4vw,52px);
+  width: 100%;
+}
+.ban-row1 { margin-bottom: clamp(36px,6vw,68px); }
+
+/* image 1 — square portrait */
+.ban-img1-wrap {
+  position: relative;
+  flex: 0 0 clamp(180px,28vw,300px);
+  max-width: 100%;
+}
+.ban-img1 {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* image 2 — landscape, shorter than before */
+.ban-img2-wrap {
+  position: relative;
+  flex: 0 0 clamp(240px,44vw,500px);
+  max-width: 100%;
+}
+.ban-img2 {
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* shared image style */
+.ban-img1 img, .ban-img2 img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.65s cubic-bezier(.22,.68,0,1.2);
+}
+.ban-img1:hover img, .ban-img2:hover img { transform: scale(1.05); }
+
+/* text blocks */
+.ban-text { flex: 1 1 220px; min-width: 0; }
+.ban-text p {
+  font-family: 'Power Grotesk','Helvetica Neue',Arial,sans-serif;
+  font-size: clamp(13px,1.3vw,16px);
+  color: #555;
+  line-height: 1.8;
+  margin: 0 0 24px 0;
+}
+
+/* decorative SVG overlays */
+.ban-sparkle {
+  position: absolute; top: -20px; right: -18px;
+  width: clamp(38px,4vw,54px); height: auto; pointer-events: none;
+}
+.ban-cap {
+  position: absolute; top: -18px; left: -16px;
+  width: clamp(48px,5vw,70px); height: auto; pointer-events: none;
+}
+.ban-scribble {
+  position: absolute; top: -18px; right: -16px;
+  width: clamp(54px,6vw,80px); height: auto; pointer-events: none;
+}
+
+/* CTA */
+.ban-cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 46px; padding: 0 30px; border-radius: 8px;
+  background: #96CA45; color: #000;
+  font-family: 'Haffer XH Mono-TRIAL','Courier New',monospace;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.ban-cta:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(150,202,69,0.35); }
+
+/* scroll-reveal */
+.ban-rv {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(.22,.68,0,1.2), transform 0.7s cubic-bezier(.22,.68,0,1.2);
+}
+.ban-rv.ban-in { opacity: 1; transform: translateY(0); }
+
+/* floating animations */
+@keyframes ban-float  { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-6px) rotate(8deg)} }
+@keyframes ban-float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-5px) rotate(-6deg)} }
+@keyframes ban-float3 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-4px) rotate(5deg)} }
+.ban-sparkle { animation: ban-float  3s   ease-in-out       infinite; }
+.ban-scribble{ animation: ban-float2 3.5s ease-in-out 0.4s  infinite; }
+.ban-cap     { animation: ban-float3 4s   ease-in-out 0.8s  infinite; }
+
+/* ── mobile: stack everything, full width images ── */
+@media (max-width: 640px) {
+  .ban-img1-wrap, .ban-img2-wrap { flex: 1 1 100%; max-width: 100%; }
+  .ban-img1 { aspect-ratio: 4/3; }
+  .ban-img2 { aspect-ratio: 16/10; }
+  .ban-sparkle  { top: -12px; right: -8px;  width: 36px; }
+  .ban-cap      { top: -12px; left: -8px;   width: 44px; }
+  .ban-scribble { top: -12px; right: -8px;  width: 48px; }
+  .ban-text { flex: 1 1 100%; }
+}
+@media (max-width: 400px) {
+  .ban-sparkle, .ban-cap, .ban-scribble { display: none; }
+}
+`;
+
+function useBanReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return { ref, visible };
+}
+
+function BuiltAroundYourNeeds() {
+  const heading = useBanReveal();
+  const row1    = useBanReveal();
+  const row2    = useBanReveal();
+
+  return (
+    <section className="ban-section">
+      <style dangerouslySetInnerHTML={{ __html: BAN_STYLES }} />
+      <div className="ban-inner">
+
+        {/* Heading */}
+        <div ref={heading.ref} className={`ban-rv ${heading.visible ? 'ban-in' : ''}`}>
+          <h2 className="ban-heading">
+            Built Around <span style={{ color: GREEN }}>Your Needs</span>
+          </h2>
+        </div>
+
+        {/* Row 1 */}
+        <div
+          ref={row1.ref}
+          className={`ban-row1 ban-rv ${row1.visible ? 'ban-in' : ''}`}
+          style={{ transitionDelay: '0.1s' }}
+        >
+          {/* Image 1 */}
+          <div className="ban-img1-wrap">
+            <div className="ban-img1">
+              <img src="/product/student-1.jpg" alt="Student with laptop" />
+            </div>
+            <img src="/product/sparkle.svg" alt="" className="ban-sparkle" />
+          </div>
+
+          {/* Text 1 */}
+          <div className="ban-text">
+            <p>
+              We understand that every student&apos;s journey is unique. That&apos;s why GrowMedLink offers
+              personalised guidance — from choosing the right university to navigating visa requirements
+              and settling in abroad. Our expert advisors work with you one-on-one to map out a plan
+              that fits your goals, your timeline, and your budget.
+            </p>
+          </div>
+        </div>
+
+        {/* Row 2 */}
+        <div
+          ref={row2.ref}
+          className={`ban-row2 ban-rv ${row2.visible ? 'ban-in' : ''}`}
+          style={{ transitionDelay: '0.18s' }}
+        >
+          {/* Image 2 */}
+          <div className="ban-img2-wrap">
+            <div className="ban-img2">
+              <img src="/product/students-2.jpg" alt="Group of students celebrating" />
+            </div>
+            <img src="/product/cap.svg"      alt="" className="ban-cap" />
+            <img src="/product/scribble.svg" alt="" className="ban-scribble" />
+          </div>
+
+          {/* Text 2 + CTA */}
+          <div className="ban-text">
+            <p>
+              From undergraduate admissions to postgraduate research programs, our services cover
+              every step of your academic journey. We partner with top institutions worldwide to
+              give you access to opportunities that truly match your aspirations.
+            </p>
+            <a href="/contact" className="ban-cta">Contact Us!</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ FILTER PILLS ══════════════════════ */
 interface FilterPillsProps {
   categories: ICategory[];
@@ -223,32 +443,36 @@ interface FilterPillsProps {
 
 function FilterPills({ categories, activeCategory, setActiveCategory }: FilterPillsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-10">
-      <button
-        onClick={() => setActiveCategory('all')}
-        className="prd-pill rounded-full px-6 py-3 text-sm font-semibold transition-all"
-        style={{
-          fontFamily: FM,
-          background: activeCategory === 'all' ? GREEN : '#E4E4E4',
-          color: '#252525',
-        }}
-      >
-        All Products
-      </button>
-      {categories.map((cat) => (
+    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any, paddingBottom: 4 }}>
+      <div className="flex items-center gap-2 px-4 py-10" style={{ width: 'max-content', minWidth: '100%', justifyContent: 'center' }}>
         <button
-          key={cat._id}
-          onClick={() => setActiveCategory(cat._id)}
+          onClick={() => setActiveCategory('all')}
           className="prd-pill rounded-full px-6 py-3 text-sm font-semibold transition-all"
           style={{
             fontFamily: FM,
-            background: activeCategory === cat._id ? GREEN : '#E4E4E4',
+            background: activeCategory === 'all' ? GREEN : '#E4E4E4',
             color: '#252525',
+            whiteSpace: 'nowrap',
           }}
         >
-          {cat.name}
+          All Products
         </button>
-      ))}
+        {categories.map((cat) => (
+          <button
+            key={cat._id}
+            onClick={() => setActiveCategory(cat._id)}
+            className="prd-pill rounded-full px-6 py-3 text-sm font-semibold transition-all"
+            style={{
+              fontFamily: FM,
+              background: activeCategory === cat._id ? GREEN : '#E4E4E4',
+              color: '#252525',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -345,10 +569,11 @@ export default function ProductsPage() {
       });
 
   return (
-    <main className="prd">
+    <main className="prd" style={{ width: '100%' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <HeroSection />
-      <FilterPills 
+      <BuiltAroundYourNeeds />
+      <FilterPills
         categories={categories} 
         activeCategory={activeCategory} 
         setActiveCategory={setActiveCategory} 
