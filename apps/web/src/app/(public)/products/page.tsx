@@ -182,7 +182,7 @@ function HeroSection() {
             className="relative z-10 text-5xl font-medium tracking-tight text-white sm:text-6xl lg:text-[86px]"
             style={{ fontFamily: FH, letterSpacing: '-0.03em', ...fadeUp(100) }}
           >
-            Our Products<span style={{ color: GREEN }}>.</span>
+            Our Study Resources<span style={{ color: GREEN }}>.</span>
           </h1>
         </div>
 
@@ -190,10 +190,7 @@ function HeroSection() {
           className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base"
           style={fadeUp(260)}
         >
-          Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque
-          nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse
-          aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus
-          ipsum nec.
+          Master your licensing exams with our exam-focused study guides, practice question banks, and clinical OSCE checklists designed by our expert educators.
         </p>
 
         <div className="mt-8 flex items-center justify-center gap-3" style={fadeUp(380)}>

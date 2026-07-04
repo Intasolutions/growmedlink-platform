@@ -7,9 +7,9 @@ import FAQSection from '@/components/FAQSection';
 import TeamCarousel, { TeamMember } from '@/components/public/TeamCarousel';
 
 const EXPERTS: TeamMember[] = [
-  { name: 'Bruce Wayne', role: 'General Manager', initials: 'BW', photo: '/about/7.jpg', grad: ['#155BA9', '#0a3d7a'], bio: 'Bruce leads our consultation team, helping students map out the right licensing and immigration pathway before they commit to a programme.', social: { ig: '#', fb: '#', tw: '#' } },
-  { name: 'Clara Singh', role: 'Senior Immigration Advisor', initials: 'CS', photo: '/about/8.jpg', grad: ['#96CA45', '#4a7a10'], bio: 'Clara has guided over 600 nurses through visa and registration processes across the UK, Canada, and Australia.', social: { ig: '#', fb: '#', tw: '#' } },
-  { name: 'Daniel Fernandez', role: 'NCLEX Strategy Lead', initials: 'DF', photo: '/about/9.jpg', grad: ['#6938EF', '#3d1d9e'], bio: 'Daniel works one-on-one with candidates to build a personalised study and exam-attempt strategy ahead of their NCLEX-RN.', social: { ig: '#', fb: '#', tw: '#' } },
+  { name: 'Bruce Wayne', role: 'General Manager', initials: 'BW', photo: '/about/7.jpg', grad: ['#155BA9', '#0a3d7a'], bio: 'Helps candidates plan their general licensing tracks and verify their career eligibility abroad.', social: { ig: '#', fb: '#', tw: '#' } },
+  { name: 'Clara Singh', role: 'Senior Immigration Advisor', initials: 'CS', photo: '/about/8.jpg', grad: ['#96CA45', '#4a7a10'], bio: 'Specialized in visa procedures, hospital sponsorships, and credential routing for the UK and USA.', social: { ig: '#', fb: '#', tw: '#' } },
+  { name: 'Daniel Fernandez', role: 'NCLEX Strategy Lead', initials: 'DF', photo: '/about/9.jpg', grad: ['#6938EF', '#3d1d9e'], bio: 'Advises candidates on prep planning, time management, and mock evaluation patterns.', social: { ig: '#', fb: '#', tw: '#' } },
 ];
 
 const GREEN = '#96CA45';
@@ -187,7 +187,7 @@ export default function TalkToExpertPage() {
             lineHeight: 1.15,
             ...fadeUp(120),
           }}>
-            Talk To an Expert
+            Talk To a Pathway Advisor
           </h1>
 
           <p style={{
@@ -198,7 +198,7 @@ export default function TalkToExpertPage() {
             lineHeight: 1.3,
             ...fadeUp(260),
           }}>
-            Tell Us What&apos;s on Your Mind?
+            Get a Free 15-Minute Consultation
           </p>
 
           <p style={{
@@ -209,10 +209,7 @@ export default function TalkToExpertPage() {
             color: 'rgba(255,255,255,0.80)',
             ...fadeUp(380),
           }}>
-            Mi tincidunt elit, id quisque ligula ac diam, amet. Vel etiam suspendisse morbi eleifend
-            faucibus eget vestibulum felis. Dictum quis montes, sit sit. Tellus aliquam enim urna,
-            etiam. Mauris posuere vulputate arcu amet, vitae nisi, tellus tincidunt. At feugiat
-            sapien varius id.
+            Unsure which country matches your nursing profile or how the credential evaluation works? Speak to our expert path advisors to map out your eligibility, target licensing exams, visa pathways, and timeline.
           </p>
         </div>
       </section>
@@ -264,7 +261,7 @@ export default function TalkToExpertPage() {
       <TeamCarousel
         team={EXPERTS}
         heading={<>Meet <span style={{ color: GREEN }}>Our Experts</span></>}
-        description="Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque etiam morbi a amet lacus phasellus ipsum nec."
+        description="Our team of registered pathway experts helps you build a custom career roadmap before you join our courses."
       />
 
       {/* ══════════════════════ FAQ ══════════════════════ */}

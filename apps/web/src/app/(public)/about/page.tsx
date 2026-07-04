@@ -14,12 +14,12 @@ const BLUE  = '#155BA9';
 const RED   = '#AF1515';
 
 const TEAM = [
-  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', photo:'/about/1.jpg',  grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. Dr. Mitchell shapes our medical curriculum and ensures every program meets the highest international standards.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', photo:'/about/2.jpg',  grad:['#96CA45','#4a7a10'], bio:'With dual specialisations in medical education and health policy, Dr. Patel leads the design of our flagship NCLEX and PLAB preparation tracks, maintaining a 91% first-attempt pass rate among our graduates.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', photo:'/about/3.jpg',  grad:['#6938EF','#3d1d9e'], bio:'Priya brings a decade of student mentorship experience from top nursing colleges. She oversees every touchpoint of the learner journey — from onboarding to post-placement support.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', photo:'/about/4.jpg',  grad:['#F79009','#a55c00'], bio:'A serial edtech entrepreneur, James architected our adaptive learning platform that personalises study plans in real-time, reducing average preparation time by 30%.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', photo:'/about/5.jpg',  grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our simulation labs, delivering the case-based learning sessions that consistently receive top learner feedback.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', photo:'/about/6.jpg',  grad:['#EE46BC','#8a1460'], bio:'Ananya manages our global partnerships with hospitals and licensing bodies across 14 countries, ensuring our graduates have clear pathways to work in the USA, UK, Canada, and Australia.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', photo:'/about/1.jpg',  grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. She shapes our medical curriculum to meet the highest international standards.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', photo:'/about/2.jpg',  grad:['#96CA45','#4a7a10'], bio:'Dr. Patel leads the design of our NCLEX and PLAB preparation tracks, ensuring candidates achieve excellent results.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', photo:'/about/3.jpg',  grad:['#6938EF','#3d1d9e'], bio:'Priya oversees student journeys, ensuring candidates receive dedicated support from enrollment up to recruitment.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', photo:'/about/4.jpg',  grad:['#F79009','#a55c00'], bio:'James manages our adaptive learning platform, providing real-time dashboards to measure student progress.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', photo:'/about/5.jpg',  grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our OSCE coaching and simulation labs.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', photo:'/about/6.jpg',  grad:['#EE46BC','#8a1460'], bio:'Ananya coordinates hospital hiring partnerships, securing placement options for our successful candidates.', social:{ ig:'#', fb:'#', tw:'#' } },
 ];
 
 const CERTS = [
@@ -57,9 +57,9 @@ const ARCH_ITEMS = [
 const ARCH_COLORS = ['#1a3a1a','#2c1b0e','#0e1f2c','#2a1a0e','#1a2c1a','#0e2c2a','#2c1a2a','#1a1a2c','#2a2c1a','#2c0e1a','#0e2a2c','#2a0e2c','#1a2c2a'];
 
 const CORE_VALUES = [
-  { title:'Patient First',   desc:'Every course, resource and programme we build starts from a single question: how does this better equip our graduates to care for patients? Excellence in medicine is meaningless without compassion at its core.', bg:'linear-gradient(180deg,#155BA9 0%,#04356B 100%)' },
-  { title:'Rigorous\nStandards',    desc:'We maintain uncompromising clinical and educational standards across all preparation tracks, ensuring our learners achieve top scores and practice with absolute clinical precision.', bg:'linear-gradient(180deg,#96CA45 0%,#477106 100%)' },
-  { title:'Global\nMindset',        desc:'We prepare healthcare professionals to excel in diverse environments worldwide, fostering cultural competency, resilience, and global medical knowledge.', bg:'linear-gradient(180deg,#252525 0%,#000 100%)' },
+  { title:'Learner Success\nFirst',   desc:'Every course, mock exam, and placement advisory is structured to guarantee our candidates achieve their licensing and career goals.', bg:'linear-gradient(180deg,#155BA9 0%,#04356B 100%)' },
+  { title:'Clinical\nIntegrity',    desc:'We maintain uncompromising educational and training standards so our students practice with safe, evidence-based global standards.', bg:'linear-gradient(180deg,#96CA45 0%,#477106 100%)' },
+  { title:'Border-Free\nGrowth',        desc:'We build solid pipelines connecting global healthcare candidates with leading medical networks in the US, UK, and beyond.', bg:'linear-gradient(180deg,#252525 0%,#000 100%)' },
 ];
 
 
@@ -899,7 +899,7 @@ function HeroSection() {
               opacity: 0,
             }}
           >
-            About GrowMedLink
+            Pioneering Global Nursing Pathways
           </h1>
         </div>
 
@@ -929,7 +929,7 @@ function HeroSection() {
             marginBottom: 'clamp(24px,3.5vw,40px)', opacity: 0,
           }}
         >
-          Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
+          GrowMedLink was founded to support nurses pursuing successful international careers. We combine expert nursing training with personalised guidance, relocation support, and career assistance—helping nurses prepare confidently and move closer to global healthcare opportunities.
         </p>
         <button
           ref={ctaRef}
@@ -1314,7 +1314,7 @@ function MissionVision() {
                   maxWidth: '416px',
                 }}
               >
-                T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
+                Our mission is to empower nurses with quality training, personalised guidance, and career support to confidently prepare for international healthcare opportunities and build successful global nursing careers.
               </p>
             </div>
 
@@ -1380,7 +1380,7 @@ function MissionVision() {
                   maxWidth: '416px',
                 }}
               >
-                T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
+                Our vision is to become a trusted global partner for nurses, creating clear pathways to international careers and helping nursing talent thrive across healthcare systems worldwide.
               </p>
             </div>
 
@@ -2315,10 +2315,8 @@ function TeamSection() {
           <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(26px,3.8vw,54px)', color: DARK, marginBottom: 'clamp(12px,1.5vw,20px)', lineHeight: 1.2 }}>
             The Faces <span style={{ color: GREEN }}>Behind The Brand</span>
           </h2>
-          <p style={{ fontFamily: FH, fontSize: 'clamp(13px,1.2vw,16px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#555', maxWidth: 680, margin: '0 auto' }}>
-            T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique
-            Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum
-            Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.
+          <p style={{ fontFamily: FH, fontSize: 'clamp(13px,1.2vw,16px)', lineHeight: '169%', letterSpacing: '0.01em', color: '#555', maxWidth: 680, margin: '0 auto' }}>
+            The instructors and leadership driving GrowMedLink.
           </p>
         </div>
 
