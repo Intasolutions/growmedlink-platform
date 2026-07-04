@@ -139,15 +139,15 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
         .scs-scrollbar::-webkit-scrollbar { display: none; }
         .scs-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
-        /* hide callout arrow on small screens */
-        @media (max-width: 599px) {
+        /* hide callout arrow on small/mid screens */
+        @media (max-width: 767px) {
           .scs-callout { display: none !important; }
         }
 
-        /* split layout: stack left col on mobile */
-        @media (max-width: 767px) {
+        /* split layout: stack at ≤899px */
+        @media (max-width: 899px) {
           .scs-split { flex-direction: column !important; }
-          .scs-left  { flex: none !important; width: 100% !important; }
+          .scs-left  { flex: none !important; width: 100% !important; max-width: 100% !important; }
         }
       `}</style>
 
@@ -236,7 +236,7 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
             ref={leftColRef}
             className="scs-left"
             style={{
-              flex: '0 0 clamp(200px,28%,360px)',
+              flex: '0 0 clamp(240px,32%,380px)',
               minWidth: 0,
             }}
           >
@@ -317,8 +317,8 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
                     ref={el => { cardRefs.current[idx] = el; }}
                     style={{
                       flexShrink: 0,
-                      width: 'clamp(200px,70vw,320px)',
-                      height: 'clamp(280px,34vw,400px)',
+                      width: 'clamp(220px,75vw,320px)',
+                      height: 'clamp(300px,38vw,420px)',
                       scrollSnapAlign: 'start',
                     }}
                   >
@@ -415,7 +415,7 @@ function ServiceCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'clamp(280px,34vw,400px)',
+        height: 'clamp(300px,38vw,420px)',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',

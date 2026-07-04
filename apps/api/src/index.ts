@@ -30,12 +30,25 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || 'http://localhost:3000',
-      'http://localhost:3001', // Admin local dev
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001'
-    ],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001'
+      ];
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('growmedlink');
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, false); // Block other origins safely
+      }
+    },
     credentials: true,
   })
 );

@@ -147,29 +147,26 @@ export default function FeaturedServices({ services }: { services: any[] }) {
       style={{ background: '#fff', padding: 'clamp(24px,4vw,32px) 0 clamp(40px,6vw,64px)', overflow: 'hidden' }}
     >
       <style>{`
+        .fs-row { display: flex; flex-direction: row; gap: 16px; flex-wrap: wrap; }
+        .fs-left  { width: clamp(280px,42%,600px); flex: 0 0 auto; border-radius: 28px; position: relative; overflow: hidden; background: linear-gradient(150deg,#004a9c 0%,#002f6c 55%,#001a45 100%); height: clamp(340px,46vw,560px); cursor: default; }
+        .fs-right { flex: 1; min-width: 0; border-radius: 28px; position: relative; display: flex; flex-direction: column; overflow: hidden; background-color: #1a1a1a; height: clamp(340px,46vw,560px); }
         @media (max-width: 767px) {
-          .fs-row { flex-direction: column !important; }
-          .fs-left  { width: 100% !important; flex: none !important; }
-          .fs-right { min-width: 0 !important; height: clamp(380px,90vw,500px) !important; }
+          .fs-row   { flex-direction: column !important; gap: 14px !important; }
+          .fs-left  { width: 100% !important; flex: none !important; height: clamp(300px,80vw,440px) !important; }
+          .fs-right { width: 100% !important; min-width: 0 !important; height: clamp(340px,95vw,480px) !important; }
+        }
+        @media (max-width: 479px) {
+          .fs-left  { height: clamp(260px,85vw,340px) !important; border-radius: 20px !important; }
+          .fs-right { height: clamp(320px,100vw,440px) !important; border-radius: 20px !important; }
         }
       `}</style>
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,4vw,48px)' }}>
-        <div className="fs-row" style={{ display: 'flex', flexDirection: 'row', gap: '20px', flexWrap: 'wrap' }}>
+        <div className="fs-row">
 
           {/* ════ LEFT PANEL ════ */}
           <div
             ref={leftPanelRef}
             className="fs-left"
-            style={{
-              width: 'clamp(280px,42%,600px)',
-              flex: '0 0 auto',
-              borderRadius: '28px',
-              position: 'relative',
-              overflow: 'hidden',
-              background: 'linear-gradient(150deg,#004a9c 0%,#002f6c 55%,#001a45 100%)',
-              height: 'clamp(340px,46vw,560px)',
-              cursor: 'default',
-            }}
           >
             {/* Shimmer overlay */}
             <div
@@ -267,13 +264,6 @@ export default function FeaturedServices({ services }: { services: any[] }) {
           <div
             ref={rightPanelRef}
             className="fs-right"
-            style={{
-              flex: 1, minWidth: 'clamp(280px,40%,600px)',
-              borderRadius: '28px', position: 'relative',
-              display: 'flex', flexDirection: 'column',
-              overflow: 'hidden', backgroundColor: '#1a1a1a',
-              height: 'clamp(340px,46vw,560px)',
-            }}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
