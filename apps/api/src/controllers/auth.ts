@@ -3,10 +3,11 @@ import { User } from '../models/User.js';
 import { LoginSchema } from '@intelligen/utils';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 
+const isDev = process.env.NODE_ENV === 'development';
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  secure: !isDev,
+  sameSite: !isDev ? ('none' as const) : ('lax' as const),
 };
 
 /**

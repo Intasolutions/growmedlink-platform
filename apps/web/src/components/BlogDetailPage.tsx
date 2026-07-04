@@ -209,6 +209,11 @@ const STYLES = `
 @media (max-width:767px) {
   .bld-hero-title   { font-size:clamp(26px,7vw,52px) !important; }
   .bld-article-wrap { padding:32px 16px 56px !important; }
+  .bld-share-row    { flex-direction:column; align-items:center; }
+}
+@media (max-width:479px) {
+  .bld-hero-summary { font-size:clamp(13px,3.5vw,16px) !important; }
+  .bld-copy-btn     { width:100%; justify-content:center; }
 }
 @media (prefers-reduced-motion:reduce) {
   .bld-rv  { opacity:1 !important; transform:none !important; transition:none !important; }
@@ -287,8 +292,8 @@ function HeroSection({ blog }: { blog: BlogDetail }) {
 
           {/* Summary */}
           {blog.summary && (
-            <p style={{
-              fontFamily:FH, fontSize:18, color:'rgba(255,255,255,0.86)', textAlign:'center',
+            <p className="bld-hero-summary" style={{
+              fontFamily:FH, fontSize:'clamp(14px,1.5vw,18px)', color:'rgba(255,255,255,0.86)', textAlign:'center',
               lineHeight:'1.65', maxWidth:720, margin:'0 auto', marginBottom:24,
               animation:'bld-fadein 0.9s ease 0.35s both',
             }}>

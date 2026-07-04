@@ -254,8 +254,16 @@ const STYLES = `
   display: flex; gap: clamp(24px, 4vw, 64px); align-items: flex-start;
 }
 .svc-rc-wrap {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; width: 100%;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; width: 100%;
 }
+
+/* decorative collage — scales with viewport */
+.svc-exc-deco {
+  position: relative; flex-shrink: 0;
+  width: clamp(260px, 36vw, 440px);
+  height: clamp(280px, 38vw, 380px);
+}
+
 @media (max-width:1199px) {
   .svc-feat-row { flex-wrap:wrap !important; }
   .svc-feat-col { width:calc(50% - 12px) !important; flex:unset !important; }
@@ -263,12 +271,18 @@ const STYLES = `
 @media (max-width:991px) {
   .svc-exc-wrap { flex-direction: column; align-items: center; }
   .svc-exc-text { max-width: 100% !important; }
+  /* hide the decorative collage when stacked — too large for column */
+  .svc-exc-deco { display: none; }
 }
 @media (max-width:767px) {
-  .svc-feat-col { width:100% !important; }
+  .svc-feat-row { flex-wrap:wrap !important; }
+  .svc-feat-col { width:100% !important; flex:unset !important; }
   .svc-rc-wrap { grid-template-columns: 1fr; }
   .svc-feat-card-body { position:static !important; width:auto !important; padding:0 14px 14px !important; }
   .svc-feat-card-head { position:static !important; width:auto !important; padding:0 14px 8px !important; }
+}
+@media (max-width:479px) {
+  .svc-rc-wrap { gap: 16px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .svc-rv { opacity:1 !important; transform:none !important; transition:none !important; }
@@ -341,7 +355,7 @@ function HeroSection({ service }: { service: ServiceDetail }) {
 
         {desc && (
           <p style={{
-            fontFamily:FH, fontWeight:400, fontSize:20, color:'#fff',
+            fontFamily:FH, fontWeight:400, fontSize:'clamp(14px,1.6vw,20px)', color:'#fff',
             lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize',
             maxWidth:1102, margin:'0 auto',
             animation:'svc-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.42s both',
@@ -409,7 +423,7 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
               <p key={i}
                 className={`svc-rv${textVis?' svc-in':''}`}
                 style={{
-                  fontFamily:FH, fontWeight:400, fontSize:18, lineHeight:'169%',
+                  fontFamily:FH, fontWeight:400, fontSize:'clamp(14px,1.4vw,18px)', lineHeight:'169%',
                   letterSpacing:'0.01em', textTransform:'capitalize', color:'#000',
                   textAlign: 'justify',
                   marginBottom: i < text.split('\n\n').length - 1 ? 24 : 0,
@@ -421,7 +435,7 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
             {/* Single-paragraph fallback */}
             {!text.includes('\n\n') && text && (
               <p className={`svc-rv${textVis?' svc-in':''}`} style={{
-                fontFamily:FH, fontWeight:400, fontSize:18, lineHeight:'169%',
+                fontFamily:FH, fontWeight:400, fontSize:'clamp(14px,1.4vw,18px)', lineHeight:'169%',
                 letterSpacing:'0.01em', textTransform:'capitalize', color:'#000',
                 textAlign: 'justify',
                 transitionDelay:'0.18s',
@@ -433,8 +447,7 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
 
           {/* RIGHT: decorative collage */}
           <div className="svc-exc-deco"
-            ref={imgRef}
-            style={{ position:'relative', width:440, height:380, flexShrink:0 }}>
+            ref={imgRef}>
 
             {/* Green tilted background rectangle */}
             <div style={{
@@ -558,27 +571,28 @@ function FeaturesSection({ features }: { features: ServiceFeature[] }) {
                   className={`svc-fc svc-rv${vis?' svc-in':''} svc-feat-col`}
                   style={{
                     flex: '1 1 0',
-                    /* Reduced by 30% from 290 */
-                    height:203, borderRadius:14,
+                    minHeight: 'clamp(160px,18vw,203px)',
+                    borderRadius:14,
                     background:pal.bg,
                     position:'relative', overflow:'hidden',
+                    padding: '10px 14px 14px',
+                    display: 'flex', flexDirection: 'column', gap: 8,
                     transitionDelay:`${0.08 + idx * 0.08}s`,
                   }}>
                   {/* Icon box */}
                   <div className="svc-fc-icon" style={{
-                    position:'absolute', top:10, left:10,
                     width:40, height:40, borderRadius:4,
-                    background:pal.iconBg,
+                    background:pal.iconBg, flexShrink: 0,
                     display:'flex', alignItems:'center', justifyContent:'center',
                   }}>
-                    <LayersIcon size={24} color={pal.iconBg === '#fff' ? BLACK : BLACK} />
+                    <LayersIcon size={24} color={BLACK} />
                   </div>
 
                   {/* Heading */}
                   <h3 className="svc-feat-card-head" style={{
-                    position:'absolute', top:69, left:10,
-                    fontFamily:FM, fontWeight:500, fontSize:20, lineHeight:'24px',
-                    color:pal.headC, width:'calc(100% - 20px)',
+                    fontFamily:FM, fontWeight:500,
+                    fontSize:'clamp(14px,1.4vw,20px)', lineHeight:'1.2',
+                    color:pal.headC,
                     zIndex: 2,
                   }}>
                     {feat.title}
@@ -586,11 +600,10 @@ function FeaturesSection({ features }: { features: ServiceFeature[] }) {
 
                   {/* Body */}
                   <p className="svc-feat-card-body" style={{
-                    position:'absolute', top:106, left:10,
-                    fontFamily:FH, fontWeight:400, fontSize:13, lineHeight:'150%',
+                    fontFamily:FH, fontWeight:400,
+                    fontSize:'clamp(11px,1vw,13px)', lineHeight:'150%',
                     letterSpacing:'0.01em', textTransform:'capitalize',
-                    color:pal.bodyC, width:'calc(100% - 20px)',
-                    overflow:'hidden', maxHeight:79,
+                    color:pal.bodyC,
                     textAlign: 'justify',
                     zIndex: 2,
                   }}>
@@ -686,7 +699,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
 
                 {/* Service name */}
                 <h3 style={{
-                  fontFamily:FM, fontWeight:500, fontSize:24, lineHeight:'1.2',
+                  fontFamily:FM, fontWeight:500, fontSize:'clamp(17px,2vw,24px)', lineHeight:'1.2',
                   color: isDark ? '#fff' : '#000', marginTop: 24,
                 }}>
                   {svc.name}
@@ -694,7 +707,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
 
                 {/* Description */}
                 <p style={{
-                  fontFamily:FH, fontWeight:400, fontSize:16, lineHeight:'150%',
+                  fontFamily:FH, fontWeight:400, fontSize:'clamp(13px,1.3vw,16px)', lineHeight:'150%',
                   letterSpacing:'0.01em', textTransform:'capitalize', textAlign: 'justify',
                   color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
                 }}>

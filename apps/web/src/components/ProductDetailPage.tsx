@@ -181,18 +181,31 @@ const STYLES = `
   display: flex; gap: clamp(24px, 4vw, 64px); align-items: flex-start;
 }
 .pdt-rc-wrap {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; width: 100%;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; width: 100%;
 }
 .pdt-stat-row {
   display: flex; gap: 20px;
 }
+
+/* decorative collage — scales with viewport */
+.pdt-exc-deco {
+  position: relative; flex-shrink: 0;
+  width: clamp(260px, 36vw, 440px);
+  height: clamp(280px, 38vw, 380px);
+}
+
 @media (max-width:991px) {
   .pdt-exc-wrap { flex-direction: column; align-items: center; }
   .pdt-exc-text { max-width: 100% !important; }
+  /* hide decorative collage when stacked */
+  .pdt-exc-deco { display: none; }
 }
 @media (max-width:767px) {
   .pdt-rc-wrap { grid-template-columns: 1fr; }
   .pdt-stat-row { flex-direction: column; }
+}
+@media (max-width:479px) {
+  .pdt-rc-wrap { gap: 16px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .pdt-rv { opacity:1 !important; transform:none !important; transition:none !important; }
@@ -385,8 +398,8 @@ function DetailsSection({ product }: { product: ProductDetail }) {
                     <TagIcon size={22} color={BLACK} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: FH, fontSize: 12, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fees</p>
-                    <p style={{ fontFamily: FM, fontSize: 20, fontWeight: 600, color: '#fff', marginTop: 2 }}>{product.fees}</p>
+                    <p style={{ fontFamily: FH, fontSize: 'clamp(10px,0.9vw,12px)', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fees</p>
+                    <p style={{ fontFamily: FM, fontSize: 'clamp(15px,1.6vw,20px)', fontWeight: 600, color: '#fff', marginTop: 2 }}>{product.fees}</p>
                   </div>
                 </div>
               )}
@@ -402,8 +415,8 @@ function DetailsSection({ product }: { product: ProductDetail }) {
                     <ClockIcon size={22} color={BLACK} />
                   </div>
                   <div>
-                    <p style={{ fontFamily: FH, fontSize: 12, color: 'rgba(0,0,0,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duration</p>
-                    <p style={{ fontFamily: FM, fontSize: 20, fontWeight: 600, color: BLACK, marginTop: 2 }}>{product.duration}</p>
+                    <p style={{ fontFamily: FH, fontSize: 'clamp(10px,0.9vw,12px)', color: 'rgba(0,0,0,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duration</p>
+                    <p style={{ fontFamily: FM, fontSize: 'clamp(15px,1.6vw,20px)', fontWeight: 600, color: BLACK, marginTop: 2 }}>{product.duration}</p>
                   </div>
                 </div>
               )}
@@ -413,7 +426,7 @@ function DetailsSection({ product }: { product: ProductDetail }) {
               <p key={i}
                 className={`pdt-rv${textVis ? ' pdt-in' : ''}`}
                 style={{
-                  fontFamily: FH, fontWeight: 400, fontSize: 18, lineHeight: '169%',
+                  fontFamily: FH, fontWeight: 400, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%',
                   letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000',
                   textAlign: 'justify',
                   marginBottom: i < text.split('\n\n').length - 1 ? 24 : 0,
@@ -424,7 +437,7 @@ function DetailsSection({ product }: { product: ProductDetail }) {
             ))}
             {!text.includes('\n\n') && text && (
               <p className={`pdt-rv${textVis ? ' pdt-in' : ''}`} style={{
-                fontFamily: FH, fontWeight: 400, fontSize: 18, lineHeight: '169%',
+                fontFamily: FH, fontWeight: 400, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%',
                 letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000',
                 textAlign: 'justify',
                 transitionDelay: '0.24s',
@@ -434,7 +447,7 @@ function DetailsSection({ product }: { product: ProductDetail }) {
             )}
           </div>
 
-          <div className="pdt-exc-deco" ref={imgRef} style={{ position: 'relative', width: 440, height: 380, flexShrink: 0 }}>
+          <div className="pdt-exc-deco" ref={imgRef}>
             <div style={{
               position: 'absolute', left: 90, top: 0, width: 310, height: 325,
               background: GREEN, borderRadius: 14,
@@ -518,7 +531,7 @@ function OtherDetailsSection({ text }: { text: string }) {
           <p key={i}
             className={`pdt-rv${vis ? ' pdt-in' : ''}`}
             style={{
-              fontFamily: FH, fontWeight: 400, fontSize: 17, lineHeight: '169%',
+              fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,17px)', lineHeight: '169%',
               letterSpacing: '0.01em', textTransform: 'capitalize', color: DARK,
               textAlign: 'justify', maxWidth: 900,
               marginBottom: i < text.split('\n\n').length - 1 ? 20 : 0,
@@ -593,14 +606,14 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
                 </div>
 
                 <h3 style={{
-                  fontFamily: FM, fontWeight: 500, fontSize: 24, lineHeight: '1.2',
+                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(17px,2vw,24px)', lineHeight: '1.2',
                   color: isDark ? '#fff' : '#000', marginTop: 24,
                 }}>
                   {p.name}
                 </h3>
 
                 <p style={{
-                  fontFamily: FH, fontWeight: 400, fontSize: 16, lineHeight: '150%',
+                  fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,16px)', lineHeight: '150%',
                   letterSpacing: '0.01em', textTransform: 'capitalize',
                   color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
                 }}>
@@ -705,7 +718,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
 
                 {/* Service name */}
                 <h3 style={{
-                  fontFamily: FM, fontWeight: 500, fontSize: 24, lineHeight: '1.2',
+                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(17px,2vw,24px)', lineHeight: '1.2',
                   color: isDark ? '#fff' : '#000', marginTop: 24,
                 }}>
                   {svc.name}
@@ -713,7 +726,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
 
                 {/* Description */}
                 <p style={{
-                  fontFamily: FH, fontWeight: 400, fontSize: 16, lineHeight: '150%',
+                  fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,16px)', lineHeight: '150%',
                   letterSpacing: '0.01em', textTransform: 'capitalize', textAlign: 'justify',
                   color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
                 }}>
