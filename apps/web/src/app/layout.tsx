@@ -1,24 +1,3 @@
-// Monkey-patch global fetch to automatically bypass localtunnel landing pages
-const globalObject = (typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : null) as any;
-if (globalObject && globalObject.fetch) {
-  const originalFetch = globalObject.fetch;
-  globalObject.fetch = function (input: any, init: any) {
-    let url = '';
-    if (typeof input === 'string') {
-      url = input;
-    } else if (input && input.url) {
-      url = input.url;
-    }
-    if (url.includes('.loca.lt')) {
-      init = init || {};
-      init.headers = {
-        ...(init.headers || {}),
-        'Bypass-Tunnel-Reminder': 'true',
-      };
-    }
-    return originalFetch.call(this, input, init);
-  };
-}
 
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
