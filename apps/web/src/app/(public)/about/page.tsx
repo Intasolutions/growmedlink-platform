@@ -657,7 +657,7 @@ function ArchCarousel() {
   const wrapRef  = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const offsetRef = useRef(0);   // current scroll offset in degrees
-  const velRef    = useRef(0.08); // auto-scroll speed deg/frame
+  const velRef    = useRef(0.03); // auto-scroll speed deg/frame
   const isDrag    = useRef(false);
   const lastX     = useRef(0);
   const N = ARCH_ITEMS.length;
@@ -742,7 +742,7 @@ function ArchCarousel() {
       ticker = gsap.ticker.add(() => {
         if (!isDrag.current) {
           // Bleed off drag momentum back toward base auto-scroll speed
-          velRef.current += (0.08 - velRef.current) * 0.015;
+          velRef.current += (0.03 - velRef.current) * 0.015;
           offsetRef.current -= velRef.current;
         } else {
           velRef.current *= 0.92;

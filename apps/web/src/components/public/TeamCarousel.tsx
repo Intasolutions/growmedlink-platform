@@ -146,15 +146,15 @@ export default function TeamCarousel({
   const nameLast = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
 
   return (
-    <section style={{ background: '#fff', padding: '64px 32px 77px' }}>
+    <section style={{ background: '#fff', padding: 'clamp(36px,6vw,64px) clamp(16px,4vw,32px) clamp(40px,6vw,77px)' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <div style={{ maxWidth: 896, margin: '0 auto', textAlign: 'center' }}>
 
-        <div ref={rh} className="tc-rv" style={{ marginBottom: 38 }}>
-          <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(26px,3.8vw,54px)', color: DARK, marginBottom: 16 }}>
+        <div ref={rh} className="tc-rv" style={{ marginBottom: 'clamp(24px,4vw,38px)' }}>
+          <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(26px,3.8vw,54px)', color: DARK, marginBottom: 14 }}>
             {heading ?? <>Meet <span style={{ color: GREEN }}>Our Experts</span></>}
           </h2>
-          <p style={{ fontFamily: FH, fontSize: 'clamp(11px,1.0vw,14px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#444', maxWidth: 688, margin: '0 auto' }}>
+          <p style={{ fontFamily: FH, fontSize: 'clamp(13px,1.2vw,15px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#444', maxWidth: 688, margin: '0 auto' }}>
             {description}
           </p>
         </div>
