@@ -774,11 +774,11 @@ export default function ProductDetailPage({ product }: { product: ProductDetail 
 
       <HeroSection product={product} />
 
+      <DetailsSection product={product} />
+
       {!!product.videoUrl && (
         <VideoSection videoUrl={product.videoUrl} />
       )}
-
-      <DetailsSection product={product} />
 
       {!!product.otherDetails && (
         <OtherDetailsSection text={product.otherDetails} />

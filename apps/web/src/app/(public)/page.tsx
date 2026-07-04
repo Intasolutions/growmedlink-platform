@@ -11,6 +11,7 @@ import WhySection from '@/components/public/WhySection';
 import ReviewsSection from '@/components/public/ReviewsSection';
 import LatestNewsSection from '@/components/public/LatestNewsSection';
 import CtaBannerSection from '@/components/public/CtaBannerSection';
+import HomeIntro from '@/components/public/HomeIntro';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <HomeIntro />
       {/* Hero Section */}
       <Hero />
 

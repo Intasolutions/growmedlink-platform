@@ -210,19 +210,105 @@ const STYLES = `
   /* ── Small mobile ≤ 479px ── */
   @media (max-width: 479px) {
     .rvs-section .rvs-heading { font-size: clamp(22px,7vw,30px); }
-    .rvs-section .rvs-card { height: clamp(220px,70vw,270px); }
-    .rvs-section .rvs-text { width: clamp(120px,38vw,170px); }
+
+    /* Switch card from position:absolute layout → flex column */
+    .rvs-section .rvs-card {
+      height: auto !important;
+      min-height: 0 !important;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 14px 0;
+      overflow: hidden;
+    }
+
+    /* deco strips: keep at top, let flexbox push rest below */
+    .rvs-section .rvs-deco {
+      position: relative;
+      left: auto; top: auto;
+      padding-left: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* avatar: inline in a row with comment */
+    .rvs-section .rvs-avatar {
+      position: relative;
+      left: auto; top: auto;
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+    }
+
+    /* comment text: full-width, left-aligned, no overflow scroll */
+    .rvs-section .rvs-text {
+      position: relative;
+      left: auto; top: auto; right: auto;
+      width: auto !important;
+      height: auto !important;
+      max-height: none !important;
+      text-align: left;
+      font-size: 12px;
+      overflow: visible;
+      padding: 0;
+    }
+
+    /* avatar + comment in one row */
+    .rvs-section .rvs-mobile-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 0 14px;
+      margin-bottom: 10px;
+    }
+
+    /* name + role below */
+    .rvs-section .rvs-name {
+      position: relative;
+      left: auto; top: auto;
+      padding: 0 14px;
+      font-size: 15px;
+    }
+    .rvs-section .rvs-role {
+      position: relative;
+      left: auto; top: auto;
+      padding: 2px 14px 0;
+      font-size: 11px;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    /* date + time in a row at the bottom */
+    .rvs-section .rvs-footer-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 14px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 8px;
+    }
+    .rvs-section .rvs-date,
+    .rvs-section .rvs-time {
+      position: relative;
+      left: auto; top: auto; right: auto; bottom: auto;
+      font-size: 10px;
+    }
+
+    /* indicator: row below card */
+    .rvs-section .rvs-indicator {
+      flex-direction: row;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* carousel row: column, no extra gap */
+    .rvs-section .rvs-carousel-row {
+      flex-direction: column;
+      gap: 0;
+    }
   }
 
   /* ── Tiny ≤ 359px ── */
   @media (max-width: 359px) {
     .rvs-section .rvs-outer { padding: 0 10px; }
     .rvs-section .rvs-heading { font-size: 22px; }
-    .rvs-section .rvs-card { height: 210px; }
-    .rvs-section .rvs-text { width: 120px; font-size: 10.5px; }
-    .rvs-section .rvs-avatar { width: 46px; height: 46px; }
-    .rvs-section .rvs-name { font-size: 14px; }
-    .rvs-section .rvs-role { font-size: 10px; }
   }
 `;
 
@@ -597,18 +683,25 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                     <div ref={strip2Ref} className="rvs-deco-strip rvs-deco-green" />
                   </div>
 
-                  <div className="rvs-avatar">
-                    {rev.studentImage
-                      ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
-                      : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
-                    }
+                  {/* Mobile top row: avatar + comment side by side */}
+                  <div className="rvs-mobile-top">
+                    <div className="rvs-avatar">
+                      {rev.studentImage
+                        ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
+                        : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
+                      }
+                    </div>
+                    <p className="rvs-text">&quot;{rev.comment}&quot;</p>
                   </div>
 
-                  <p className="rvs-text">&quot;{rev.comment}&quot;</p>
                   <div className="rvs-name">{rev.studentName}</div>
                   <div className="rvs-role">{rev.service?.title || 'Verified Student'}</div>
-                  <div className="rvs-date">{fmtDate(rev.createdAt)}</div>
-                  <div className="rvs-time">{fmtTime(rev.createdAt)}</div>
+
+                  {/* Mobile footer row: date + time */}
+                  <div className="rvs-footer-row">
+                    <div className="rvs-date">{fmtDate(rev.createdAt)}</div>
+                    <div className="rvs-time">{fmtTime(rev.createdAt)}</div>
+                  </div>
                 </div>
               </div>
 
