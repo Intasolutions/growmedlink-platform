@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace packages/types && npm run build --workspace packages/constants && npm run build --workspace packages/utils && npm run build --workspace packages/ui && npm run build --workspace apps/api && npm run build --workspace apps/web",
     "start": "concurrently \"npm run start -w apps/api\" \"npm run start -w apps/web\"",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
