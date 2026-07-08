@@ -19,6 +19,7 @@ export default function AdminSettingsPage() {
       instagram: '',
       linkedin: '',
       twitter: '',
+      youtube: '',
     },
     seoDefaultTitle: '',
     seoDefaultDescription: '',
@@ -268,6 +269,16 @@ export default function AdminSettingsPage() {
                   value={formData.socialLinks.twitter}
                   onChange={(e) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, twitter: e.target.value } })}
                   placeholder="https://twitter.com/..."
+                  className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-secondary transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">YouTube</label>
+                <input
+                  type="url"
+                  value={(formData.socialLinks as any).youtube || ''}
+                  onChange={(e) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, youtube: e.target.value } })}
+                  placeholder="https://youtube.com/@..."
                   className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-secondary transition-colors"
                 />
               </div>

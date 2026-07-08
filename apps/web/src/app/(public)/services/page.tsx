@@ -441,7 +441,7 @@ function HeroSection() {
             style={{ height:'clamp(28px,3.5vw,38px)', width:'auto' }}
             onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
           <span style={{ fontFamily:FP, fontSize:'clamp(13px,1.4vw,16px)', color:'#CACACA', lineHeight:'1.4' }}>
-            1600 + Trusted Students
+            7000 + Trusted Students
           </span>
         </div>
       </div>

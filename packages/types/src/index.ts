@@ -68,6 +68,7 @@ export interface IProduct {
   _id: string;
   name: string;
   slug: string;
+  order?: number;
   category?: string | ICategory;
   image: string | IMedia; // Media ID or full object reference
   details: Record<string, any>; // Tiptap JSON content object
@@ -155,6 +156,7 @@ export interface ISettings {
     instagram?: string;
     linkedin?: string;
     twitter?: string;
+    youtube?: string;
   };
   seoDefaultTitle: string;
   seoDefaultDescription: string;

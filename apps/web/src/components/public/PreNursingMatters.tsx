@@ -6,10 +6,10 @@ import Link from 'next/link';
 import gsap from 'gsap';
 
 /* ── helpers ── */
-function getServiceImage(s: any): string {
-  if (!s) return '';
-  if (s.image && typeof s.image === 'object' && s.image.secureUrl) return s.image.secureUrl;
-  if (typeof s.image === 'string' && s.image) return s.image;
+function getProductImage(p: any): string {
+  if (!p) return '';
+  if (p.image && typeof p.image === 'object' && p.image.secureUrl) return p.image.secureUrl;
+  if (typeof p.image === 'string' && p.image) return p.image;
   return '';
 }
 
@@ -29,9 +29,9 @@ const FAN = [
   { x:  '62%', rotate:  18, scale: 0.90, z: 2 },
 ];
 
-interface Props { services?: any[] }
+interface Props { products?: any[] }
 
-export default function PreNursingMatters({ services = [] }: Props) {
+export default function PreNursingMatters({ products = [] }: Props) {
   const sunburstRef  = useRef<HTMLDivElement>(null);
   const cardEls      = useRef<(HTMLDivElement | null)[]>([]);
   /* refs for the centre card's animated layers */
@@ -42,8 +42,11 @@ export default function PreNursingMatters({ services = [] }: Props) {
   const revealedRef  = useRef(false);
   const fannedRef    = useRef(false);
 
-  const leftImg  = getServiceImage(services[0]) || FALLBACK[0];
-  const rightImg = getServiceImage(services[1]) || FALLBACK[1];
+  /* Sort by order field, then take images */
+  const sortedProducts = [...products].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const centreImg = getProductImage(sortedProducts[0]) || '/pre-nursing-photo.png';
+  const leftImg   = getProductImage(sortedProducts[1]) || FALLBACK[0];
+  const rightImg  = getProductImage(sortedProducts[2]) || FALLBACK[1];
 
   /* ── rAF-throttled sunburst parallax ── */
   useEffect(() => {
@@ -229,14 +232,14 @@ export default function PreNursingMatters({ services = [] }: Props) {
 
           {/* card 0 — left back (photo, dark tint) */}
           <div ref={el => { cardEls.current[0] = el; }} style={{ ...cardStyle, boxShadow: '0 25px 60px rgba(0,0,0,0.25)' }}>
-            <Image src={leftImg} alt="Service" fill className="object-cover" sizes="50vw" />
+            <Image src={leftImg} alt="Product" fill className="object-cover" sizes="50vw" />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
           </div>
 
-          {/* card 1 — centre (clear photo at rest, green overlay on hover) */}
+          {/* card 1 — centre (first-order product image at rest, green overlay on hover) */}
           <div ref={el => { cardEls.current[1] = el; }} style={{ ...cardStyle, boxShadow: '0 30px 70px rgba(0,0,0,0.30)' }}>
-            {/* always-visible clear photo */}
-            <Image src="/pre-nursing-photo.png" alt="GrowMedLink" fill className="object-cover" sizes="50vw" />
+            {/* always-visible clear photo — product with order=0 */}
+            <Image src={centreImg} alt="GrowMedLink" fill className="object-cover" sizes="50vw" />
 
             {/* green tinted overlay — opacity controlled by GSAP */}
             <div

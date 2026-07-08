@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link  from 'next/link';
 import FAQSection from '@/components/FAQSection';
 import { TiptapRenderer } from '@/components/TiptapRenderer';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -411,6 +412,7 @@ export default function BlogDetailPage({ blog }: { blog: BlogDetail }) {
       <HeroSection  blog={blog} />
       <ArticleContent blog={blog} />
       <FAQSection />
+      <WhatsAppButton pageType="blog_detail" itemName={blog.title} />
     </main>
   );
 }

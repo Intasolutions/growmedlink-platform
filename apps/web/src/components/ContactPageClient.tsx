@@ -3,6 +3,7 @@
 import React, { useState, useRef, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
 import { Phone, Mail, MessageCircle, MapPin } from 'lucide-react';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { submitEnquiry } from '@/lib/api/enquiries';
 import { ENQUIRY_TYPES } from '@intelligen/constants';
 import gsap from 'gsap';
@@ -718,6 +719,7 @@ export default function ContactPageClient() {
           ))}
         </div>
       </section>
+      <WhatsAppButton pageType="contact" />
     </main>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
@@ -2439,6 +2440,7 @@ export default function AboutPage() {
       <CoreValuesSection />
       <TeamSection />
       <FAQSection />
+      <WhatsAppButton pageType="about" />
     </main>
   );
 }

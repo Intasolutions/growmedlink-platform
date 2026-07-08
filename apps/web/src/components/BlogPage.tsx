@@ -19,6 +19,7 @@ import Image from 'next/image';
 import Link  from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import FAQSection from '@/components/FAQSection';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -697,6 +698,7 @@ export default function BlogPage({ blogs, pagination, heroImage, heroSubtitle }:
       <BlogGridSection blogs={blogs} />
       <PaginationControls pagination={pagination} />
       <FAQSection />
+      <WhatsAppButton pageType="blog" />
     </main>
   );
 }

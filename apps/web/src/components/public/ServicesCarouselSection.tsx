@@ -7,7 +7,8 @@ import gsap from 'gsap';
 
 const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 
-export default function ServicesCarouselSection({ services }: { services: any[] }) {
+export default function ServicesCarouselSection({ products }: { products: any[] }) {
+  const services = products; // internal alias — carousel now shows products
   const sectionRef   = useRef<HTMLElement>(null);
   const headingRef   = useRef<HTMLHeadingElement>(null);
   const arrowWrapRef = useRef<HTMLDivElement>(null);
@@ -323,9 +324,9 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
                     }}
                   >
                     <ServiceCard
-                      href={`/services/${service?.slug || '#'}`}
+                      href={`/products/${service?.slug || '#'}`}
                       img={img}
-                      title={service?.title || 'NCLEX Exam application process'}
+                      title={service?.name || service?.title || 'NCLEX Exam application process'}
                       description={service?.description || 'Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.'}
                     />
                   </div>
@@ -523,9 +524,9 @@ function ServiceCard({
   );
 }
 
-/* ── Explore button with GSAP hover ── */
+/* ── Explore button with GSAP hover — links to /services ── */
 function ExploreBtn() {
-  const ref = useRef<HTMLButtonElement>(null);
+  const ref = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -546,8 +547,9 @@ function ExploreBtn() {
   }, []);
 
   return (
-    <button
+    <Link
       ref={ref}
+      href="/services"
       style={{
         backgroundColor: '#96CA45',
         color: '#111',
@@ -560,9 +562,10 @@ function ExploreBtn() {
         boxShadow: '0 4px 16px rgba(150,202,69,0.35)',
         willChange: 'transform',
         display: 'inline-block',
+        textDecoration: 'none',
       }}
     >
       Explore Services
-    </button>
+    </Link>
   );
 }

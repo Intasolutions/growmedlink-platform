@@ -66,6 +66,7 @@ export const ProductSchema = z.object({
   keywords: z.array(z.string()),
   canonicalUrl: z.string().url('Please enter a valid canonical URL').optional().or(z.literal('')),
   ogImage: z.string().url('Please enter a valid Open Graph image URL').optional().or(z.literal('')),
+  order: z.number().int().min(0).default(0).optional(),
   isFeatured: z.boolean().default(false),
   videoUrl: z.string().optional().or(z.literal('')),
 });
@@ -121,6 +122,7 @@ export const SettingsSchema = z.object({
     instagram: z.string().url('Invalid URL').optional().or(z.literal('')),
     linkedin: z.string().url('Invalid URL').optional().or(z.literal('')),
     twitter: z.string().url('Invalid URL').optional().or(z.literal('')),
+    youtube: z.string().url('Invalid URL').optional().or(z.literal('')),
   }),
   seoDefaultTitle: z.string().min(5, 'Default SEO title is required'),
   seoDefaultDescription: z.string().min(10, 'Default SEO description is required'),

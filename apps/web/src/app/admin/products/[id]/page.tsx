@@ -28,6 +28,7 @@ export default function EditProductPage({ params }: EditProductProps) {
   const [otherDetailsText, setOtherDetailsText] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
+  const [order, setOrder] = useState(0);
 
   // SEO states
   const [metaTitle, setMetaTitle] = useState('');
@@ -90,6 +91,7 @@ export default function EditProductPage({ params }: EditProductProps) {
           setCanonicalUrl(product.canonicalUrl || '');
           setOgImage(product.ogImage || '');
           setVideoUrl(product.videoUrl || '');
+          setOrder(product.order ?? 0);
         } else {
           setErrorMsg(data.message || 'Failed to retrieve product parameters.');
         }
@@ -148,6 +150,7 @@ export default function EditProductPage({ params }: EditProductProps) {
       keywords,
       canonicalUrl: canonicalUrl || undefined,
       ogImage: ogImage || selectedImage.secureUrl,
+      order,
       isFeatured,
       videoUrl: videoUrl || undefined,
     };
@@ -353,6 +356,22 @@ export default function EditProductPage({ params }: EditProductProps) {
                 <p className="text-red-400 text-xs mt-1">{fieldErrors.duration[0]}</p>
               )}
             </div>
+          </div>
+
+          {/* Display Order */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest">
+              Display Order
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={order}
+              onChange={e => setOrder(Number(e.target.value))}
+              placeholder="e.g. 1"
+              className="w-full px-4 py-3 bg-[#020C1B]/80 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-secondary transition-all text-sm"
+            />
+            <p className="text-gray-500 text-xs">Lower numbers appear first in the homepage nursing section.</p>
           </div>
 
           {/* YouTube Video URL */}

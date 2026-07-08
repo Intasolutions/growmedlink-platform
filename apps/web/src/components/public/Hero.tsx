@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import gsap from 'gsap';
 
 /* ─── Types ─── */
@@ -527,7 +528,7 @@ export default function Hero() {
                     fontSize: 'clamp(11px,1.1vw,15px)',
                   }}
                 >
-                  1600 + Trusted Students
+                  7000 + Trusted Students
                 </span>
               </div>
             </div>
@@ -579,25 +580,28 @@ export default function Hero() {
               </p>
 
               {/* CTA button */}
-              <button
+              <Link
+                href="/services"
                 className="hover:brightness-90 active:scale-95 transition-all"
                 style={{
                   width: 'clamp(170px,36vw,228px)',
                   height: 'clamp(44px,5.5vw,54px)',
                   background: '#96CA45',
                   borderRadius: '6px',
-                  border: 'none',
                   cursor: 'pointer',
                   fontFamily: "'Haffer XH Mono-TRIAL','Courier New',monospace",
                   fontSize: 'clamp(14px,1.3vw,18px)',
                   fontWeight: 600,
                   color: '#000',
                   letterSpacing: '0.01em',
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
                 }}
               >
                 Explore Courses
-              </button>
+              </Link>
 
               {/* Arrow callout — in normal flow directly below the button */}
               <div

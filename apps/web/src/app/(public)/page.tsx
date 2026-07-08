@@ -1,5 +1,6 @@
 import React from 'react';
 import { getServices } from '@/lib/api/services';
+import { getProducts } from '@/lib/api/products';
 import { getBlogs } from '@/lib/api/blogs';
 import { getPublicReviews } from '@/lib/api/reviews';
 import Hero from '@/components/public/Hero';
@@ -12,17 +13,21 @@ import ReviewsSection from '@/components/public/ReviewsSection';
 import LatestNewsSection from '@/components/public/LatestNewsSection';
 import CtaBannerSection from '@/components/public/CtaBannerSection';
 import HomeIntro from '@/components/public/HomeIntro';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [allServices, allBlogs, allReviews] = await Promise.all([
+  const [allServices, allProducts, allBlogs, allReviews] = await Promise.all([
     getServices().catch(() => []),
+    getProducts().catch(() => []),
     getBlogs().catch(() => []),
     getPublicReviews().catch(() => [])
   ]);
 
   const featuredServices = allServices.slice(0, 3);
+  /* Sort products by order field for display */
+  const sortedProducts = [...allProducts].sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -34,13 +39,13 @@ export default async function Home() {
       <StatsBanner />
 
       {/* Why Pre-Nursing Matters Section */}
-      <PreNursingMatters services={featuredServices} />
+      <PreNursingMatters products={sortedProducts} />
 
-      {/* Featured Services Interactive Section */}
+      {/* Our Services Carousel (shows products, links to product detail) */}
+      <ServicesCarouselSection products={sortedProducts} />
+
+      {/* Featured Services Interactive Section (products carousel) */}
       <FeaturedServices services={featuredServices} />
-
-      {/* Services Carousel Section */}
-      <ServicesCarouselSection services={allServices} />
 
       {/* Why Section */}
       <WhySection />
@@ -53,6 +58,9 @@ export default async function Home() {
 
       {/* CTA Banner Section */}
       <CtaBannerSection />
+
+      {/* WhatsApp floating button */}
+      <WhatsAppButton pageType="home" />
     </div>
   );
 }

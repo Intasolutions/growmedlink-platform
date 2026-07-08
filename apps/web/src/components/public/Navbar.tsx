@@ -158,14 +158,26 @@ export default function Navbar({ settings }: NavbarProps) {
         </nav>
         {/* navlink underline styles are in globals.css */}
 
-        {/* Right: Join Button */}
-        <Link
-          href="/talk-to-expert"
-          className="cursor-pointer border-none py-2 px-4 md:px-6 lg:px-7 bg-[rgba(150,202,69,1)] h-[44px] md:h-[44px] lg:h-[54px] min-w-[70px] md:min-w-[95px] lg:min-w-[120px] rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shrink-0">
-          <div className="text-base md:text-lg font-semibold font-['Haffer_XH_Mono-TRIAL'] text-[#000]">
-            Join
-          </div>
-        </Link>
+        {/* Right: Join Button → WhatsApp */}
+        {(() => {
+          const phone = settings?.contactPhone ? settings.contactPhone.replace(/[^0-9]/g, '') : '';
+          const waHref = phone
+            ? `https://wa.me/${phone}?text=${encodeURIComponent('Hello! I would like to join GrowMedLink and learn more about your nursing programs.')}`
+            : 'https://wa.me/';
+          return (
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer border-none py-2 px-4 md:px-6 lg:px-7 bg-[rgba(150,202,69,1)] h-[44px] md:h-[44px] lg:h-[54px] min-w-[70px] md:min-w-[95px] lg:min-w-[120px] rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shrink-0"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="text-base md:text-lg font-semibold font-['Haffer_XH_Mono-TRIAL'] text-[#000]">
+                Join
+              </div>
+            </a>
+          );
+        })()}
       </div>
 
       {/* Mobile / Dropdown Navigation (Hidden when closed, hidden on desktop) */}

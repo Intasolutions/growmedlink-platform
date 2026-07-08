@@ -33,6 +33,7 @@ const settingsSchema = new Schema<ISettings>(
       instagram: { type: String, default: '' },
       linkedin: { type: String, default: '' },
       twitter: { type: String, default: '' },
+      youtube: { type: String, default: '' },
     },
     seoDefaultTitle: {
       type: String,

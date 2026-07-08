@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Phone, Mail, Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
 
 interface FooterProps {
   settings: any;
@@ -234,6 +234,13 @@ export default function Footer({ settings }: FooterProps) {
                       style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
                       <Linkedin style={{ width: 16, height: 16 }} />
+                    </a>
+                  )}
+                  {settings?.socialLinks?.youtube && (
+                    <a href={settings.socialLinks.youtube} target="_blank" rel="noreferrer"
+                      style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.12)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#252525', textDecoration: 'none' }}>
+                      <Youtube style={{ width: 16, height: 16 }} />
                     </a>
                   )}
                 </div>

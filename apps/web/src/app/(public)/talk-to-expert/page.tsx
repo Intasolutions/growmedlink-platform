@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Phone, Mail, MessageCircle } from 'lucide-react';
 import FAQSection from '@/components/FAQSection';
 import TeamCarousel, { TeamMember } from '@/components/public/TeamCarousel';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const EXPERTS: TeamMember[] = [
   { name: 'Bruce Wayne', role: 'General Manager', initials: 'BW', photo: '/about/7.jpg', grad: ['#155BA9', '#0a3d7a'], bio: 'Helps candidates plan their general licensing tracks and verify their career eligibility abroad.', social: { ig: '#', fb: '#', tw: '#' } },
@@ -266,6 +267,7 @@ export default function TalkToExpertPage() {
 
       {/* ══════════════════════ FAQ ══════════════════════ */}
       <FAQSection />
+      <WhatsAppButton pageType="talk_to_expert" />
     </main>
   );
 }
