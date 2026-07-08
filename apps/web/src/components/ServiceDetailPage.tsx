@@ -350,7 +350,17 @@ function HeroSection({ service }: { service: ServiceDetail }) {
           marginBottom:'clamp(14px,2vw,28px)',
           animation:'svc-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.18s both',
         }}>
-          {service.name}
+          {(() => {
+            const words = service.name.split(' ');
+            const first = words[0];
+            const rest  = words.slice(1).join(' ');
+            return (
+              <>
+                <span style={{ color:'#96CA45' }}>{first}</span>
+                {rest && <> {rest}</>}
+              </>
+            );
+          })()}
         </h1>
 
         {desc && (

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import FAQSection from '@/components/FAQSection';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { getGlobalSettings } from '@/lib/api/settings';
 
 const FH = "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif";
 const FM = "'Haffer XH Mono-TRIAL','Courier New',monospace";
@@ -657,7 +658,7 @@ function BracketIcon({ size = '100%' }: { size?: string }) {
 function ArchCarousel() {
   const wrapRef  = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const offsetRef = useRef(0);   // current scroll offset in degrees
+  const offsetRef = useRef(-12);  // start half-step offset so first pair is symmetric
   const velRef    = useRef(0.03); // auto-scroll speed deg/frame
   const isDrag    = useRef(false);
   const lastX     = useRef(0);
@@ -672,10 +673,10 @@ function ArchCarousel() {
    *  - Cards loop infinitely: we render SLOTS virtual slots spread across 360°,
    *    each mapped to a real card via modulo so the stream never ends.
    */
-  const STEP_DEG = 16; // degrees between adjacent cards (wider gap)
-  const VIS_HALF = 44; // cards within ±44° of top are visible
+  const STEP_DEG = 19; // degrees between adjacent cards
+  const VIS_HALF = 42; // cards within ±42° of top (~4 cards visible at once)
   // Fill the full circle so looping is seamless: ceil(360/STEP_DEG) slots
-  const SLOTS    = Math.ceil(360 / STEP_DEG); // ~23 virtual positions
+  const SLOTS    = Math.ceil(360 / STEP_DEG); // ~19 virtual positions
 
   const getDims = () => {
     const vw    = window.innerWidth;
@@ -686,7 +687,10 @@ function ArchCarousel() {
     // cy_apex = ctrY - radius  =>  ctrY = apex_y + radius
     const apexY  = Math.round(contH * 0.28);
     const ctrY   = apexY + radius;
-    const cardW  = Math.round(Math.min(Math.max(110, vw * 0.19), 260));
+    // Card width = 94% of the horizontal gap between adjacent card centres
+    // gap = radius * sin(STEP_DEG°) — guarantees no overlap at any viewport
+    const arcGap = radius * Math.sin((STEP_DEG * Math.PI) / 180);
+    const cardW  = Math.round(Math.min(Math.max(100, arcGap * 0.94), 240));
     const cardH  = Math.round(cardW * 0.70);
     return { radius, ctrY, cardW, cardH };
   };
@@ -818,9 +822,22 @@ function HeroSection() {
   const h1Ref      = useRef<HTMLHeadingElement>(null);
   const subRef     = useRef<HTMLDivElement>(null);
   const bodyRef    = useRef<HTMLParagraphElement>(null);
-  const ctaRef     = useRef<HTMLButtonElement>(null);
+  const ctaRef     = useRef<HTMLAnchorElement>(null);
   const calloutRef = useRef<HTMLDivElement>(null);
   const burstRef   = useRef<HTMLDivElement>(null);
+  const [waHref, setWaHref] = useState('https://wa.me/');
+
+  useEffect(() => {
+    getGlobalSettings()
+      .then(settings => {
+        if (settings?.contactPhone) {
+          const phone = settings.contactPhone.replace(/[^0-9]/g, '');
+          const msg = encodeURIComponent('Hello! I would like to become a member of GrowMedLink and learn more about your nursing programs.');
+          setWaHref(`https://wa.me/${phone}?text=${msg}`);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -911,7 +928,7 @@ function HeroSection() {
           <Image src="/avatars-group.png" alt="Students" width={221} height={38}
             style={{ height: 'clamp(28px,3.5vw,38px)', width: 'auto' }}
             onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-          <span style={{ fontFamily: FP, fontSize: 'clamp(13px,1.4vw,16px)', color: '#CACACA', lineHeight: '1.4' }}>1600 + Trusted Students</span>
+          <span style={{ fontFamily: FP, fontSize: 'clamp(13px,1.4vw,16px)', color: '#CACACA', lineHeight: '1.4' }}>7000 + Trusted Students</span>
         </div>
       </div>
 
@@ -932,17 +949,21 @@ function HeroSection() {
         >
           GrowMedLink was founded to support nurses pursuing successful international careers. We combine expert nursing training with personalised guidance, relocation support, and career assistance—helping nurses prepare confidently and move closer to global healthcare opportunities.
         </p>
-        <button
+        <a
           ref={ctaRef}
+          href={waHref}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             width: 'clamp(180px,20vw,228px)', height: 'clamp(44px,5vw,54px)',
-            background: GREEN, borderRadius: 6, border: 'none', cursor: 'pointer',
+            background: GREEN, borderRadius: 6, cursor: 'pointer',
             fontFamily: FM, fontSize: 'clamp(14px,1.2vw,18px)', fontWeight: 600, color: '#000',
-            opacity: 0,
+            opacity: 0, textDecoration: 'none',
           }}
         >
           Become a Member
-        </button>
+        </a>
       </div>
 
       {/* Wave dots + script callout */}
@@ -1093,17 +1114,18 @@ function ShelfCollage({ vis }: { vis: boolean }) {
       onMouseLeave={onLeave}
       style={{
         position: 'relative',
-        width: 'clamp(300px,46vw,480px)',
+        width: 'clamp(260px,44vw,480px)',
         userSelect: 'none',
         cursor: 'default',
       }}
     >
-      {/* ── Top row: circle (left) + rounded-rect (right, overlapping) ── */}
+      {/* ── Top row: circle (left) + rounded-rect (right, side by side with small gap) ── */}
       <div
         className={`abt-ms${vis ? ' abt-in' : ''}`}
         style={{
-          position: 'relative',
-          height: 'clamp(150px,18vw,210px)',
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: 10,
           marginBottom: 12,
           zIndex: 2,
         }}
@@ -1112,11 +1134,9 @@ function ShelfCollage({ vis }: { vis: boolean }) {
         <div
           ref={circleRef}
           style={{
-            position: 'absolute',
-            left: 0, top: '50%',
-            transform: 'translateY(-50%)',
-            width: 'clamp(130px,16vw,175px)',
-            height: 'clamp(130px,16vw,175px)',
+            flexShrink: 0,
+            width: 'clamp(110px,14vw,158px)',
+            height: 'clamp(110px,14vw,158px)',
             borderRadius: '50%',
             overflow: 'hidden',
             border: '4px solid #fff',
@@ -1129,21 +1149,20 @@ function ShelfCollage({ vis }: { vis: boolean }) {
             onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
         </div>
 
-        {/* Rounded-rect portrait — overlaps right side of circle */}
+        {/* Rounded-rect portrait — sits to the right, taller than the circle */}
         <div
           ref={rectRef}
           style={{
-            position: 'absolute',
-            left: 'clamp(96px,12vw,128px)',
-            top: 0,
-            width: 'clamp(118px,15vw,160px)',
-            height: 'clamp(150px,18vw,205px)',
+            flexShrink: 0,
+            width: 'clamp(100px,13vw,145px)',
+            height: 'clamp(138px,17vw,196px)',
             borderRadius: 18,
             overflow: 'hidden',
             border: '4px solid #fff',
             boxShadow: '0 8px 28px rgba(0,0,0,0.14)',
             zIndex: 2,
             willChange: 'transform, border-radius',
+            position: 'relative',
           }}
         >
           <Image src="/about/3.jpg" alt="" fill style={{ objectFit: 'cover' }}
@@ -1916,7 +1935,7 @@ function CertificationSection() {
         {/* Avatars at bottom */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginTop:48, position:'relative', zIndex:10 }}>
           <Image src="/avatars-group.png" alt="Trusted Students" width={160} height={32} style={{ height:32, width:'auto' }} />
-          <span style={{ fontFamily:FP, fontSize:14, color:DARK, fontWeight:500 }}>1600 + Trusted Students</span>
+          <span style={{ fontFamily:FP, fontSize:14, color:DARK, fontWeight:500 }}>7000 + Trusted Students</span>
         </div>
 
       </div>

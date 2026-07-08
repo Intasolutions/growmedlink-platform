@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
-import { Phone, Mail, MessageCircle, MapPin } from 'lucide-react';
+import { Phone, Mail, MessageCircle, MapPin, MessageSquare } from 'lucide-react';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { submitEnquiry } from '@/lib/api/enquiries';
 import { ENQUIRY_TYPES } from '@intelligen/constants';
@@ -283,6 +283,39 @@ const KEYFRAMES = `
     pointer-events: none;
   }
 
+  /* ── quick contact cards (from talk-to-expert) ── */
+  .cnt-qc-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+  @media (min-width: 560px) {
+    .cnt-qc-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 900px) {
+    .cnt-qc-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .cnt-qc-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 2vw, 16px);
+    border-radius: 16px;
+    padding: clamp(16px, 3vw, 24px) clamp(14px, 3vw, 24px);
+    text-decoration: none;
+    transition: transform 0.28s cubic-bezier(.22,.68,0,1.2), box-shadow 0.28s ease;
+  }
+  .cnt-qc-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  }
+  @keyframes cnt-card-in {
+    from { opacity: 0; transform: translate3d(0, 32px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0px, 0);  }
+  }
+
   /* state group divider */
   .cnt-state-group {
     padding-bottom: 48px;
@@ -355,22 +388,20 @@ function BranchCard({ branch }: { branch: Branch }) {
           </div>
         )}
         {branch.whatsapp && (
-          <a
-            href={`https://wa.me/${branch.whatsapp.replace(/[^0-9]/g, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cnt-wa-btn"
-          >
-            <span className="cnt-wa-icon">
-              {/* WhatsApp SVG */}
-              <svg width="17" height="17" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.676 4.8 1.854 6.79L2 30l7.418-1.83A13.93 13.93 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2Z" fill="#25D366"/>
-                <path d="M22.5 19.3c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.68-1.64-.93-2.24-.24-.59-.5-.51-.68-.52h-.58c-.2 0-.52.07-.79.37-.27.3-1.03 1-1.03 2.45s1.05 2.84 1.2 3.04c.15.2 2.07 3.16 5.02 4.43.7.3 1.25.48 1.67.62.7.22 1.34.19 1.84.11.56-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" fill="#fff"/>
-              </svg>
-            </span>
-            <span className="cnt-wa-label">Join Now</span>
-            <span className="cnt-wa-ping" />
-          </a>
+          <div className="cnt-contact-row">
+            <div className="cnt-icon-box">
+              <MessageSquare size={15} color="#252525" />
+            </div>
+            <a
+              href={`https://wa.me/${branch.whatsapp.replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cnt-contact-text"
+              style={{ color: '#252525', textDecoration: 'none' }}
+            >
+              {branch.whatsapp}
+            </a>
+          </div>
         )}
       </div>
     </div>
@@ -438,6 +469,70 @@ function StateGroup({ group }: { group: StateGroup }) {
         ))}
       </div>
     </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   QUICK CONTACT CARDS
+══════════════════════════════════════════════════════════════════════ */
+const QUICK_CONTACTS = [
+  { icon: Phone,          label: '+91 9898989898',      href: 'tel:+919898989898',          bg: GREEN,    iconBg: '#252525', iconColor: GREEN,    text: '#252525' },
+  { icon: Mail,           label: 'info@growmedlink.com', href: 'mailto:info@growmedlink.com', bg: '#252525', iconBg: GREEN,    iconColor: '#252525', text: '#fff'    },
+  { icon: MessageCircle,  label: '+91 9898989898',      href: 'https://wa.me/919898989898', bg: GREEN,    iconBg: '#252525', iconColor: GREEN,    text: '#252525' },
+];
+
+function QuickContactCards() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section ref={ref} style={{ background: '#fff', padding: 'clamp(28px,5vw,56px) clamp(16px,5vw,40px)' }}>
+      <div className="cnt-qc-grid">
+        {QUICK_CONTACTS.map((c, i) => {
+          const Icon = c.icon;
+          return (
+            <a
+              key={i}
+              href={c.href}
+              className="cnt-qc-card"
+              style={{
+                background: c.bg,
+                opacity: visible ? 1 : 0,
+                animation: visible
+                  ? `cnt-card-in 0.6s cubic-bezier(.22,.68,0,1.2) ${i * 0.12}s both`
+                  : 'none',
+              }}
+            >
+              <span style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 'clamp(40px,5vw,48px)', height: 'clamp(40px,5vw,48px)',
+                borderRadius: 10, background: c.iconBg, flexShrink: 0,
+              }}>
+                <Icon style={{ width: 22, height: 22, color: c.iconColor }} />
+              </span>
+              <span style={{
+                fontSize: 'clamp(13px,1.4vw,17px)',
+                fontWeight: 500,
+                color: c.text,
+                wordBreak: 'break-all',
+              }}>
+                {c.label}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -696,6 +791,9 @@ export default function ContactPageClient() {
           )}
         </div>
       </section>
+
+      {/* ══════════ QUICK CONTACT CARDS ══════════ */}
+      <QuickContactCards />
 
       {/* ══════════ LOCATIONS SECTION ══════════ */}
       <section style={{ background: '#f8f9fa', padding: 'clamp(48px,7vw,96px) clamp(16px,5vw,72px)' }}>

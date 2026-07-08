@@ -195,7 +195,7 @@ function HeroSection() {
 
         <div className="mt-8 flex items-center justify-center gap-3" style={fadeUp(380)}>
           <Image src="/avatars-group.png" alt="Students" width={154} height={27} style={{ height: 27, width: 'auto' }} />
-          <span style={{ fontFamily: FP, fontSize: 12, color: '#CACACA' }}>1600 + Trusted Students</span>
+          <span style={{ fontFamily: FP, fontSize: 12, color: '#CACACA' }}>7000 + Trusted Students</span>
         </div>
 
         <div className="mt-8" style={fadeUp(480)}>

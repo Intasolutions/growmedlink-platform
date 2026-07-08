@@ -156,12 +156,12 @@ export default function Footer({ settings }: FooterProps) {
                   </h3>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column' }}>
                     {[
-                      { href: '/',              label: 'Home'            },
-                      { href: '/about',         label: 'About Us'        },
-                      { href: '/products',      label: 'Products'        },
-                      { href: '/services',      label: 'Services'        },
-                      { href: '/blog',          label: 'Blogs'           },
-                      { href: '/talk-to-expert',label: 'Talk to an Expert'},
+                      { href: '/',         label: 'Home'     },
+                      { href: '/about',    label: 'About Us' },
+                      { href: '/products', label: 'Products' },
+                      { href: '/services', label: 'Services' },
+                      { href: '/blog',     label: 'Blogs'    },
+                      { href: '/contact',  label: 'Contact'  },
                     ].map(({ href, label }) => (
                       <li key={href} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '7px 0' }}>
                         <Link href={href} style={{ color: '#fff', fontSize: 'clamp(12px,1.1vw,14px)', textDecoration: 'none' }}

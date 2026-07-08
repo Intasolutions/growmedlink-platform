@@ -69,15 +69,16 @@ const STYLES = `
   100% { background-position: 200% center; }
 }
 
+/* ── wrapper ── */
 .wa-wrap {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
+  bottom: clamp(14px, 4vw, 28px);
+  right: clamp(14px, 4vw, 28px);
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: clamp(5px, 1vw, 8px);
   animation: wa-entry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.8s both;
 }
 
@@ -86,11 +87,11 @@ const STYLES = `
   animation: wa-float 3s ease-in-out infinite;
 }
 
-/* circle button */
+/* ── circle button ── */
 .wa-btn {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: clamp(46px, 7vw, 60px);
+  height: clamp(46px, 7vw, 60px);
   border-radius: 50%;
   background: #25D366;
   display: flex;
@@ -116,7 +117,16 @@ const STYLES = `
   transform: scale(0.95);
 }
 
-/* pulse rings — two staggered */
+/* ── SVG icon inside circle ── */
+.wa-icon {
+  width: clamp(22px, 3.5vw, 30px);
+  height: clamp(22px, 3.5vw, 30px);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* ── pulse rings — two staggered ── */
 .wa-ring {
   position: absolute;
   inset: 0;
@@ -129,12 +139,12 @@ const STYLES = `
   animation-delay: 0.75s;
 }
 
-/* "Join Now" label — outside below the circle */
+/* ── "Join Now" label — outside below the circle ── */
 .wa-label {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 13px 5px 10px;
+  gap: clamp(3px, 0.8vw, 5px);
+  padding: clamp(3px, 0.6vw, 5px) clamp(8px, 1.5vw, 13px) clamp(3px, 0.6vw, 5px) clamp(6px, 1.2vw, 10px);
   border-radius: 20px;
   background: #fff;
   box-shadow: 0 3px 12px rgba(37,211,102,0.28), 0 1px 4px rgba(0,0,0,0.12);
@@ -150,21 +160,20 @@ const STYLES = `
   transform: translateY(-2px);
 }
 
-/* dot indicator */
+/* ── dot indicator ── */
 .wa-label-dot {
-  width: 7px;
-  height: 7px;
+  width: clamp(5px, 1vw, 7px);
+  height: clamp(5px, 1vw, 7px);
   border-radius: 50%;
   background: #25D366;
   flex-shrink: 0;
-  box-shadow: 0 0 0 0 rgba(37,211,102,0.5);
   animation: wa-ring 1.6s ease-out infinite;
 }
 
-/* shimmer gradient text */
+/* ── shimmer gradient text ── */
 .wa-label-text {
   font-family: 'Haffer XH Mono-TRIAL','Courier New',monospace;
-  font-size: 11px;
+  font-size: clamp(9px, 1.4vw, 11px);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -175,6 +184,14 @@ const STYLES = `
   background-clip: text;
   animation: wa-shimmer 2.5s linear 1.5s infinite;
   line-height: 1;
+}
+
+/* ── very small screens (≤360px) — shrink further ── */
+@media (max-width: 360px) {
+  .wa-wrap { bottom: 10px; right: 10px; gap: 4px; }
+  .wa-btn  { width: 42px; height: 42px; }
+  .wa-icon { width: 20px; height: 20px; }
+  .wa-label-text { font-size: 8px; letter-spacing: 0.04em; }
 }
 `;
 
@@ -221,12 +238,10 @@ export default function WhatsAppButton({ pageType, itemName }: WhatsAppButtonPro
           <div className="wa-ring" />
 
           <svg
-            width="30"
-            height="30"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ position: 'relative', zIndex: 1 }}
+            className="wa-icon"
           >
             <path
               fillRule="evenodd"

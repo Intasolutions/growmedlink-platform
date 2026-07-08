@@ -223,8 +223,9 @@ const STYLES = `
   .srv-sh          { font-size:clamp(15px,4vw,22px) !important; line-height:1.25 !important; }
   .srv-wide-inner  { flex-direction:column !important; }
   .srv-wide-img    { width:calc(100% - 36px) !important; aspect-ratio:16/9 !important; min-height:unset !important; }
-  .srv-narrow-card { flex:1 1 100% !important; }
   .srv-cards-wrap  { padding:0 14px !important; }
+  /* narrow pair: stack to 1 column on small screens */
+  .srv-narrow-row  { grid-template-columns:1fr !important; }
 }
 @media (max-width:479px) {
   .srv-h1 { font-size:28px !important; }
@@ -453,14 +454,22 @@ function HeroSection() {
 
       {/* CTA */}
       <div style={{ textAlign:'center', padding:'clamp(20px,2.5vw,36px) 24px 0', position:'relative', zIndex:5 }}>
-        <button style={{
-          width:'clamp(180px,20vw,228px)', height:'clamp(44px,5vw,54px)',
-          background:GREEN, borderRadius:6,
-          border:'none', cursor:'pointer', fontFamily:FM,
-          fontSize:'clamp(14px,1.2vw,18px)', fontWeight:600, color:'#000',
-        }}>
+        <a
+          href="#services-grid"
+          onClick={e => {
+            e.preventDefault();
+            document.getElementById('services-grid')?.scrollIntoView({ behavior:'smooth' });
+          }}
+          style={{
+            display:'inline-flex', alignItems:'center', justifyContent:'center',
+            width:'clamp(180px,20vw,228px)', height:'clamp(44px,5vw,54px)',
+            background:GREEN, borderRadius:6, cursor:'pointer', fontFamily:FM,
+            fontSize:'clamp(14px,1.2vw,18px)', fontWeight:600, color:'#000',
+            textDecoration:'none',
+          }}
+        >
           Explore Services
-        </button>
+        </a>
       </div>
 
       {/* Wave dots (left) + "What We Offer" script (right) */}
@@ -616,22 +625,24 @@ function WhatSetsUsApart() {
               opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)',
               transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1s'
             }}>
-              <button style={{
-                padding: '13px 26px', background: GREEN, borderRadius: 8,
-                border: 'none', cursor: 'pointer', fontFamily: FM,
-                fontSize: 13, fontWeight: 600, color: '#000',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(150,202,69,0.4)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
-              }}>
-                Contact Us!
-              </button>
+              <Link href="/contact" style={{ textDecoration:'none' }}>
+                <button style={{
+                  padding: '13px 26px', background: GREEN, borderRadius: 8,
+                  border: 'none', cursor: 'pointer', fontFamily: FM,
+                  fontSize: 13, fontWeight: 600, color: '#000',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(150,202,69,0.4)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+                }}>
+                  Contact Us!
+                </button>
+              </Link>
             </div>
             
           </div>
@@ -702,7 +713,7 @@ function CardReveal({ children, delay }: { children:React.ReactNode; delay:numbe
   }, []);
   return (
     <div ref={ref} className="srv-card-rv"
-      style={{ transitionDelay:`${delay}s`, flex:'inherit', width:'inherit' }}>
+      style={{ transitionDelay:`${delay}s`, width:'100%', height:'100%', display:'flex', flexDirection:'column' }}>
       {children}
     </div>
   );
@@ -773,9 +784,10 @@ function NarrowCard({ service, bg, delay }: { service:ServiceItem; bg:string; de
     <CardReveal delay={delay}>
       <div className="srv-card srv-narrow-card" style={{
         background:bg, borderRadius:22,
-        flex:'1 1 300px', minWidth:0,
+        width:'100%', minWidth:0,
         position:'relative', overflow:'hidden',
         display:'flex', flexDirection:'column',
+        height:'100%',
       }}>
         {/* Image */}
         <div className="srv-card-img" style={{
@@ -822,7 +834,7 @@ function ServiceCardsSection({ services }: { services:ServiceItem[] }) {
   const groups = groupServices(services);
 
   return (
-    <section style={{ background:'#fff', padding:'clamp(20px,3vw,40px) 0 clamp(40px,5vw,72px)' }}>
+    <section id="services-grid" style={{ background:'#fff', padding:'clamp(20px,3vw,40px) 0 clamp(40px,5vw,72px)' }}>
       <div className="srv-cards-wrap" style={{
         maxWidth:1320, margin:'0 auto',
         padding:'0 clamp(16px,3vw,42px)',
@@ -835,7 +847,7 @@ function ServiceCardsSection({ services }: { services:ServiceItem[] }) {
               <WideCard service={g.wide} bg={wideBg} index={gi} />
               {g.pair.length > 0 && (
                 <div className="srv-narrow-row"
-                  style={{ display:'flex', gap:18, flexWrap:'wrap' }}>
+                  style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18 }}>
                   {g.pair.map((svc,pi) => (
                     <NarrowCard key={svc.id ?? pi} service={svc}
                       bg={NARROW_BG[pi % NARROW_BG.length]}
