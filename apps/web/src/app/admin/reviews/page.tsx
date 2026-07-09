@@ -1,23 +1,25 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Loader2, 
-  Star, 
-  MessageSquare, 
-  Check, 
-  X, 
-  Trash2, 
-  Edit, 
-  Plus, 
-  Inbox, 
-  CheckCircle, 
+import {
+  Search,
+  Filter,
+  Loader2,
+  Star,
+  MessageSquare,
+  Check,
+  X,
+  Trash2,
+  Edit,
+  Plus,
+  Inbox,
+  CheckCircle,
   AlertTriangle,
-  Bookmark
+  Bookmark,
 } from 'lucide-react';
 import { REVIEW_STATUSES } from '@intelligen/constants';
+import CropUploader from '../../../components/CropUploader';
+import { IMedia } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -59,6 +61,8 @@ export default function AdminReviewsPage() {
     status: REVIEW_STATUSES.PENDING as string,
     isFeatured: false,
   });
+  const [studentImage, setStudentImage] = useState('');
+  const [studentImageMedia, setStudentImageMedia] = useState<IMedia | null>(null);
 
   const [modalError, setModalError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -209,6 +213,8 @@ export default function AdminReviewsPage() {
         status: review.status,
         isFeatured: review.isFeatured,
       });
+      setStudentImage(review.studentImage || '');
+      setStudentImageMedia(review.studentImage ? { secureUrl: review.studentImage, filename: 'photo' } as IMedia : null);
     } else {
       setFormData({
         studentName: '',
@@ -218,6 +224,8 @@ export default function AdminReviewsPage() {
         status: REVIEW_STATUSES.PENDING as string,
         isFeatured: false,
       });
+      setStudentImage('');
+      setStudentImageMedia(null);
     }
     setIsModalOpen(true);
   };
@@ -246,6 +254,7 @@ export default function AdminReviewsPage() {
     try {
       const payload = {
         studentName: formData.studentName.trim(),
+        studentImage: studentImage || '',
         rating: formData.rating,
         comment: formData.comment.trim(),
         service: formData.service || undefined,
@@ -626,6 +635,23 @@ export default function AdminReviewsPage() {
                   placeholder="e.g. Rohan Sharma"
                   className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-secondary font-sans"
                   disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Student Photo (optional) */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  Student Photo <span className="text-gray-600 normal-case font-normal">(optional)</span>
+                </label>
+                <CropUploader
+                  value={studentImageMedia}
+                  onUpload={(media) => { setStudentImageMedia(media); setStudentImage(media.secureUrl); }}
+                  onClear={() => { setStudentImageMedia(null); setStudentImage(''); }}
+                  label="Upload Student Photo"
+                  folder="reviews"
+                  aspect={1}
+                  outputWidth={400}
+                  outputHeight={400}
                 />
               </div>
 

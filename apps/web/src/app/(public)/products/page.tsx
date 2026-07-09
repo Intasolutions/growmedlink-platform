@@ -182,17 +182,9 @@ function HeroSection() {
             className="relative z-10 text-5xl font-medium tracking-tight text-white sm:text-6xl lg:text-[86px]"
             style={{ fontFamily: FH, letterSpacing: '-0.03em', ...fadeUp(100) }}
           >
-            Our Study Resources<span style={{ color: GREEN }}>.</span>
+            Our Product Collection<span style={{ color: GREEN }}>.</span>
           </h1>
         </div>
-
-        <p
-          className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base"
-          style={fadeUp(260)}
-        >
-          Master your licensing exams with our exam-focused study guides, practice question banks, and clinical OSCE checklists designed by our expert educators.
-        </p>
-
         <div className="mt-8 flex items-center justify-center gap-3" style={fadeUp(380)}>
           <Image src="/avatars-group.png" alt="Students" width={154} height={27} style={{ height: 27, width: 'auto' }} />
           <span style={{ fontFamily: FP, fontSize: 12, color: '#CACACA' }}>7000 + Trusted Students</span>

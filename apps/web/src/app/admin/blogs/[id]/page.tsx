@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, AlertCircle, Loader2 } from 'lucide-react';
-import ImageUploader from '../../../../components/ImageUploader';
+import CropUploader from '../../../../components/CropUploader';
 import TiptapEditor from '../../../../components/TiptapEditor';
 import { IMedia, IBlog } from '@intelligen/types';
 
@@ -350,12 +350,15 @@ export default function EditBlogPage({ params }: EditBlogProps) {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Featured Image
             </label>
-            <ImageUploader
+            <CropUploader
               value={selectedImage}
               onUpload={setSelectedImage}
               onClear={() => setSelectedImage(null)}
               label="Upload Featured Image"
               folder="blogs"
+              aspect={16 / 9}
+              outputWidth={1600}
+              outputHeight={900}
             />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>

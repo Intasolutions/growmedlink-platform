@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
-import ImageUploader from '../../../../components/ImageUploader';
+import CropUploader from '../../../../components/CropUploader';
 import { IMedia, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -249,12 +249,15 @@ export default function NewProductPage() {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Product Image
             </label>
-            <ImageUploader
+            <CropUploader
               value={selectedImage}
               onUpload={setSelectedImage}
               onClear={() => setSelectedImage(null)}
               label="Upload Product Image"
               folder="products"
+              aspect={16 / 9}
+              outputWidth={1600}
+              outputHeight={900}
             />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>

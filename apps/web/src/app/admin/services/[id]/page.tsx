@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react';
-import ImageUploader from '../../../../components/ImageUploader';
+import CropUploader from '../../../../components/CropUploader';
 import { IMedia, IService, ICategory } from '@intelligen/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -335,12 +335,15 @@ export default function EditServicePage({ params }: EditServiceProps) {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Featured Image
             </label>
-            <ImageUploader
+            <CropUploader
               value={selectedImage}
               onUpload={setSelectedImage}
               onClear={() => setSelectedImage(null)}
               label="Upload Featured Image"
               folder="services"
+              aspect={16 / 9}
+              outputWidth={1600}
+              outputHeight={900}
             />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
@@ -369,12 +372,15 @@ export default function EditServicePage({ params }: EditServiceProps) {
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
               Secondary Image
             </label>
-            <ImageUploader
+            <CropUploader
               value={secondaryImage}
               onUpload={setSecondaryImage}
               onClear={() => setSecondaryImage(null)}
               label="Upload Secondary Image"
               folder="services"
+              aspect={1}
+              outputWidth={800}
+              outputHeight={800}
             />
             {fieldErrors.secondaryImage && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.secondaryImage[0]}</p>
