@@ -29,11 +29,7 @@ interface ReviewItem {
   studentImage?: string;
   rating: number;
   comment: string;
-  service?: {
-    _id: string;
-    title: string;
-    category: string;
-  } | null;
+  service?: string | null;
   status: string;
   isFeatured: boolean;
   createdAt: string;
@@ -41,7 +37,6 @@ interface ReviewItem {
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
-  const [services, setServices] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0, limit: 10 });
   const [isLoading, setIsLoading] = useState(true);
   
@@ -101,16 +96,9 @@ export default function AdminReviewsPage() {
     }
   };
 
-  // Fetch metrics and services
+  // Fetch metrics
   const fetchAuxiliaryData = async () => {
     try {
-      // Fetch services for select menu
-      const sRes = await fetch(`${API_BASE_URL}/api/services`);
-      if (sRes.ok) {
-        const sData = await sRes.json();
-        setServices(sData.data || []);
-      }
-
       // Fetch all reviews (without limit) to count statuses for metrics
       const mRes = await fetch(`${API_BASE_URL}/api/reviews/admin?limit=1000`, {
         credentials: 'include'
@@ -209,7 +197,7 @@ export default function AdminReviewsPage() {
         studentName: review.studentName,
         rating: review.rating,
         comment: review.comment,
-        service: review.service?._id || '',
+        service: review.service || '',
         status: review.status,
         isFeatured: review.isFeatured,
       });
@@ -454,7 +442,7 @@ export default function AdminReviewsPage() {
                             <div className="font-bold text-white truncate max-w-[150px]">{review.studentName}</div>
                             {review.service ? (
                               <span className="text-[10px] text-secondary font-medium tracking-wide bg-secondary/5 border border-secondary/15 px-1.5 py-0.5 rounded block w-max truncate max-w-[150px]">
-                                {review.service.title}
+                                {review.service}
                               </span>
                             ) : (
                               <span className="text-[10px] text-gray-500 block">General Feedback</span>
@@ -688,25 +676,17 @@ export default function AdminReviewsPage() {
               {/* Linked Service */}
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                  Linked Service / Course
+                  Linked Service / Course <span className="text-gray-600 normal-case font-normal">(optional)</span>
                 </label>
-                <select
+                <input
+                  type="text"
                   name="service"
                   value={formData.service}
                   onChange={handleInputChange}
-                  className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-secondary cursor-pointer font-sans"
+                  placeholder="e.g. IELTS Coaching, Student Visa Pathway..."
+                  className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-secondary font-sans"
                   disabled={isSubmitting}
-                >
-                  <option value="">-- No linked service (General review) --</option>
-                  {services.map((svc) => {
-                    const catName = svc.category ? (typeof svc.category === 'object' ? (svc.category as any).name : svc.category) : '';
-                    return (
-                      <option key={svc._id} value={svc._id}>
-                        [{catName.toUpperCase()}] {svc.title}
-                      </option>
-                    );
-                  })}
-                </select>
+                />
               </div>
 
               {/* Status */}

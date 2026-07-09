@@ -57,6 +57,7 @@ export const ProductSchema = z.object({
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. ielts-coaching-package)'),
   category: z.string().min(1, 'Please select a category'), // Category MongoID
   image: z.string().min(1, 'Please select an image from media library'), // ObjectId of Media
+  secondaryImage: z.string().optional().or(z.literal('')),
   details: z.record(z.any(), { message: 'Details must be a valid Tiptap JSON object' }),
   fees: z.string().min(1, 'Fees is required'),
   duration: z.string().min(1, 'Duration is required'),

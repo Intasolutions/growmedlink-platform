@@ -37,6 +37,7 @@ export interface ProductDetail {
   name: string;
   slug: string;
   image?: string | { url: string } | null;
+  secondaryImage?: string | { url: string } | null;
   imageUrl?: string;
   details?: string;
   fees?: string;
@@ -301,7 +302,7 @@ function HeroSection({ product }: { product: ProductDetail }) {
         }}>
           {product.fees && (
             <span style={{ fontFamily: FM, fontSize: 18, color: GREEN, fontWeight: 600 }}>
-              {product.fees}
+              ₹{product.fees}
             </span>
           )}
           {product.duration && (
@@ -353,7 +354,8 @@ function VideoSection({ videoUrl }: { videoUrl: string }) {
 /* ══════════════════════ §2 PRODUCT DETAILS ══════════════════════ */
 function DetailsSection({ product }: { product: ProductDetail }) {
   const text = product.details ?? '';
-  const secImg = resolveImg(product.image) ?? product.imageUrl ?? null;
+  const heroImg = resolveImg(product.image) ?? product.imageUrl ?? null;
+  const secImg = resolveImg(product.secondaryImage) ?? null;
 
   const textRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -399,7 +401,7 @@ function DetailsSection({ product }: { product: ProductDetail }) {
                   </div>
                   <div>
                     <p style={{ fontFamily: FH, fontSize: 'clamp(10px,0.9vw,12px)', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fees</p>
-                    <p style={{ fontFamily: FM, fontSize: 'clamp(15px,1.6vw,20px)', fontWeight: 600, color: '#fff', marginTop: 2 }}>{product.fees}</p>
+                    <p style={{ fontFamily: FM, fontSize: 'clamp(15px,1.6vw,20px)', fontWeight: 600, color: '#fff', marginTop: 2 }}>₹{product.fees}</p>
                   </div>
                 </div>
               )}
@@ -448,16 +450,30 @@ function DetailsSection({ product }: { product: ProductDetail }) {
           </div>
 
           <div className="pdt-exc-deco" ref={imgRef}>
+            {/* Green tilted card — contains the hero/main product image */}
             <div style={{
               position: 'absolute', left: 90, top: 0, width: 310, height: 325,
-              background: GREEN, borderRadius: 14,
+              borderRadius: 14,
               transform: 'rotate(6.68deg)',
               transformOrigin: 'center center',
               opacity: imgVis ? 1 : 0,
               transition: 'opacity 0.9s ease 0.05s',
               willChange: 'opacity',
-            }} />
+              overflow: 'hidden',
+            }}>
+              {heroImg ? (
+                <Image src={heroImg} alt={product.name} fill sizes="310px"
+                  style={{ objectFit: 'cover' }} />
+              ) : null}
+              {/* Green colour overlay on top of the hero photo */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: GREEN,
+                opacity: heroImg ? 0.55 : 1,
+              }} />
+            </div>
 
+            {/* Foreground square — secondary image */}
             <div className={`pdt-exc-img${imgVis ? ' pdt-in' : ''}`} style={{
               position: 'absolute', left: 0, top: 34,
               width: 335, height: 335,
@@ -466,7 +482,7 @@ function DetailsSection({ product }: { product: ProductDetail }) {
               <div className="pdt-exc-img-inner">
                 {secImg ? (
                   <Image src={secImg} alt={product.name} fill sizes="335px"
-                    style={{ objectFit: 'cover', transform: 'scaleX(-1)' }} />
+                    style={{ objectFit: 'cover' }} />
                 ) : (
                   <div style={{ position: 'absolute', inset: 0, background: '#ccc', borderRadius: 14 }} />
                 )}
@@ -617,7 +633,7 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
                   letterSpacing: '0.01em', textTransform: 'capitalize',
                   color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
                 }}>
-                  {[p.fees, p.duration].filter(Boolean).join(' · ')}
+                  {[p.fees ? `₹${p.fees}` : null, p.duration].filter(Boolean).join(' · ')}
                 </p>
 
                 <div style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>

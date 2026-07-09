@@ -54,7 +54,7 @@ export const listProducts = async (req: Request, res: Response, next: NextFuncti
 export const getProductBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { slug } = req.params;
-    const product = await Product.findOne({ slug }).populate('image').populate('category');
+    const product = await Product.findOne({ slug }).populate('image').populate('secondaryImage').populate('category');
 
     if (!product) {
       res.status(404).json({
@@ -79,7 +79,7 @@ export const getProductBySlug = async (req: Request, res: Response, next: NextFu
 export const getProductById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id).populate('image').populate('category');
+    const product = await Product.findById(id).populate('image').populate('secondaryImage').populate('category');
 
     if (!product) {
       res.status(404).json({
@@ -127,7 +127,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     const product = new Product(validationResult.data);
     await product.save();
 
-    const populated = await Product.findById(product._id).populate('image').populate('category');
+    const populated = await Product.findById(product._id).populate('image').populate('secondaryImage').populate('category');
 
     res.status(201).json({
       success: true,
@@ -178,7 +178,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     Object.assign(product, validationResult.data);
     await product.save();
 
-    const populated = await Product.findById(product._id).populate('image').populate('category');
+    const populated = await Product.findById(product._id).populate('image').populate('secondaryImage').populate('category');
 
     res.status(200).json({
       success: true,

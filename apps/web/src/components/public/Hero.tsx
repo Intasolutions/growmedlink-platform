@@ -566,7 +566,7 @@ export default function Hero() {
                   lineHeight: '1.4',
                 }}
               >
-                Connect with the people who love building great websites as much as you do.
+                Build your global nursing future with people who truly understand your journey.
               </p>
               <p
                 className="text-gray-400 leading-relaxed mb-6"

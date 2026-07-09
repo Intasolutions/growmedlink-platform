@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { Plus, X, Star, Check, MessageSquare } from 'lucide-react';
 import gsap from 'gsap';
+import CropUploader from '@/components/CropUploader';
+import { IMedia } from '@intelligen/types';
 
 interface ReviewItem {
   _id: string;
@@ -11,7 +13,7 @@ interface ReviewItem {
   studentImage?: string;
   rating: number;
   comment: string;
-  service?: { _id: string; title: string; category: string } | null;
+  service?: string | null;
   createdAt: string;
 }
 
@@ -340,8 +342,8 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
 
   /* modal */
   const [isModalOpen, setIsModalOpen]   = useState(false);
-  const [services, setServices]         = useState<any[]>([]);
   const [formData, setFormData]         = useState({ studentName:'', rating:5, comment:'', service:'' });
+  const [photoMedia, setPhotoMedia]     = useState<IMedia | null>(null);
   const [hoverRating, setHoverRating]   = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -565,10 +567,9 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
   const openModal = () => {
     setIsModalOpen(true); setSubmitSuccess(false); setSubmitError(null);
     setFormData({ studentName:'', rating:5, comment:'', service:'' });
-    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    fetch(`${base}/api/services`).then(r=>r.json()).then(d=>setServices(d.data||[])).catch(()=>{});
+    setPhotoMedia(null);
   };
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => {
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(p => ({ ...p, [name]: value }));
   };
@@ -576,7 +577,7 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     e.preventDefault(); setIsSubmitting(true); setSubmitError(null);
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     try {
-      const res  = await fetch(`${base}/api/reviews`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ studentName:formData.studentName.trim(), rating:formData.rating, comment:formData.comment.trim(), service:formData.service||undefined, studentImage:'' }) });
+      const res  = await fetch(`${base}/api/reviews`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ studentName:formData.studentName.trim(), rating:formData.rating, comment:formData.comment.trim(), service:formData.service||undefined, studentImage: photoMedia?.secureUrl || '' }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Validation failed.');
       setSubmitSuccess(true);
@@ -695,7 +696,7 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                   </div>
 
                   <div className="rvs-name">{rev.studentName}</div>
-                  <div className="rvs-role">{rev.service?.title || 'Verified Student'}</div>
+                  <div className="rvs-role">{rev.service || 'Verified Student'}</div>
 
                   {/* Mobile footer row: date + time */}
                   <div className="rvs-footer-row">
@@ -759,6 +760,20 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                     <input type="text" name="studentName" id="studentName" required value={formData.studentName} onChange={handleInput} placeholder="e.g. Bruce Wayne" disabled={isSubmitting} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[rgba(150,202,69,1)] focus:ring-1 focus:ring-[rgba(150,202,69,1)] text-sm transition-all text-black" />
                   </div>
                   <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Your Photo <span className="font-normal text-gray-400">(Optional)</span></label>
+                    <CropUploader
+                      value={photoMedia}
+                      onUpload={setPhotoMedia}
+                      onClear={() => setPhotoMedia(null)}
+                      label="Upload Your Photo"
+                      folder="reviews"
+                      aspect={1}
+                      outputWidth={400}
+                      outputHeight={400}
+                      publicUpload
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Rating *</label>
                     <div className="flex items-center gap-1.5">
                       {Array.from({length:5},(_,i)=>{
@@ -768,14 +783,8 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="service" className="block text-sm font-bold text-gray-700 mb-1">Service / Course (Optional)</label>
-                    <select name="service" id="service" value={formData.service} onChange={handleInput} disabled={isSubmitting} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[rgba(150,202,69,1)] text-sm bg-white text-black">
-                      <option value="">-- Select Service --</option>
-                      {services.map(s => {
-                        const catName = s.category ? (typeof s.category === 'object' ? (s.category as any).name : s.category) : '';
-                        return <option key={s._id} value={s._id}>[{catName.toUpperCase()}] {s.title}</option>;
-                      })}
-                    </select>
+                    <label htmlFor="service" className="block text-sm font-bold text-gray-700 mb-1">Service / Course <span className="font-normal text-gray-400">(Optional)</span></label>
+                    <input type="text" name="service" id="service" value={formData.service} onChange={handleInput} disabled={isSubmitting} placeholder="e.g. IELTS Coaching, Student Visa Pathway..." className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[rgba(150,202,69,1)] text-sm bg-white text-black" />
                   </div>
                   <div>
                     <label htmlFor="comment" className="block text-sm font-bold text-gray-700 mb-1">Review Description *</label>

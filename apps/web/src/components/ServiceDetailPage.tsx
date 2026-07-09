@@ -482,7 +482,7 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
               <div className="svc-exc-img-inner">
                 {secImg ? (
                   <Image src={secImg} alt="Excellence" fill sizes="335px"
-                    style={{ objectFit:'cover', transform:'scaleX(-1)' }} />
+                    style={{ objectFit:'cover' }} />
                 ) : (
                   <div style={{ position:'absolute', inset:0, background:'#ccc', borderRadius:14 }} />
                 )}

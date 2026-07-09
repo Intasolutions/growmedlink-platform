@@ -249,7 +249,7 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
               letterSpacing: '-0.02em',
               lineHeight: 1.2,
             }}>
-              Lorem Ipsum Dolor
+              Careers Beyond Borders
             </h3>
             <p style={{
               color: '#252525',
@@ -258,9 +258,7 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
               marginBottom: 'clamp(20px,2.5vw,36px)',
               fontWeight: 500,
             }}>
-              Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.
-              Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat
-              Consectetur Molestie Est Ornare.
+               GrowMedLink provides expert nursing career guidance, exam training, documentation support, interview preparation, and global job assistance to help nurses achieve international opportunities confidently.
             </p>
             <ExploreBtn />
           </div>

@@ -29,9 +29,9 @@ const reviewSchema = new Schema(
       trim: true,
     },
     service: {
-      type: Schema.Types.ObjectId,
-      ref: 'Service',
-      default: null,
+      type: String,
+      trim: true,
+      default: '',
     },
     status: {
       type: String,

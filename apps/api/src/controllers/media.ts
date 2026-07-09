@@ -2,6 +2,65 @@ import { Request, Response, NextFunction } from 'express';
 import { Media } from '../models/Media.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../services/media.js';
 
+// Magic bytes for raster image formats — guards against MIME type spoofing
+const IMAGE_SIGNATURES: { mime: string; bytes: number[]; offset?: number }[] = [
+  { mime: 'image/jpeg', bytes: [0xFF, 0xD8, 0xFF] },
+  { mime: 'image/png',  bytes: [0x89, 0x50, 0x4E, 0x47] },
+  { mime: 'image/webp', bytes: [0x52, 0x49, 0x46, 0x46], offset: 0 }, // RIFF header
+];
+
+function validateImageMagicBytes(buffer: Buffer, mimetype: string): boolean {
+  for (const sig of IMAGE_SIGNATURES) {
+    if (sig.mime !== mimetype && !(mimetype === 'image/jpg' && sig.mime === 'image/jpeg')) continue;
+    const offset = sig.offset ?? 0;
+    return sig.bytes.every((b, i) => buffer[offset + i] === b);
+  }
+  return false;
+}
+
+function sanitiseFilename(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
+}
+
+/**
+ * Public upload for review photos — folder hardcoded to 'reviews', no auth required.
+ * Applies magic-byte validation and filename sanitisation.
+ */
+export const uploadPublicReviewPhoto = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    // Verify actual file content matches declared MIME type
+    if (!validateImageMagicBytes(req.file.buffer, req.file.mimetype)) {
+      res.status(400).json({ success: false, message: 'File content does not match the declared image type.' });
+      return;
+    }
+
+    const safeFilename = sanitiseFilename(req.file.originalname);
+    const uploadResult = await uploadToCloudinary(req.file.buffer, 'reviews', safeFilename);
+
+    const media = new Media({
+      filename: safeFilename,
+      folder: 'reviews',
+      publicId: uploadResult.public_id,
+      secureUrl: uploadResult.secure_url,
+      width: uploadResult.width,
+      height: uploadResult.height,
+      size: uploadResult.bytes || req.file.size,
+      uploadedBy: null,
+    });
+
+    await media.save();
+
+    res.status(201).json({ success: true, message: 'File uploaded successfully', data: media });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Handle image upload directly to Cloudinary and register in database
  */

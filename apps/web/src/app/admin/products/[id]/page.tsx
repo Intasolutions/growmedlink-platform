@@ -22,6 +22,7 @@ export default function EditProductPage({ params }: EditProductProps) {
   const [slug, setSlug] = useState('');
   const [autoSlug, setAutoSlug] = useState(false); // default false on edit so we don't accidentally rename
   const [selectedImage, setSelectedImage] = useState<IMedia | null>(null);
+  const [secondaryImage, setSecondaryImage] = useState<IMedia | null>(null);
   const [detailsText, setDetailsText] = useState('');
   const [fees, setFees] = useState('');
   const [duration, setDuration] = useState('');
@@ -79,6 +80,7 @@ export default function EditProductPage({ params }: EditProductProps) {
           setName(product.name);
           setSlug(product.slug);
           setSelectedImage(product.image as IMedia);
+          setSecondaryImage(product.secondaryImage ? (product.secondaryImage as IMedia) : null);
           setDetailsText(product.details?.text || '');
           setFees(product.fees);
           setDuration(product.duration);
@@ -141,6 +143,7 @@ export default function EditProductPage({ params }: EditProductProps) {
       slug,
       category: categoryId,
       image: selectedImage._id,
+      secondaryImage: secondaryImage?._id || undefined,
       details: { text: detailsText },
       fees,
       duration,
@@ -321,6 +324,26 @@ export default function EditProductPage({ params }: EditProductProps) {
             />
             {fieldErrors.image && (
               <p className="text-red-400 text-xs mt-1">{fieldErrors.image[0]}</p>
+            )}
+          </div>
+
+          {/* Secondary Image (Detail Collage Foreground) */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-widest mb-1">
+              Secondary Image <span className="text-gray-500 normal-case font-normal">(optional — shown in detail section collage)</span>
+            </label>
+            <CropUploader
+              value={secondaryImage}
+              onUpload={setSecondaryImage}
+              onClear={() => setSecondaryImage(null)}
+              label="Upload Secondary Image"
+              folder="products"
+              aspect={1}
+              outputWidth={800}
+              outputHeight={800}
+            />
+            {fieldErrors.secondaryImage && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.secondaryImage[0]}</p>
             )}
           </div>
 

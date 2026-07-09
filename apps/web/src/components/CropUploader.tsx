@@ -17,6 +17,7 @@ interface CropUploaderProps {
   aspect: number;       // e.g. 16/9 or 1
   outputWidth: number;  // pixels to store
   outputHeight: number;
+  publicUpload?: boolean; // skip auth — uses public review upload endpoint
 }
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number): Crop {
@@ -71,6 +72,7 @@ export default function CropUploader({
   aspect,
   outputWidth,
   outputHeight,
+  publicUpload = false,
 }: CropUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -86,6 +88,23 @@ export default function CropUploader({
     if (!file) return;
     e.target.value = '';
     setError('');
+
+    const maxBytes = publicUpload ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setError(`File is too large. Maximum size is ${publicUpload ? '2 MB' : '5 MB'}.`);
+      return;
+    }
+
+    const allowedTypes = publicUpload
+      ? ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      : ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      setError(publicUpload
+        ? 'Invalid file type. Only JPG, PNG, and WEBP images are accepted.'
+        : 'Invalid file type. Supported types are JPG, PNG, WEBP, and SVG.');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => setSrcUrl(reader.result as string);
     reader.readAsDataURL(file);
@@ -105,10 +124,13 @@ export default function CropUploader({
       const fd = new FormData();
       fd.append('file', blob, `crop_${Date.now()}.jpg`);
       fd.append('folder', folder);
-      const res = await fetch(`${API_BASE_URL}/api/media/upload`, {
+      const uploadUrl = publicUpload
+        ? `${API_BASE_URL}/api/media/upload/public-review`
+        : `${API_BASE_URL}/api/media/upload`;
+      const res = await fetch(uploadUrl, {
         method: 'POST',
         body: fd,
-        credentials: 'include',
+        credentials: publicUpload ? 'omit' : 'include',
       });
       const data = await res.json();
       if (res.status === 201 && data.success) {
@@ -273,6 +295,9 @@ export default function CropUploader({
             <p className="text-xs font-semibold tracking-wider uppercase">{label}</p>
             <p className="text-[11px] text-gray-500 mt-1">
               Click to browse · Will crop to {ratioLabel}
+            </p>
+            <p className="text-[11px] text-gray-600 mt-0.5">
+              {publicUpload ? 'JPG, PNG or WEBP · Max 2 MB' : 'JPG, PNG, WEBP or SVG · Max 5 MB'}
             </p>
           </div>
         </button>

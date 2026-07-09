@@ -574,8 +574,8 @@ function WhatSetsUsApart() {
                 fontSize: 'clamp(26px, 2.8vw, 38px)',
                 color: DARK, lineHeight: '1.2', display: 'flex', flexWrap: 'wrap', gap: '0.25em'
               }}>
-                <span>What Sets</span>
-                <span style={{ color: GREEN }}>Us Apart</span>
+                <span>Designed for Your Global </span>
+                <span style={{ color: GREEN }}>Nursing Career</span>
               </h2>
             </div>
 
@@ -587,10 +587,7 @@ function WhatSetsUsApart() {
               transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.55s',
               position: 'relative', zIndex: 10
             }}>
-              Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur
-              scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est
-              ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque
-              etiam morbi a amet lacus phasellus ipsum nec.
+              We provide complete support for nurses who dream of building a successful career in India and abroad. From nursing exam training and language classes to documentation guidance, interview preparation, and job assistance, our services are designed to make every step of your career journey easier, clearer, and more confident.
             </p>
 
             {/* Atom Icon (right) */}
@@ -614,10 +611,7 @@ function WhatSetsUsApart() {
               opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)',
               transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s'
             }}>
-              Lorem ipsum dolor sit amet consectetur. Purus in in fames sit ac vitae. Curabitur
-              scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est
-              ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis. Sed neque
-              etiam morbi a amet lacus phasellus ipsum nec.
+             Our services are designed to guide nurses at every stage of their career journey. We offer nursing exam training, language preparation, documentation support, interview guidance, and job assistance for nurses aiming to build successful careers in India and abroad. With expert support and a clear step-by-step approach, we help nurses prepare confidently for global healthcare opportunities.
             </p>
 
             {/* CTA Button */}

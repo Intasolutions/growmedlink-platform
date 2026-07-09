@@ -71,6 +71,7 @@ export interface IProduct {
   order?: number;
   category?: string | ICategory;
   image: string | IMedia; // Media ID or full object reference
+  secondaryImage?: string | IMedia | null;
   details: Record<string, any>; // Tiptap JSON content object
   fees: string;
   duration: string;
@@ -190,7 +191,7 @@ export interface IReview {
   studentImage?: string;
   rating: number;
   comment: string;
-  service?: string | IService;
+  service?: string;
   status: ReviewStatus;
   isFeatured: boolean;
   isDeleted?: boolean;

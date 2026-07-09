@@ -9,7 +9,6 @@ import { REVIEW_STATUSES } from '@intelligen/constants';
 export const listPublicReviews = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const reviews = await Review.find({ status: REVIEW_STATUSES.APPROVED })
-      .populate('service', 'title category')
       .sort({ isFeatured: -1, createdAt: -1 });
 
     res.status(200).json({
@@ -61,7 +60,7 @@ export const submitReview = async (req: Request, res: Response, next: NextFuncti
 export const getReviewById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const review = await Review.findById(id).populate('service', 'title category');
+    const review = await Review.findById(id);
     
     if (!review) {
       res.status(404).json({
@@ -105,7 +104,6 @@ export const listAdminReviews = async (req: Request, res: Response, next: NextFu
 
     const total = await Review.countDocuments(query);
     const reviews = await Review.find(query)
-      .populate('service', 'title category')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -153,12 +151,10 @@ export const updateReview = async (req: Request, res: Response, next: NextFuncti
     Object.assign(review, validationResult.data);
     await review.save();
 
-    const populated = await Review.findById(review._id).populate('service', 'title category');
-
     res.status(200).json({
       success: true,
       message: 'Review updated successfully',
-      data: populated,
+      data: review,
     });
   } catch (error) {
     next(error);

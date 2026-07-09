@@ -103,9 +103,7 @@ export default function CTABanner() {
           {/* Paragraph text */}
           <div className={styles.textArea}>
             <p className={styles.text}>
-              Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae. Curabitur
-              Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est
-              Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis.
+              Explore our complete nursing career pathway, training support, documentation guidance, and global placement services. Download the GrowMedLink brochure to learn how we help nurses move confidently toward international opportunities.
             </p>
           </div>
 

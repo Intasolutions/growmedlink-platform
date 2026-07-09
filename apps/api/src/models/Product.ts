@@ -23,6 +23,11 @@ const productSchema = new Schema(
       ref: 'Media',
       required: [true, 'Product image reference is required'],
     },
+    secondaryImage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Media',
+      default: null,
+    },
     details: {
       type: Schema.Types.Mixed,
       required: [true, 'Rich text details content is required'],

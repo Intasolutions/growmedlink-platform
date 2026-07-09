@@ -44,6 +44,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     name: product.name,
     slug: product.slug,
     image: product.image?.secureUrl || product.image,
+    secondaryImage: product.secondaryImage?.secureUrl || product.secondaryImage || null,
     details: product.details?.text || '',
     fees: product.fees,
     duration: product.duration,

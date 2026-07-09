@@ -364,7 +364,7 @@ function BuiltAroundYourNeeds() {
         {/* Heading */}
         <div ref={heading.ref} className={`ban-rv ${heading.visible ? 'ban-in' : ''}`}>
           <h2 className="ban-heading">
-            Built Around <span style={{ color: GREEN }}>Your Needs</span>
+             Classes for Global <span style={{ color: GREEN }}>Nursing Success</span>
           </h2>
         </div>
 
@@ -385,10 +385,7 @@ function BuiltAroundYourNeeds() {
           {/* Text 1 */}
           <div className="ban-text">
             <p>
-              We understand that every student&apos;s journey is unique. That&apos;s why GrowMedLink offers
-              personalised guidance — from choosing the right university to navigating visa requirements
-              and settling in abroad. Our expert advisors work with you one-on-one to map out a plan
-              that fits your goals, your timeline, and your budget.
+              Our nursing classes are designed to support nurses who want to build a successful career in India and abroad. We provide structured training, expert guidance, and practical learning support to help students improve their knowledge, skills, and confidence. From nursing exam preparation to career-focused learning, our classes help nurses take the right steps toward global healthcare opportunities.   
             </p>
           </div>
         </div>
@@ -411,9 +408,7 @@ function BuiltAroundYourNeeds() {
           {/* Text 2 + CTA */}
           <div className="ban-text">
             <p>
-              From undergraduate admissions to postgraduate research programs, our services cover
-              every step of your academic journey. We partner with top institutions worldwide to
-              give you access to opportunities that truly match your aspirations.
+               Many nurses have improved their knowledge, confidence, and career direction through our nursing classes. With expert guidance, structured learning, and focused training support, our students are better prepared for nursing exams, interviews, documentation, and global career opportunities. Our classes help nurses take strong steps toward achieving professional success in India and abroad.
             </p>
             <a href="/contact" className="ban-cta">Contact Us!</a>
           </div>
@@ -496,7 +491,7 @@ function ProductCard({ product, delay }: { product: ProductItem; delay: number }
             className="mt-2 max-w-[85%] text-sm leading-relaxed text-[#252525]"
             style={{ fontFamily: FH, letterSpacing: '0.01em', textTransform: 'capitalize' }}
           >
-            {product.fees} &middot; {product.duration}
+            ₹{product.fees} &middot; {product.duration}
           </p>
           <div className="prd-card-arrow absolute bottom-0 right-0 h-[42px] w-[42px] rounded-lg bg-white shadow-md">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="m-auto mt-[11px]">

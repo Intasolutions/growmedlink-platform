@@ -456,7 +456,7 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
               Latest <span className="lns-title-green">News</span>
             </h2>
             <p ref={subRef} className="lns-sub">
-              Stay up to date with the latest insights, success stories, and guidance for healthcare professionals navigating their international career journey.
+              Stay updated with the latest nursing career news, global healthcare opportunities, exam updates, and expert guidance from GrowMedLink.
             </p>
           </div>
           <div ref={labelRef} className="lns-label">

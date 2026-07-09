@@ -42,7 +42,7 @@ const mediaSchema = new Schema(
     uploadedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Uploaded by user reference is required'],
+      default: null,
     },
   },
   {
