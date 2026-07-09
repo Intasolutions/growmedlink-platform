@@ -117,7 +117,7 @@ export default function StatsBanner() {
       className="bg-white overflow-hidden"
       style={{ padding: 'clamp(20px,4vw,56px) 0' }}
     >
-      <div className="max-w-[1440px] mx-auto" style={{ padding: '0 clamp(12px,3vw,48px)' }}>
+      <div className="max-w-[1440px] mx-auto" style={{ padding: '0 clamp(12px,3vw,48px)', overflow: 'hidden' }}>
 
         {/*
           Outer wrapper gives vertical room for the dark card to overflow
@@ -165,11 +165,11 @@ export default function StatsBanner() {
                         display: 'none',
                         opacity: 0,
                         /* overflow above+below the bar */
-                        top:    'clamp(-18px,-3.5vw,-40px)',
-                        bottom: 'clamp(-18px,-3.5vw,-40px)',
-                        /* slightly wider than the column, centred */
-                        left:   'clamp(-8px,-1vw,-16px)',
-                        right:  'clamp(-8px,-1vw,-16px)',
+                        top:    'clamp(-12px,-2.5vw,-32px)',
+                        bottom: 'clamp(-12px,-2.5vw,-32px)',
+                        /* no horizontal overflow — avoids page-level bleed on mobile */
+                        left:   0,
+                        right:  0,
                         borderRadius: 'clamp(14px,2vw,22px)',
                         zIndex: 20,
                       }}

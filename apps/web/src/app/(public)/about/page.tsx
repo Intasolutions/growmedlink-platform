@@ -576,10 +576,12 @@ const STYLES = `
   .abt-footer-r  { display: none !important; }
 }
 @media (max-width: 767px) {
-  .abt-h1-big { font-size: clamp(38px,8vw,80px) !important; }
-  .abt-sh     { font-size: clamp(28px,6vw,52px) !important; line-height: 1.2 !important; }
-  .abt-pill   { border-radius: 40px !important; }
-  .abt-cert-h { font-size: clamp(28px,6vw,44px) !important; }
+  .abt-h1-big    { font-size: clamp(38px,8vw,80px) !important; }
+  .abt-sh        { font-size: clamp(28px,6vw,52px) !important; line-height: 1.2 !important; }
+  .abt-pill      { border-radius: 40px !important; }
+  .abt-cert-h    { font-size: clamp(28px,6vw,44px) !important; }
+  /* hide all curly-arrow callout decorations on small screens */
+  .abt-arrow-callout { display: none !important; }
 }
 @media (max-width: 479px) {
   .abt-h1-big { font-size: 32px !important; }
@@ -977,6 +979,7 @@ function HeroSection() {
 
         <div
           ref={calloutRef}
+          className="abt-arrow-callout"
           style={{ position: 'relative', pointerEvents: 'none', opacity: 0, flexShrink: 0 }}
         >
           {/* Curly arrow */}
@@ -1340,7 +1343,7 @@ function MissionVision() {
 
             {/* See How Its Work! Callout */}
             <div
-              className={`abt-ms abt-d2${v ? ' abt-in' : ''}`}
+              className={`abt-arrow-callout abt-ms abt-d2${v ? ' abt-in' : ''}`}
               style={{
                 position: 'relative',
                 height: '64px',
@@ -1890,7 +1893,7 @@ function CertificationSection() {
 
             {/* Handwritten callout pointing to the photo */}
             <div
-              className={`abt-cp-callout${calloutIn ? ' abt-in' : ''}`}
+              className={`abt-arrow-callout abt-cp-callout${calloutIn ? ' abt-in' : ''}`}
               style={{
                 position:'absolute',
                 bottom:-65,

@@ -142,13 +142,20 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
 
         /* hide callout arrow on small/mid screens */
         @media (max-width: 767px) {
-          .scs-callout { display: none !important; }
+          .scs-callout  { display: none !important; }
+          .scs-progress { display: none !important; }
+          .scs-dots     { display: none !important; }
         }
 
         /* split layout: stack at ≤899px */
         @media (max-width: 899px) {
-          .scs-split { flex-direction: column !important; }
+          .scs-split { flex-direction: column !important; gap: clamp(20px,4vw,36px) !important; }
           .scs-left  { flex: none !important; width: 100% !important; max-width: 100% !important; }
+          .scs-right { width: 100% !important; flex: none !important; }
+        }
+        @media (max-width: 767px) {
+          .scs-split { gap: 16px !important; }
+          .scs-heading { font-size: clamp(36px,10vw,56px) !important; margin-bottom: 20px !important; }
         }
       `}</style>
 
@@ -159,12 +166,13 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
 
         {/* ════ HEADER ════ */}
         <div
-          style={{ marginBottom: 'clamp(40px,6vw,80px)', position: 'relative' }}
+          style={{ marginBottom: 'clamp(16px,4vw,80px)', position: 'relative' }}
         >
           {/* Heading + callout row — flex so callout stays beside heading on wide, hides on narrow */}
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'clamp(12px,2vw,28px)', flexWrap: 'wrap' }}>
             <h2
               ref={headingRef}
+              className="scs-heading"
               style={{
                 fontSize: 'clamp(32px,6.5vw,88px)',
                 fontWeight: 500,
@@ -266,10 +274,11 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
           {/* ── RIGHT ── */}
           <div
             ref={rightColRef}
+            className="scs-right"
             style={{ flex: 1, minWidth: 0 }}
           >
-            {/* Progress bar */}
-            <div style={{
+            {/* Progress bar — hidden on mobile via .scs-progress */}
+            <div className="scs-progress" style={{
               width: '100%', height: '4px',
               backgroundColor: '#f0f0f0',
               borderRadius: '2px',
@@ -316,8 +325,8 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
                     ref={el => { cardRefs.current[idx] = el; }}
                     style={{
                       flexShrink: 0,
-                      width: 'clamp(220px,75vw,320px)',
-                      height: 'clamp(300px,38vw,420px)',
+                      width: 'clamp(260px,82vw,320px)',
+                      height: 'clamp(340px,55vw,420px)',
                       scrollSnapAlign: 'start',
                     }}
                   >
@@ -332,8 +341,8 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
               })}
             </div>
 
-            {/* Dot wave */}
-            <div style={{
+            {/* Dot wave — hidden on mobile via .scs-dots */}
+            <div className="scs-dots" style={{
               display: 'flex',
               justifyContent: 'flex-end',
               gap: 'clamp(8px,1vw,14px)',
@@ -414,7 +423,7 @@ function ServiceCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'clamp(300px,38vw,420px)',
+        height: 'clamp(340px,55vw,420px)',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',

@@ -152,12 +152,12 @@ export default function FeaturedServices({ services }: { services: any[] }) {
         .fs-right { flex: 1; min-width: 0; border-radius: 28px; position: relative; display: flex; flex-direction: column; overflow: hidden; background-color: #1a1a1a; height: clamp(340px,46vw,560px); }
         @media (max-width: 767px) {
           .fs-row   { flex-direction: column !important; gap: 14px !important; }
-          .fs-left  { width: 100% !important; flex: none !important; height: clamp(300px,80vw,440px) !important; }
-          .fs-right { width: 100% !important; min-width: 0 !important; height: clamp(340px,95vw,480px) !important; }
+          .fs-left  { width: 100% !important; flex: none !important; height: clamp(280px,75vw,380px) !important; }
+          .fs-right { width: 100% !important; min-width: 0 !important; height: clamp(480px,130vw,560px) !important; }
         }
         @media (max-width: 479px) {
-          .fs-left  { height: clamp(260px,85vw,340px) !important; border-radius: 20px !important; }
-          .fs-right { height: clamp(320px,100vw,440px) !important; border-radius: 20px !important; }
+          .fs-left  { height: clamp(240px,72vw,300px) !important; border-radius: 20px !important; }
+          .fs-right { height: clamp(440px,120vw,520px) !important; border-radius: 20px !important; }
         }
       `}</style>
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,4vw,48px)' }}>
@@ -552,7 +552,7 @@ function DeckStack({
             position: 'absolute',
             left: 'clamp(10px,2.5vw,28px)',
             right: 'clamp(10px,2.5vw,28px)',
-            top: '50%', marginTop: 'clamp(-130px,-14vw,-100px)',
+            top: '52%', marginTop: 'clamp(-160px,-17vw,-110px)',
             willChange: 'transform, opacity',
             transformOrigin: 'center center',
           }}

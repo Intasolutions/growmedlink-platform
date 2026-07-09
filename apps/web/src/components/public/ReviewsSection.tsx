@@ -18,29 +18,49 @@ interface ReviewItem {
 }
 
 const FALLBACK: ReviewItem[] = [
-  { _id:'f1', studentName:'Bruce Wayne',      studentImage:'', rating:5, comment:'GrowMedLink was instrumental in my transition to study nursing abroad. The guidance is top-notch and cleared up all my doubts about the registry requirements!',                  service:{ _id:'1', title:'Immigration Consultation', category:'Immigration' }, createdAt: new Date('2025-12-25T10:10:00Z').toISOString() },
-  { _id:'f2', studentName:'Diana Prince',     studentImage:'', rating:5, comment:'The IELTS preparation course here is excellent. The trainers are incredibly supportive, and the mock tests gave me the exact confidence I needed. Highly recommended!',              service:{ _id:'2', title:'IELTS Coaching',            category:'Language'    }, createdAt: new Date('2025-11-18T14:30:00Z').toISOString() },
-  { _id:'f3', studentName:'Clark Kent',       studentImage:'', rating:5, comment:'Fantastic experience working with the immigration experts. They handled my documentation process smoothly and kept me updated at every stage.',                                        service:{ _id:'3', title:'Student Visa Pathway',      category:'Immigration' }, createdAt: new Date('2025-10-05T11:45:00Z').toISOString() },
-  { _id:'f4', studentName:'Tony Stark',       studentImage:'', rating:4, comment:'Truly the best guidance platform for studying healthcare abroad. They have deep expertise and a very streamlined transition process.',                                                  service:{ _id:'4', title:'OET Exam Prep',             category:'Language'    }, createdAt: new Date('2025-09-22T15:15:00Z').toISOString() },
-  { _id:'f5', studentName:'Natasha Romanoff', studentImage:'', rating:5, comment:'Highly professional team that guided me through every step. Their knowledge of international nursing requirements is second to none. Would strongly recommend!',                        service:{ _id:'5', title:'Career Pathway',            category:'Counselling' }, createdAt: new Date('2025-08-10T09:00:00Z').toISOString() },
-  { _id:'f6', studentName:'Steve Rogers',     studentImage:'', rating:5, comment:'The entire team at GrowMedLink was incredibly helpful. The process was smooth and stress-free. I am now studying in my dream country thanks to their support!',                         service:{ _id:'6', title:'University Placement',      category:'Education'   }, createdAt: new Date('2025-07-15T16:30:00Z').toISOString() },
-  { _id:'f7', studentName:'Wanda Maximoff',   studentImage:'', rating:5, comment:'Outstanding service from start to finish. The counsellors are knowledgeable, patient, and genuinely care about your success. I cannot thank them enough!',                              service:{ _id:'7', title:'Exchange Programme',        category:'Education'   }, createdAt: new Date('2025-06-30T13:00:00Z').toISOString() },
+  { _id:'f1', studentName:'Bruce Wayne',      studentImage:'', rating:5, comment:'GrowMedLink was instrumental in my transition to study nursing abroad. The guidance is top-notch and cleared up all my doubts about the registry requirements!',      service:'Immigration Consultation', createdAt: new Date('2025-12-25T10:10:00Z').toISOString() },
+  { _id:'f2', studentName:'Diana Prince',     studentImage:'', rating:5, comment:'The IELTS preparation course here is excellent. The trainers are incredibly supportive, and the mock tests gave me the exact confidence I needed. Highly recommended!',service:'IELTS Coaching',           createdAt: new Date('2025-11-18T14:30:00Z').toISOString() },
+  { _id:'f3', studentName:'Clark Kent',       studentImage:'', rating:5, comment:'Fantastic experience working with the immigration experts. They handled my documentation process smoothly and kept me updated at every stage.',                        service:'Student Visa Pathway',     createdAt: new Date('2025-10-05T11:45:00Z').toISOString() },
+  { _id:'f4', studentName:'Tony Stark',       studentImage:'', rating:4, comment:'Truly the best guidance platform for studying healthcare abroad. They have deep expertise and a very streamlined transition process.',                                  service:'OET Exam Prep',            createdAt: new Date('2025-09-22T15:15:00Z').toISOString() },
+  { _id:'f5', studentName:'Natasha Romanoff', studentImage:'', rating:5, comment:'Highly professional team that guided me through every step. Their knowledge of international nursing requirements is second to none. Would strongly recommend!',        service:'Career Pathway',           createdAt: new Date('2025-08-10T09:00:00Z').toISOString() },
+  { _id:'f6', studentName:'Steve Rogers',     studentImage:'', rating:5, comment:'The entire team at GrowMedLink was incredibly helpful. The process was smooth and stress-free. I am now studying in my dream country thanks to their support!',         service:'University Placement',     createdAt: new Date('2025-07-15T16:30:00Z').toISOString() },
+  { _id:'f7', studentName:'Wanda Maximoff',   studentImage:'', rating:5, comment:'Outstanding service from start to finish. The counsellors are knowledgeable, patient, and genuinely care about your success. I cannot thank them enough!',              service:'Exchange Programme',       createdAt: new Date('2025-06-30T13:00:00Z').toISOString() },
 ];
 
 const AUTO_MS = 6000;
 
-/* Layout-only styles — no CSS animation/transition on animated elements */
 const STYLES = `
-  /* dot pulse-ring keyframe */
+  /* ── Keyframes ── */
   @keyframes rvs-dot-ring {
     0%   { box-shadow: 0 0 0 0px rgba(150,202,69,0.7); }
     70%  { box-shadow: 0 0 0 7px rgba(150,202,69,0);   }
     100% { box-shadow: 0 0 0 0px rgba(150,202,69,0);   }
   }
+  @keyframes rvs-glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(150,202,69,0.0), inset 0 0 0 1px rgba(150,202,69,0.09); }
+    50%       { box-shadow: 0 0 18px 4px rgba(150,202,69,0.12), inset 0 0 0 1px rgba(150,202,69,0.22); }
+  }
+  @keyframes rvs-map-float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50%       { transform: translateY(-5px) scale(1.06); }
+  }
+  @keyframes rvs-pct-count {
+    from { opacity: 0; transform: translateY(8px) scale(0.85); }
+    to   { opacity: 1; transform: translateY(0)   scale(1);    }
+  }
+  @keyframes rvs-shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
 
+  /* ── Section shell ── */
   .rvs-section { background: #fff; padding: clamp(24px,4vw,40px) 0 clamp(40px,6vw,60px); }
-  .rvs-section .rvs-outer { max-width: 1200px; margin: 0 auto; padding: 0 clamp(12px,3vw,24px); position: relative; }
+  .rvs-section .rvs-outer {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 clamp(12px,3vw,24px); position: relative;
+  }
 
+  /* ── Wave dots ── */
   .rvs-section .rvs-dots { position: relative; height: clamp(26px,3.5vw,38px); margin-bottom: 6px; }
   .rvs-section .rvs-dot {
     position: absolute;
@@ -48,7 +68,18 @@ const STYLES = `
     border-radius: 50%; background: #96CA45;
     animation: rvs-dot-ring 2.2s ease-out infinite;
   }
+  .rvs-section .rvs-dot:nth-child(1)  { animation-delay: 0.00s; }
+  .rvs-section .rvs-dot:nth-child(2)  { animation-delay: 0.22s; }
+  .rvs-section .rvs-dot:nth-child(3)  { animation-delay: 0.44s; }
+  .rvs-section .rvs-dot:nth-child(4)  { animation-delay: 0.66s; }
+  .rvs-section .rvs-dot:nth-child(5)  { animation-delay: 0.88s; }
+  .rvs-section .rvs-dot:nth-child(6)  { animation-delay: 1.10s; }
+  .rvs-section .rvs-dot:nth-child(7)  { animation-delay: 1.32s; }
+  .rvs-section .rvs-dot:nth-child(8)  { animation-delay: 1.54s; }
+  .rvs-section .rvs-dot:nth-child(9)  { animation-delay: 1.76s; }
+  .rvs-section .rvs-dot:nth-child(10) { animation-delay: 1.98s; }
 
+  /* ── Two-column grid ── */
   .rvs-section .rvs-grid {
     display: grid;
     grid-template-columns: 38fr 62fr;
@@ -56,31 +87,146 @@ const STYLES = `
     align-items: start;
   }
 
-  /* ── LEFT panel ── */
+  /* ══════════════════════════════════════
+     LEFT panel
+  ══════════════════════════════════════ */
   .rvs-section .rvs-left {
     height: clamp(320px,45vw,500px);
-    background: #252525; border-radius: clamp(10px,1.5vw,16px);
+    background: #1e1e1e;
+    border-radius: clamp(10px,1.5vw,16px);
     position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    /* subtle green inner rim that pulses */
+    animation: rvs-glow-pulse 4s ease-in-out infinite;
   }
-  .rvs-section .rvs-globe-wrap {
-    position: absolute; left: 50%; top: clamp(20px,4vw,35px);
-    transform: translateX(-50%);
-    width: clamp(160px,26vw,330px); height: clamp(160px,26vw,330px);
+  /* decorative corner sparkle lines */
+  .rvs-section .rvs-left::before,
+  .rvs-section .rvs-left::after {
+    content: '';
+    position: absolute;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(150,202,69,0.12) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
   }
+  .rvs-section .rvs-left::before { top: -20px; left: -20px; }
+  .rvs-section .rvs-left::after  { bottom: -20px; right: -20px; }
+
+  /* ── 2×2 card grid ── */
+  .rvs-section .rvs-country-grid {
+    flex: 1; display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(6px,1vw,12px);
+    padding: clamp(14px,2.2vw,24px) clamp(14px,2.2vw,24px) clamp(8px,1.2vw,12px);
+    position: relative; z-index: 1;
+  }
+
+  /* individual country card */
+  .rvs-section .rvs-ccard {
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: clamp(8px,1vw,12px);
+    padding: clamp(10px,1.5vw,18px) clamp(8px,1.2vw,14px);
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    gap: clamp(5px,0.7vw,9px);
+    cursor: default;
+    position: relative; overflow: hidden;
+    /* base transition for hover */
+    transition:
+      background    0.3s ease,
+      border-color  0.3s ease,
+      transform     0.3s cubic-bezier(.22,.68,0,1.2),
+      box-shadow    0.3s ease;
+  }
+
+  /* shimmer sweep on hover */
+  .rvs-section .rvs-ccard::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(150,202,69,0.10) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    background-position: -200% center;
+    transition: background-position 0s;
+    pointer-events: none;
+  }
+  .rvs-section .rvs-ccard:hover::before {
+    animation: rvs-shimmer 0.65s ease forwards;
+  }
+
+  .rvs-section .rvs-ccard:hover {
+    background:    rgba(150,202,69,0.10);
+    border-color:  rgba(150,202,69,0.35);
+    transform:     translateY(-4px) scale(1.02);
+    box-shadow:    0 12px 28px rgba(0,0,0,0.25), 0 0 0 1px rgba(150,202,69,0.2);
+  }
+
+  /* map image wrapper */
+  .rvs-section .rvs-ccard-map {
+    width: clamp(38px,5.5vw,60px); height: clamp(38px,5.5vw,60px);
+    position: relative; flex-shrink: 0;
+    /* idle gentle float */
+    animation: rvs-map-float 4s ease-in-out infinite;
+    /* stagger each card's float so they don't sync */
+    will-change: transform;
+  }
+  .rvs-section .rvs-ccard:nth-child(2) .rvs-ccard-map { animation-delay: 1s;   }
+  .rvs-section .rvs-ccard:nth-child(3) .rvs-ccard-map { animation-delay: 0.5s; }
+  .rvs-section .rvs-ccard:nth-child(4) .rvs-ccard-map { animation-delay: 1.5s; }
+  /* pause float on hover so the card's lift transform isn't fighting it */
+  .rvs-section .rvs-ccard:hover .rvs-ccard-map { animation-play-state: paused; }
+
+  /* country label */
+  .rvs-section .rvs-ccard-name {
+    font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size: clamp(10px,0.85vw,12px); font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    text-align: center; letter-spacing: 0.03em; line-height: 1.2;
+    transition: color 0.25s;
+  }
+  .rvs-section .rvs-ccard:hover .rvs-ccard-name { color: rgba(255,255,255,0.95); }
+
+  /* percentage number */
+  .rvs-section .rvs-ccard-pct {
+    font-family:'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
+    font-size: clamp(20px,2.8vw,38px); font-weight: 500; color: #96CA45;
+    letter-spacing: -0.02em; line-height: 1;
+    transition: transform 0.25s cubic-bezier(.22,.68,0,1.2), text-shadow 0.25s;
+  }
+  .rvs-section .rvs-ccard:hover .rvs-ccard-pct {
+    transform: scale(1.08);
+    text-shadow: 0 0 18px rgba(150,202,69,0.5);
+  }
+
+  /* GSAP entrance: cards start invisible */
+  .rvs-section .rvs-ccard.rvs-ccard-hidden {
+    opacity: 0; transform: translateY(22px) scale(0.92);
+  }
+
+  /* ── Left footer ── */
   .rvs-section .rvs-left-footer {
-    position: absolute; bottom: clamp(18px,3.5vw,35px); left: 0; right: 0; text-align: center;
+    padding: clamp(12px,2vw,20px) clamp(16px,3vw,28px);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    text-align: center; position: relative; z-index: 1;
   }
   .rvs-section .rvs-connect {
     font-family:'Haffer XH Mono-TRIAL','Courier New',monospace;
-    font-size: clamp(12px,1.3vw,16px); font-weight:500; line-height:1.4;
-    color:#fff; letter-spacing:0.04em; margin-bottom:6px;
+    font-size: clamp(10px,1vw,13px); font-weight:500;
+    color: rgba(255,255,255,0.45); letter-spacing:0.09em; text-transform: uppercase;
+    margin-bottom: 3px;
   }
   .rvs-section .rvs-community {
     font-family:'Great Day Personal Use','Brush Script MT',cursive;
-    font-size: clamp(14px,1.5vw,19px); font-weight:400; color:#96CA45;
+    font-size: clamp(15px,1.7vw,21px); font-weight:400; color:#96CA45;
   }
 
-  /* ── RIGHT panel ── */
+  /* ══════════════════════════════════════
+     RIGHT panel
+  ══════════════════════════════════════ */
   .rvs-section .rvs-right {
     height: clamp(320px,45vw,500px);
     background: #F0F0F0; border-radius: clamp(10px,1.5vw,16px);
@@ -103,7 +249,7 @@ const STYLES = `
     display: flex; align-items: center; gap: clamp(10px,1.5vw,20px);
   }
 
-  /* card itself: full-width inside clip wrapper */
+  /* review card */
   .rvs-section .rvs-card {
     width: 100%; height: clamp(240px,27vw,350px);
     background: #155BA9; border-radius: clamp(8px,1vw,12px);
@@ -111,7 +257,8 @@ const STYLES = `
     will-change: transform;
   }
   .rvs-section .rvs-deco {
-    position: absolute; left: clamp(14px,2.5vw,30px); top: 0; display: flex; gap: clamp(6px,0.8vw,9px);
+    position: absolute; left: clamp(14px,2.5vw,30px); top: 0;
+    display: flex; gap: clamp(6px,0.8vw,9px);
   }
   .rvs-section .rvs-deco-strip {
     width: clamp(22px,3vw,40px); height: clamp(70px,8.5vw,100px);
@@ -161,8 +308,8 @@ const STYLES = `
   }
 
   .rvs-section .rvs-indicator { display:flex; flex-direction:column; align-items:flex-end; gap:clamp(8px,1vw,12px); flex-shrink:0; }
-  .rvs-section .rvs-bar { border-radius:6px; cursor:pointer; }
-  .rvs-section .rvs-bar:hover { opacity: 0.7; }
+  .rvs-section .rvs-bar { border-radius:6px; cursor:pointer; transition: opacity 0.2s; }
+  .rvs-section .rvs-bar:hover { opacity: 0.65; }
 
   .rvs-section .rvs-write-btn { position: absolute; right: clamp(14px,2vw,24px); top: clamp(28px,3.5vw,40px); z-index: 10; }
 
@@ -173,146 +320,138 @@ const STYLES = `
     box-shadow: 0 24px 60px rgba(0,0,0,0.15);
   }
 
-  /* ── Stagger each dot's ring pulse so they don't all fire at once ── */
-  .rvs-section .rvs-dot:nth-child(1)  { animation-delay: 0.00s; }
-  .rvs-section .rvs-dot:nth-child(2)  { animation-delay: 0.22s; }
-  .rvs-section .rvs-dot:nth-child(3)  { animation-delay: 0.44s; }
-  .rvs-section .rvs-dot:nth-child(4)  { animation-delay: 0.66s; }
-  .rvs-section .rvs-dot:nth-child(5)  { animation-delay: 0.88s; }
-  .rvs-section .rvs-dot:nth-child(6)  { animation-delay: 1.10s; }
-  .rvs-section .rvs-dot:nth-child(7)  { animation-delay: 1.32s; }
-  .rvs-section .rvs-dot:nth-child(8)  { animation-delay: 1.54s; }
-  .rvs-section .rvs-dot:nth-child(9)  { animation-delay: 1.76s; }
-  .rvs-section .rvs-dot:nth-child(10) { animation-delay: 1.98s; }
+  /* ══════════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════════ */
 
-  /* ── Tablet: stack panels ── */
+  /* ── Tablet 768–1023px: single column stack ── */
   @media (max-width: 1023px) {
     .rvs-section .rvs-grid { grid-template-columns: 1fr; }
-    .rvs-section .rvs-left { height: clamp(280px,52vw,420px); }
-    .rvs-section .rvs-right { height: auto; padding: clamp(16px,3vw,28px) clamp(16px,3vw,24px) clamp(24px,4vw,36px); overflow: visible; }
+
+    /* left panel expands with content */
+    .rvs-section .rvs-left { height: auto; min-height: clamp(280px,48vw,400px); }
+
+    /* right panel: de-absolute everything, use normal flow */
+    .rvs-section .rvs-right {
+      height: auto; overflow: visible;
+      padding: clamp(20px,3.5vw,36px) clamp(16px,3vw,28px) clamp(28px,5vw,44px);
+    }
     .rvs-section .rvs-heading {
       position: relative; top: auto; left: auto; transform: none;
-      font-size: clamp(28px,5vw,44px); line-height: 1.2;
-      text-align: center; display: block; margin-bottom: clamp(14px,2.5vw,22px); white-space: normal;
+      font-size: clamp(32px,5.5vw,52px); line-height: 1.15;
+      text-align: center; display: block;
+      margin-bottom: clamp(20px,3vw,32px); white-space: normal;
     }
     .rvs-section .rvs-carousel-row {
       position: relative; top: auto; left: auto; right: auto;
       justify-content: center;
     }
-    .rvs-section .rvs-write-btn { position: relative; right: auto; top: auto; margin-bottom: 12px; display: inline-flex; }
+    /* review card needs a solid height now it's not absolutely positioned */
+    .rvs-section .rvs-card {
+      height: clamp(260px,36vw,360px);
+    }
+    .rvs-section .rvs-write-btn {
+      position: relative; right: auto; top: auto;
+      margin-bottom: 16px; display: inline-flex;
+    }
+    /* indicator bars go horizontal */
+    .rvs-section .rvs-indicator { flex-direction: row; align-items: center; gap: 10px; }
   }
 
   /* ── Mobile ≤ 767px ── */
   @media (max-width: 767px) {
-    .rvs-section .rvs-outer { padding: 0 clamp(10px,3vw,16px); }
-    .rvs-section .rvs-left { height: clamp(240px,68vw,320px); }
-    .rvs-section .rvs-indicator { flex-direction: row; align-items: center; gap: 10px; justify-content: center; }
+    .rvs-section .rvs-outer { padding: 0 clamp(10px,4vw,16px); }
+
+    .rvs-section .rvs-left { min-height: clamp(240px,72vw,340px); }
+    .rvs-section .rvs-country-grid {
+      gap: clamp(6px,2vw,10px);
+      padding: clamp(14px,4vw,20px) clamp(14px,4vw,20px) clamp(8px,2vw,12px);
+    }
+    .rvs-section .rvs-ccard-pct { font-size: clamp(20px,6vw,30px); }
+    .rvs-section .rvs-ccard-map { width: clamp(36px,10vw,52px); height: clamp(36px,10vw,52px); }
+
+    /* right panel */
+    .rvs-section .rvs-right { padding: clamp(16px,4vw,28px) clamp(12px,3.5vw,20px) clamp(20px,5vw,32px); }
+    .rvs-section .rvs-heading { font-size: clamp(26px,7vw,40px); margin-bottom: clamp(14px,3.5vw,24px); }
+    .rvs-section .rvs-card { height: clamp(240px,55vw,320px); }
   }
 
-  /* ── Small mobile ≤ 479px ── */
+  /* ── Small mobile ≤ 479px: review card switches to flex column ── */
   @media (max-width: 479px) {
     .rvs-section .rvs-heading { font-size: clamp(22px,7vw,30px); }
 
-    /* Switch card from position:absolute layout → flex column */
+    /* left country cards: compact */
+    .rvs-section .rvs-left { min-height: clamp(210px,85vw,290px); }
+    .rvs-section .rvs-country-grid { gap: 6px; padding: 12px 12px 6px; }
+    .rvs-section .rvs-ccard { padding: 10px 8px; gap: 5px; }
+    .rvs-section .rvs-ccard-map { width: 36px; height: 36px; }
+    .rvs-section .rvs-ccard-pct { font-size: 20px; }
+    .rvs-section .rvs-ccard-name { font-size: 10px; }
+
+    /* review card: flow layout instead of absolute children */
     .rvs-section .rvs-card {
-      height: auto !important;
-      min-height: 0 !important;
-      display: flex;
-      flex-direction: column;
-      padding: 0 0 14px 0;
-      overflow: hidden;
+      height: auto !important; min-height: 0 !important;
+      display: flex; flex-direction: column;
+      padding: 0 0 14px 0; overflow: hidden;
     }
-
-    /* deco strips: keep at top, let flexbox push rest below */
     .rvs-section .rvs-deco {
-      position: relative;
-      left: auto; top: auto;
-      padding-left: 14px;
-      margin-bottom: 10px;
+      position: relative; left: auto; top: auto;
+      padding-left: 14px; margin-bottom: 10px;
     }
-
-    /* avatar: inline in a row with comment */
     .rvs-section .rvs-avatar {
-      position: relative;
-      left: auto; top: auto;
-      width: 48px; height: 48px;
-      flex-shrink: 0;
+      position: relative; left: auto; top: auto;
+      width: 48px; height: 48px; flex-shrink: 0;
     }
-
-    /* comment text: full-width, left-aligned, no overflow scroll */
     .rvs-section .rvs-text {
-      position: relative;
-      left: auto; top: auto; right: auto;
-      width: auto !important;
-      height: auto !important;
-      max-height: none !important;
-      text-align: left;
-      font-size: 12px;
-      overflow: visible;
-      padding: 0;
+      position: relative; left: auto; top: auto; right: auto;
+      width: auto !important; height: auto !important;
+      max-height: none !important; text-align: left;
+      font-size: 12px; overflow: visible; padding: 0;
     }
-
-    /* avatar + comment in one row */
     .rvs-section .rvs-mobile-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 0 14px;
-      margin-bottom: 10px;
+      display: flex; align-items: flex-start;
+      gap: 10px; padding: 0 14px; margin-bottom: 10px;
     }
-
-    /* name + role below */
     .rvs-section .rvs-name {
-      position: relative;
-      left: auto; top: auto;
-      padding: 0 14px;
-      font-size: 15px;
+      position: relative; left: auto; top: auto;
+      padding: 0 14px; font-size: 15px;
     }
     .rvs-section .rvs-role {
-      position: relative;
-      left: auto; top: auto;
-      padding: 2px 14px 0;
-      font-size: 11px;
-      max-width: 100%;
-      white-space: normal;
+      position: relative; left: auto; top: auto;
+      padding: 2px 14px 0; font-size: 11px;
+      max-width: 100%; white-space: normal;
     }
-
-    /* date + time in a row at the bottom */
     .rvs-section .rvs-footer-row {
-      display: flex;
-      justify-content: space-between;
+      display: flex; justify-content: space-between;
       padding: 10px 14px 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px;
     }
     .rvs-section .rvs-date,
     .rvs-section .rvs-time {
-      position: relative;
-      left: auto; top: auto; right: auto; bottom: auto;
+      position: relative; left: auto; top: auto; right: auto; bottom: auto;
       font-size: 10px;
     }
-
-    /* indicator: row below card */
-    .rvs-section .rvs-indicator {
-      flex-direction: row;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    /* carousel row: column, no extra gap */
-    .rvs-section .rvs-carousel-row {
-      flex-direction: column;
-      gap: 0;
-    }
+    .rvs-section .rvs-indicator { flex-direction: row; justify-content: center; gap: 8px; margin-top: 12px; }
+    .rvs-section .rvs-carousel-row { flex-direction: column; gap: 0; }
+    .rvs-section .rvs-right { padding: 12px 12px 16px; }
   }
 
   /* ── Tiny ≤ 359px ── */
   @media (max-width: 359px) {
     .rvs-section .rvs-outer { padding: 0 10px; }
-    .rvs-section .rvs-heading { font-size: 22px; }
+    .rvs-section .rvs-heading { font-size: 20px; }
+    .rvs-section .rvs-ccard-pct { font-size: 17px; }
+    .rvs-section .rvs-ccard-map { width: 28px; height: 28px; }
   }
 `;
+
+const HERO_COUNTRIES = [
+  { name: 'Australia',  mapSrc: '/australia-map.png',     percentage: 54 },
+  { name: 'India',      mapSrc: '/india-map.png',         percentage: 28 },
+  { name: 'S. America', mapSrc: '/south-america-map.png', percentage: 25 },
+  { name: 'Africa',     mapSrc: '/africa-map.png',        percentage: 12 },
+];
+const GREEN_TINT = 'brightness(0) saturate(100%) invert(68%) sepia(60%) saturate(500%) hue-rotate(40deg) brightness(110%)';
 
 export default function ReviewsSection({ initialReviews = [] }: { initialReviews?: ReviewItem[] }) {
   const [reviews, setReviews]           = useState<ReviewItem[]>(initialReviews);
@@ -323,9 +462,6 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
   const sectionRef   = useRef<HTMLDivElement>(null);
   const leftRef      = useRef<HTMLDivElement>(null);
   const rightRef     = useRef<HTMLDivElement>(null);
-  const globeRef    = useRef<HTMLDivElement>(null);
-  const worldMapRef = useRef<HTMLDivElement>(null);
-  const globeIdxRef = useRef(0);
   const connectRef   = useRef<HTMLParagraphElement>(null);
   const communityRef = useRef<HTMLParagraphElement>(null);
   const hw1Ref       = useRef<HTMLSpanElement>(null);
@@ -338,6 +474,7 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
   const writeBtnRef  = useRef<HTMLDivElement>(null);
   const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
   const barRefs      = useRef<(HTMLDivElement | null)[]>([]);
+  const ccardRefs    = useRef<(HTMLDivElement | null)[]>([]);
   const triggeredRef = useRef(false);
 
   /* modal */
@@ -366,7 +503,6 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     const els = {
       left:      leftRef.current,
       right:     rightRef.current,
-      globe:     globeRef.current,
       connect:   connectRef.current,
       community: communityRef.current,
       hw1:       hw1Ref.current,
@@ -379,10 +515,8 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     };
     if (!els.left || !els.right) return;
 
-    /* set hidden states */
     gsap.set(els.left,      { opacity: 0, x: -56 });
     gsap.set(els.right,     { opacity: 0, x:  56 });
-    gsap.set(els.globe,     { scale: 0.7, opacity: 0 });
     gsap.set(els.connect,   { opacity: 0, y: 18 });
     gsap.set(els.community, { opacity: 0, y: 18 });
     gsap.set(els.hw1,       { opacity: 0, y: 34 });
@@ -391,7 +525,8 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     gsap.set(els.strip1,    { y: '-110%' });
     gsap.set(els.strip2,    { y: '-110%' });
     gsap.set(els.writeBtn,  { opacity: 0, x: 22 });
-    dotRefs.current.forEach((d, i) => d && gsap.set(d, { scale: 0, opacity: 0, y: 0 }));
+    dotRefs.current.forEach((d) => d && gsap.set(d, { scale: 0, opacity: 0, y: 0 }));
+    ccardRefs.current.forEach((c) => c && gsap.set(c, { opacity: 0, y: 22, scale: 0.88 }));
 
     const io = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || triggeredRef.current) return;
@@ -401,81 +536,32 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
       /* 1. Both panels slide in */
-      tl.to(els.left,  { opacity: 1, x: 0, duration: 0.85, ease: 'power3.out' }, 0);
-      tl.to(els.right, { opacity: 1, x: 0, duration: 0.85, ease: 'power3.out' }, 0.1);
+      tl.to(els.left,  { opacity: 1, x: 0, duration: 0.85 }, 0);
+      tl.to(els.right, { opacity: 1, x: 0, duration: 0.85 }, 0.1);
 
-      /* 2. Globe pops in */
-      tl.to(els.globe, { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.4)' }, 0.3);
+      /* 2. Country cards stagger in */
+      tl.to(ccardRefs.current.filter(Boolean), {
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)',
+      }, 0.45);
 
-      /* 3. Globe breathe loop after entrance */
-      tl.call(() => {
-        gsap.to(els.globe, { scale: 1.04, duration: 2.5, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-      }, [], 1.1);
+      /* 3. Left footer text */
+      tl.to(els.connect,   { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.75);
+      tl.to(els.community, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.90);
 
-      /* 4. World-map pan — each country drifts to centre, eastward loop */
-      tl.call(() => {
-        const map = worldMapRef.current;
-        if (!map) return;
-
-        /*
-          Map is rendered at 260% of circle width so there's room to pan.
-          Longitude stops (% across map width, Mercator):
-            Brazil    ~47°W  → 37%
-            Turkey    ~33°E  → 59%
-            India     ~77°E  → 66%
-            Australia ~151°E → 81%
-          To centre country at 50% of circle:
-            translateX = -(countryPct - 0.5) * mapWidth
-          mapWidth = 2.6 × circleWidth, so in % of circleWidth:
-            tx = -(countryPct - 0.5) * 260%
-        */
-        const STOPS = [
-          { label: 'Brazil',    pct: 0.37 },
-          { label: 'Turkey',    pct: 0.59 },
-          { label: 'India',     pct: 0.66 },
-          { label: 'Australia', pct: 0.81 },
-        ];
-        const MAP_SCALE = 2.6; // map width as multiple of circle
-
-        const xFor = (pct: number) => `-${(pct - 0.5) * MAP_SCALE * 100}%`;
-
-        /* Start at Brazil */
-        gsap.set(map, { x: xFor(STOPS[0].pct) });
-        globeIdxRef.current = 0;
-
-        const advance = () => {
-          const next = (globeIdxRef.current + 1) % STOPS.length;
-          globeIdxRef.current = next;
-          gsap.to(map, {
-            x: xFor(STOPS[next].pct),
-            duration: 1.6,
-            ease: 'power2.inOut',
-          });
-        };
-
-        const id = setInterval(advance, 3200);
-        if (globeRef.current) (globeRef.current as any).__clearCycle = () => clearInterval(id);
-      }, [], 1.4);
-
-      /* 4. Left footer text */
-      tl.to(els.connect,   { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.72);
-      tl.to(els.community, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.88);
-
-      /* 5. Heading words drop in */
+      /* 4. Heading words drop in */
       tl.to(els.hw1, { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.3)' }, 0.38);
       tl.to(els.hw2, { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.3)' }, 0.54);
 
-      /* 6. Carousel row rises */
-      tl.to(els.carousel, { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }, 0.52);
+      /* 5. Carousel row rises */
+      tl.to(els.carousel, { opacity: 1, y: 0, duration: 0.65 }, 0.52);
 
-      /* 7. Deco strips drop */
-      tl.to(els.strip1, { y: '0%', duration: 0.65, ease: 'power3.out' }, 0.72);
-      tl.to(els.strip2, { y: '0%', duration: 0.65, ease: 'power3.out' }, 0.86);
+      /* 6. Deco strips drop */
+      tl.to(els.strip1, { y: '0%', duration: 0.65 }, 0.72);
+      tl.to(els.strip2, { y: '0%', duration: 0.65 }, 0.86);
 
-      /* 8. Write-review button slides in */
+      /* 7. Write-review button slides in */
       tl.to(els.writeBtn, { opacity: 1, x: 0, duration: 0.5, ease: 'back.out(1.4)' }, 0.6);
-
-      /* 8. Write-review pulse loop */
       tl.call(() => {
         gsap.to(els.writeBtn, {
           boxShadow: '0 0 0 8px rgba(150,202,69,0)', duration: 1.4,
@@ -483,26 +569,20 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
         });
       }, [], 2.2);
 
-      /* 9. Dots pop in with stagger then wave loop */
+      /* 7. Dots pop in with stagger then wave loop */
       tl.to(dotRefs.current.filter(Boolean), {
         scale: 1, opacity: 1, duration: 0.4, stagger: 0.055, ease: 'back.out(1.6)',
       }, 0.2);
       tl.call(() => {
         dotRefs.current.forEach((d, i) => {
           if (!d) return;
-          gsap.to(d, {
-            y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1,
-            delay: i * 0.14,
-          });
+          gsap.to(d, { y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.14 });
         });
       }, [], 0.9);
     }, { threshold: 0.07 });
 
     if (sectionRef.current) io.observe(sectionRef.current);
-    return () => {
-      io.disconnect();
-      (globeRef.current as any)?.__clearCycle?.();
-    };
+    return () => { io.disconnect(); };
   }, []);
 
   /* ── GSAP carousel: exit up-back, enter from below ── */
@@ -630,39 +710,32 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
 
         <div className="rvs-grid">
 
-          {/* ═══════ LEFT PANEL ═══════ */}
+          {/* ═══════ LEFT PANEL — Country cards ═══════ */}
           <div ref={leftRef} className="rvs-left">
-            {/* outer: breathe scale lives here */}
-            <div ref={globeRef} className="rvs-globe-wrap">
-              {/* inner clip — overflow:hidden keeps map pan inside the circle */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                borderRadius: '50%',
-                overflow: 'hidden',
-              }}>
-                {/* world map rendered at 260% width; GSAP pans x to centre each country */}
+            <div className="rvs-country-grid">
+              {HERO_COUNTRIES.map((c, i) => (
                 <div
-                  ref={worldMapRef}
-                  style={{
-                    position: 'absolute',
-                    top: 0, bottom: 0,
-                    width: '260%',
-                    willChange: 'transform',
-                  }}
+                  key={c.name}
+                  ref={el => { ccardRefs.current[i] = el; }}
+                  className="rvs-ccard"
                 >
-                  <Image
-                    src="/world-map-bg.png"
-                    alt="World map"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    priority
-                  />
+                  <div className="rvs-ccard-map">
+                    <Image
+                      src={c.mapSrc}
+                      alt={c.name}
+                      fill
+                      sizes="64px"
+                      style={{ objectFit: 'contain', filter: GREEN_TINT }}
+                    />
+                  </div>
+                  <span className="rvs-ccard-name">{c.name}</span>
+                  <span className="rvs-ccard-pct">{c.percentage}%</span>
                 </div>
-              </div>
+              ))}
             </div>
             <div className="rvs-left-footer">
-              <p ref={connectRef}   className="rvs-connect">Connect World Wide</p>
-              <p ref={communityRef} className="rvs-community">GrowMedLink&apos;s Global Community</p>
+              <p ref={connectRef}   className="rvs-connect">Placing students across</p>
+              <p ref={communityRef} className="rvs-community">24+ Countries Worldwide</p>
             </div>
           </div>
 

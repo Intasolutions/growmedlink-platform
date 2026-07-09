@@ -260,9 +260,9 @@ function CountryCard({ country, isActive, onClick }: {
       onMouseEnter={() => !isActive && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width:     isActive ? 'clamp(240px,48vw,380px)' : 'clamp(80px,15vw,110px)',
-        minWidth:  isActive ? 'clamp(240px,48vw,380px)' : 'clamp(80px,15vw,110px)',
-        height:    'clamp(160px,24vw,205px)',
+        width:     isActive ? 'clamp(200px,52vw,380px)' : 'clamp(60px,12vw,110px)',
+        minWidth:  isActive ? 'clamp(200px,52vw,380px)' : 'clamp(60px,12vw,110px)',
+        height:    'clamp(140px,22vw,205px)',
         flexShrink: 0,
         position: 'relative',
         overflow: 'hidden',
@@ -312,7 +312,7 @@ function CountryCard({ country, isActive, onClick }: {
               onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             />
           </div>
-          <span style={{ fontSize: 'clamp(36px,6vw,54px)', fontWeight: 500, lineHeight: 1, color: '#96CA45', letterSpacing: '-0.02em', fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif" }}>
+          <span style={{ fontSize: 'clamp(28px,5.5vw,54px)', fontWeight: 500, lineHeight: 1, color: '#96CA45', letterSpacing: '-0.02em', fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif" }}>
             {count}%
           </span>
         </div>
