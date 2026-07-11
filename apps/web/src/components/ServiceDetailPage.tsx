@@ -295,7 +295,7 @@ const STYLES = `
    HOOK
 ══════════════════════════════════════════════════════════════════════ */
 function useReveal(threshold = 0.08) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -309,71 +309,59 @@ function useReveal(threshold = 0.08) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   §1  HERO
-   765px tall, radial-gradient vignette over service hero image.
-   Service name + short description animate in on mount.
+   §0  NAMEPLATE — service name displayed below hero, above content
+══════════════════════════════════════════════════════════════════════ */
+function NameplateSection({ name }: { name: string }) {
+  const h1Ref = useReveal(0.1);
+  const words = name.trim().split(' ');
+  const first = words[0];
+  const rest  = words.slice(1).join(' ');
+  return (
+    <section style={{
+      padding: 'clamp(28px,5vw,56px) clamp(20px,6vw,80px)',
+      background: '#fff',
+      textAlign: 'center',
+    }}>
+      <h1 ref={h1Ref} className="svc-rv" style={{
+        fontFamily: FH, fontWeight: 500,
+        fontSize: 'clamp(26px,4.5vw,56px)',
+        lineHeight: '1.15', letterSpacing: '-0.03em',
+        margin: '0 auto 0',
+        maxWidth: 900,
+      }}>
+        <span style={{ color: GREEN }}>{first}</span>
+        {rest && <span style={{ color: DARK }}> {rest}</span>}
+      </h1>
+      {/* green accent bar */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'clamp(12px,1.8vw,20px)' }}>
+        <div style={{
+          height: 4, borderRadius: 2,
+          width: 'clamp(48px,8vw,96px)',
+          background: GREEN,
+        }} />
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   §1  HERO — full-bleed image, no overlays
 ══════════════════════════════════════════════════════════════════════ */
 function HeroSection({ service }: { service: ServiceDetail }) {
   const heroImg = resolveImg(service.image) ?? service.imageUrl ?? null;
-  const desc    = service.description ?? service.shortDescription ?? '';
 
   return (
     <section style={{
       position:'relative', width:'100%',
-      height:'clamp(420px,53.1vw,765px)',
-      overflow:'hidden', display:'flex', alignItems:'flex-end',
+      height:'clamp(260px,56vw,760px)',
+      overflow:'hidden',
     }}>
-      {/* Background photo */}
-      <div style={{ position:'absolute', inset:0, zIndex:0 }}>
-        {heroImg ? (
-          <Image src={heroImg} alt={service.name} fill sizes="100vw"
-            style={{ objectFit:'cover' }} priority />
-        ) : (
-          <div style={{ position:'absolute', inset:0, background:'#111' }} />
-        )}
-        {/* Radial vignette — exact Figma gradient */}
-        <div style={{
-          position:'absolute', inset:0,
-          background:'radial-gradient(56.72% 50% at 50% 50%, rgba(0,0,0,0) 0%, #000 100%)',
-        }} />
-      </div>
-
-      {/* Text content */}
-      <div style={{
-        position:'relative', zIndex:2, width:'100%', textAlign:'center',
-        padding:'0 24px clamp(36px,5.5vw,80px)',
-      }}>
-        <h1 style={{
-          fontFamily:FH, fontWeight:500, color:'#fff',
-          fontSize:'clamp(24px,4vw,48px)',
-          lineHeight:'1.19', letterSpacing:'-0.03em',
-          marginBottom:'clamp(14px,2vw,28px)',
-          animation:'svc-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.18s both',
-        }}>
-          {(() => {
-            const words = service.name.split(' ');
-            const first = words[0];
-            const rest  = words.slice(1).join(' ');
-            return (
-              <>
-                <span style={{ color:'#96CA45' }}>{first}</span>
-                {rest && <> {rest}</>}
-              </>
-            );
-          })()}
-        </h1>
-
-        {desc && (
-          <p style={{
-            fontFamily:FH, fontWeight:400, fontSize:'clamp(14px,1.6vw,20px)', color:'#fff',
-            lineHeight:'169%', letterSpacing:'0.01em', textTransform:'capitalize',
-            maxWidth:1102, margin:'0 auto',
-            animation:'svc-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.42s both',
-          }}>
-            {desc}
-          </p>
-        )}
-      </div>
+      {heroImg ? (
+        <Image src={heroImg} alt={service.name} fill sizes="100vw"
+          style={{ objectFit:'cover', objectPosition:'center top' }} priority />
+      ) : (
+        <div style={{ position:'absolute', inset:0, background:'#111' }} />
+      )}
     </section>
   );
 }
@@ -766,6 +754,7 @@ export default function ServiceDetailPage({ service }: { service: ServiceDetail 
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <HeroSection  service={service} />
+      <NameplateSection name={service.name} />
       <ExcellenceSection service={service} />
 
       {!!service.features?.length && (
