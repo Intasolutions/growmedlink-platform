@@ -228,7 +228,7 @@ const STYLES = `
   overflow: hidden;
   position: relative;
   width: 100%;
-  padding: 16px 0;
+  padding: 12px 0;
   margin-bottom: 48px;
 }
 .abt-mq-h-wrap::before, .abt-mq-h-wrap::after {
@@ -249,14 +249,24 @@ const STYLES = `
 }
 .abt-mq-h-track {
   display: flex;
-  gap: 120px;
-  animation: abt-mq-horizontal 30s linear infinite;
+  gap: 48px;
+  animation: abt-mq-horizontal 45s linear infinite;
   white-space: nowrap;
   width: max-content;
   align-items: center;
 }
 .abt-mq-h-track:hover {
   animation-play-state: paused;
+}
+/* each logo slot: fixed 180×72 */
+.abt-mq-logo-slot {
+  flex-shrink: 0;
+  width: 180px;
+  height: 72px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── centerpiece animations ── */
@@ -1531,96 +1541,67 @@ function BackgroundSection() {
    §4  CERTIFICATIONS & AFFILIATIONS — vertical marquee (2 columns)
    + larger doctor photo below
 ══════════════════════════════════════════════════════════════════════════ */
-/* ── Horizontal Marquee Brand SVG Fallbacks ── */
-function LayersLogo() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
-      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#9e77ed" />
-        <path d="M2 17L12 22L22 17M2 12L17 17L22 12" stroke="#9e77ed" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Layers</span>
-    </div>
-  );
-}
-
-function SisyphusLogo() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
-      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#12b76a" stroke="#12b76a" strokeWidth={2} strokeLinejoin="round" />
-      </svg>
-      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Sisyphus</span>
-    </div>
-  );
-}
-
-function CircoolesLogo() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
-      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-        <circle cx={9} cy={12} r={6} fill="#1570ef" fillOpacity={0.8} />
-        <circle cx={15} cy={12} r={6} fill="#155BA9" fillOpacity={0.8} />
-      </svg>
-      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Circooles</span>
-    </div>
-  );
-}
-
-function CatalogLogo() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
-      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-        <circle cx={12} cy={12} r={10} stroke="#1570ef" strokeWidth={4} />
-        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22" fill="#1570ef" />
-      </svg>
-      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Catalog</span>
-    </div>
-  );
-}
-
-function QuotientLogo() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, userSelect:'none' }}>
-      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-        <circle cx={11} cy={11} r={8} stroke="#7a5af8" strokeWidth={3} />
-        <path d="M16 16L22 22" stroke="#7a5af8" strokeWidth={4} strokeLinecap="round" />
-      </svg>
-      <span style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#252525', letterSpacing:'-0.02em' }}>Quotient</span>
-    </div>
-  );
-}
-
 const BRAND_LOGOS = [
-  { name: 'Layers',    src: '/about/logo-layers.png',    width: 110, height: 32 },
-  { name: 'Sisyphus',  src: '/about/logo-sisyphus.png',  width: 120, height: 32 },
-  { name: 'Circooles', src: '/about/logo-circooles.png', width: 120, height: 32 },
-  { name: 'Catalog',   src: '/about/logo-catalog.png',   width: 110, height: 32 },
-  { name: 'Quotient',  src: '/about/logo-quotient.png',  width: 125, height: 32 },
+  { name: 'AAN',            src: '/certifications/aan_logo.png' },
+  { name: 'CareerBee',      src: '/certifications/Asset-8@4x-8.png' },
+  { name: 'CCPNR',          src: '/certifications/CCPNRLogo_English-French-1.png' },
+  { name: 'CCRNR',          src: '/certifications/CCRNR_Logo_EN_RGB_Large.webp' },
+  { name: 'CNA',            src: '/certifications/CNA logo.svg' },
+  { name: 'CLPNS',          src: '/certifications/clpns-logo.png' },
+  { name: 'CNNB',           src: '/certifications/CNNB-Logo-LG.png' },
+  { name: 'CRPNA',          src: '/certifications/CRPNA-FULL-Color-Logo.png' },
+  { name: 'CWC',            src: '/certifications/CWC_502x49_Horizontalblue_sm.png' },
+  { name: 'DCCA',           src: '/certifications/DCCA_Logo.webp' },
+  { name: 'CLHA',           src: '/certifications/Logo-CLHA.svg' },
+  { name: 'MIC',            src: '/certifications/MIC-log64-1-e1666979907892.png' },
+  { name: 'MyNMBI',         src: '/certifications/MyNMBI_328x120.png' },
+  { name: 'NonSolus',       src: '/certifications/NonSolusLogo.svg' },
+  { name: 'PEICNM',         src: '/certifications/PEICNM-Logo-Full-Colour-768x353.png' },
+  { name: 'NNAS',           src: '/certifications/logo.png' },
+  { name: 'NSNMR',          src: '/certifications/nsnmr-logo.png' },
+  { name: 'TRS',            src: '/certifications/trs_logo-e1708510431638.png' },
+  { name: 'Web Logo',       src: '/certifications/Web-Logo-Retina.png.webp' },
+  { name: 'AN',             src: '/certifications/AN_Logo_RGB_Primary_Resized.svg' },
+  { name: 'Aussie Locums',  src: '/certifications/aussie-locums.svg' },
+  { name: 'NCSBN',          src: '/certifications/ncsbn.svg' },
+  { name: 'Asset1',         src: '/certifications/Asset+1.webp' },
+  { name: 'NLCN',           src: '/certifications/nlcn-logo-color.svg' },
+  { name: 'CRNM',           src: '/certifications/crnm-logo.svg' },
+  { name: 'CRPNM',          src: '/certifications/crpnm-logo.svg' },
+  { name: 'CPL Healthcare', src: '/certifications/cplhealthcarelogo.svg' },
+  { name: 'ADH',            src: '/certifications/adh-logo.svg' },
+  { name: 'CNPS',           src: '/certifications/logo (1).svg' },
+  { name: 'DIO',            src: '/certifications/logo (2).svg' },
+  { name: 'Nursing Board',  src: '/certifications/logo (3).svg' },
+  { name: 'WES',            src: '/certifications/logo (4).svg' },
+  { name: 'Logo V2',        src: '/certifications/logo-v2.svg' },
+  { name: 'Nursing Cred',   src: '/certifications/logo.svg' },
+  { name: 'UofT SCS',       src: '/certifications/uoft-scs-ces-logo.svg' },
+  { name: 'NMBI Ireland',   src: '/certifications/logo (1).png' },
+  { name: 'Promedi',        src: '/certifications/logo-promedi-zeile.png' },
+  { name: 'qt95',           src: '/certifications/qt=q_95.webp' },
+  { name: 'Greenstaff',     src: '/certifications/greenstaff-ca.png' },
 ];
-const MARQUEE_LOGOS = [...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS];
+/* duplicate twice so the seamless loop never shows a gap */
+const MARQUEE_LOGOS = [...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS];
 
 function LogoRenderer({ name, src }: { name: string; src: string }) {
-  const [useFallback, setUseFallback] = useState(false);
-
-  if (useFallback) {
-    if (name === 'Layers') return <LayersLogo />;
-    if (name === 'Sisyphus') return <SisyphusLogo />;
-    if (name === 'Circooles') return <CircoolesLogo />;
-    if (name === 'Catalog') return <CatalogLogo />;
-    if (name === 'Quotient') return <QuotientLogo />;
-    return <span style={{ fontFamily:FH, fontSize:20, fontWeight:700 }}>{name}</span>;
-  }
-
   return (
-    <div style={{ position:'relative', height:32, width: 140, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+    <div style={{
+      flexShrink: 0,
+      width: 180,
+      height: 72,
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
       <Image
         src={src}
         alt={name}
         fill
-        sizes="140px"
-        style={{ objectFit:'contain' }}
-        onError={() => setUseFallback(true)}
+        sizes="180px"
+        style={{ objectFit: 'contain' }}
       />
     </div>
   );
@@ -1817,7 +1798,7 @@ function CertificationSection() {
         {/* Description Paragraph */}
         <div style={{ maxWidth:920, margin:'0 auto 60px', textAlign:'center' }}>
           <p style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525' }}>
-            Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.Lorem Ipsum Dolor Sit Amet Consectetur.
+            GrowMedLink is affiliated with globally recognised certification bodies and healthcare institutions. Our programmes align with WHO standards, NCLEX-RN licensing, NMC UK registration, USMLE pathways, and OET &amp; IELTS language proficiency requirements — ensuring every student we guide meets the exact criteria demanded by hospitals and health systems worldwide.
           </p>
         </div>
 

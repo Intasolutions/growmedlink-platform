@@ -327,7 +327,7 @@ function VideoSection({ videoUrl }: { videoUrl: string }) {
           fontFamily: FH, fontWeight: 400, fontSize: 'clamp(22px,3.5vw,40px)',
           letterSpacing: '-0.03em', marginBottom: 'clamp(20px,3vw,40px)', color: DARK,
         }}>
-          Watch <span style={{ color: GREEN }}>Overview</span>
+          See It in <span style={{ color: GREEN }}>Action</span>
         </h2>
         {/* 16:9 responsive wrapper */}
         <div style={{
