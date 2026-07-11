@@ -603,6 +603,8 @@ function DeckStack({
                       fontFamily: "'Courier New', monospace", fontWeight: 900,
                       fontSize: 'clamp(13px,1.5vw,20px)', color: title,
                       margin: '0 0 8px', lineHeight: 1.15,
+                      display: '-webkit-box', WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical', overflow: 'hidden',
                     }}>
                       {svc?.title || 'Course Name'}
                     </h3>

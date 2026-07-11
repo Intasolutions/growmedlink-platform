@@ -115,32 +115,42 @@ export default function Navbar({ settings }: NavbarProps) {
     let gsapInstance: any = null;
 
     const cleanup = { fns: [] as (() => void)[] };
+    let cancelled = false;
+
+    const navEl = el;
+
+    // Auto-hide-on-idle only makes sense with a mouse/trackpad — on touch
+    // devices there's no hover to "wake" the nav between taps, so it would
+    // stay hidden and unreachable. Skip the whole behaviour there.
+    const isCoarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    if (isCoarsePointer) return;
 
     import('gsap').then(({ gsap }) => {
+      if (cancelled) return;
       gsapInstance = gsap;
       // Initialise transform so GSAP controls both axes
-      gsap.set(el, { xPercent: -50, yPercent: 0, opacity: 1 });
+      gsap.set(navEl, { xPercent: -50, yPercent: 0, opacity: 1 });
       // Remove Tailwind's translate so they don't fight
-      el.style.left = '50%';
-      el.style.transform = '';
+      navEl.style.left = '50%';
+      navEl.style.transform = '';
 
       function hide() {
         if (hiddenRef.current || isOpenRef.current) return;
         hiddenRef.current = true;
-        gsap.to(el, {
+        gsap.to(navEl, {
           yPercent: -200,
           opacity: 0,
           duration: 0.5,
           ease: 'power3.in',
-          onComplete: () => { el.style.pointerEvents = 'none'; },
+          onComplete: () => { navEl.style.pointerEvents = 'none'; },
         });
       }
 
       function show() {
         if (!hiddenRef.current) return;
         hiddenRef.current = false;
-        el.style.pointerEvents = 'auto';
-        gsap.to(el, {
+        navEl.style.pointerEvents = 'auto';
+        gsap.to(navEl, {
           yPercent: 0,
           opacity: 1,
           duration: 0.45,
@@ -161,11 +171,12 @@ export default function Navbar({ settings }: NavbarProps) {
       cleanup.fns.push(() => {
         events.forEach(e => window.removeEventListener(e, wake));
         if (timerRef.current) clearTimeout(timerRef.current);
-        gsap.killTweensOf(el);
+        gsap.killTweensOf(navEl);
       });
     });
 
     return () => {
+      cancelled = true;
       cleanup.fns.forEach(fn => fn());
       if (timerRef.current) clearTimeout(timerRef.current);
     };

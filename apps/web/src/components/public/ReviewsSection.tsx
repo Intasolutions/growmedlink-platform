@@ -19,12 +19,6 @@ interface ReviewItem {
 
 const FALLBACK: ReviewItem[] = [
   { _id:'f1', studentName:'Bruce Wayne',      studentImage:'', rating:5, comment:'GrowMedLink was instrumental in my transition to study nursing abroad. The guidance is top-notch and cleared up all my doubts about the registry requirements!',      service:'Immigration Consultation', createdAt: new Date('2025-12-25T10:10:00Z').toISOString() },
-  { _id:'f2', studentName:'Diana Prince',     studentImage:'', rating:5, comment:'The IELTS preparation course here is excellent. The trainers are incredibly supportive, and the mock tests gave me the exact confidence I needed. Highly recommended!',service:'IELTS Coaching',           createdAt: new Date('2025-11-18T14:30:00Z').toISOString() },
-  { _id:'f3', studentName:'Clark Kent',       studentImage:'', rating:5, comment:'Fantastic experience working with the immigration experts. They handled my documentation process smoothly and kept me updated at every stage.',                        service:'Student Visa Pathway',     createdAt: new Date('2025-10-05T11:45:00Z').toISOString() },
-  { _id:'f4', studentName:'Tony Stark',       studentImage:'', rating:4, comment:'Truly the best guidance platform for studying healthcare abroad. They have deep expertise and a very streamlined transition process.',                                  service:'OET Exam Prep',            createdAt: new Date('2025-09-22T15:15:00Z').toISOString() },
-  { _id:'f5', studentName:'Natasha Romanoff', studentImage:'', rating:5, comment:'Highly professional team that guided me through every step. Their knowledge of international nursing requirements is second to none. Would strongly recommend!',        service:'Career Pathway',           createdAt: new Date('2025-08-10T09:00:00Z').toISOString() },
-  { _id:'f6', studentName:'Steve Rogers',     studentImage:'', rating:5, comment:'The entire team at GrowMedLink was incredibly helpful. The process was smooth and stress-free. I am now studying in my dream country thanks to their support!',         service:'University Placement',     createdAt: new Date('2025-07-15T16:30:00Z').toISOString() },
-  { _id:'f7', studentName:'Wanda Maximoff',   studentImage:'', rating:5, comment:'Outstanding service from start to finish. The counsellors are knowledgeable, patient, and genuinely care about your success. I cannot thank them enough!',              service:'Exchange Programme',       createdAt: new Date('2025-06-30T13:00:00Z').toISOString() },
 ];
 
 const AUTO_MS = 6000;

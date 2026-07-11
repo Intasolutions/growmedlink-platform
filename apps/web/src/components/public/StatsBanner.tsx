@@ -16,6 +16,7 @@ const EASE = 'cubic-bezier(0.48, 0.01, 0.2, 1)';
 export default function StatsBanner() {
   const prevIndex   = useRef(0);
   const paused      = useRef(false);
+  const touchResumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sectionRef  = useRef<HTMLElement>(null);
   const barRef      = useRef<HTMLDivElement>(null);
   const cardRefs    = useRef<(HTMLDivElement | null)[]>([]);
@@ -111,6 +112,10 @@ export default function StatsBanner() {
     return () => clearInterval(id);
   }, [activateCard]);
 
+  useEffect(() => () => {
+    if (touchResumeTimer.current) clearTimeout(touchResumeTimer.current);
+  }, []);
+
   return (
     <section
       ref={sectionRef}
@@ -128,6 +133,11 @@ export default function StatsBanner() {
           style={{ padding: 'clamp(18px,4vw,48px) 0' }}
           onMouseEnter={() => { paused.current = true; }}
           onMouseLeave={() => { paused.current = false; }}
+          onTouchStart={() => {
+            paused.current = true;
+            if (touchResumeTimer.current) clearTimeout(touchResumeTimer.current);
+            touchResumeTimer.current = setTimeout(() => { paused.current = false; }, 4000);
+          }}
         >
           {/* ── GREEN BAR ── */}
           <div

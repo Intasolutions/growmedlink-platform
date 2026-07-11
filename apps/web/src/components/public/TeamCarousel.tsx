@@ -77,9 +77,31 @@ const STYLES = `
 }
 `;
 
-const SLOT_SIZES = [176, 124, 80];
+const SLOT_SIZES_BY_BP = {
+  desktop: [176, 124, 80],
+  tablet:  [140, 100, 64],
+  mobile:  [104, 72, 46],
+};
+const SLOT_X_BY_BP = {
+  desktop: [0, 184, 328],
+  tablet:  [0, 148, 256],
+  mobile:  [0, 92, 154],
+};
 const SLOT_OPACITY = [1, 0.82, 0.55];
-const SLOT_X = [0, 184, 328];
+
+function useBreakpoint() {
+  const [bp, setBp] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setBp(w <= 640 ? 'mobile' : w <= 900 ? 'tablet' : 'desktop');
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return bp;
+}
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -108,6 +130,9 @@ export default function TeamCarousel({
   description = 'T Purus In In Fames Sit Ac Vitae. Curabitur Scelerisque Nunc Mauris Blandit. Donec Tristique Placerat Consectetur Molestie Est Ornare. Suspendisse Aliquet Semper Quam Volutpat Bibendum Est Mattis. Sed Neque Etiam Morbi A Amet Lacus Phasellus Ipsum Nec.',
 }: TeamCarouselProps) {
   const rh = useReveal();
+  const bp = useBreakpoint();
+  const SLOT_SIZES = SLOT_SIZES_BY_BP[bp];
+  const SLOT_X = SLOT_X_BY_BP[bp];
   const n = team.length;
   const [activeIdx, setActiveIdx] = useState(0);
   const [displayIdx, setDisplayIdx] = useState(0);

@@ -256,13 +256,15 @@ const SPARKLE_POSITIONS = [
   { top:'38%', right:'7%', sd:'3.0s', ss:'0.9s', sz:'12px' },
 ];
 
+// Deterministic pseudo-random spread (not Math.random()) so server-rendered
+// and client-hydrated markup match exactly — avoids a hydration mismatch.
 const PARTICLES = Array.from({ length: 20 }, (_, i) => {
   const angle = (i / 20) * Math.PI * 2;
-  const dist  = 70 + Math.random() * 120;
+  const dist  = 70 + ((i * 53) % 120);
   return {
     px: `${Math.cos(angle) * dist}px`,
     py: `${Math.sin(angle) * dist}px`,
-    delay: `${0.3 + Math.random() * 0.6}s`,
+    delay: `${(0.3 + ((i * 37) % 60) / 100).toFixed(2)}s`,
   };
 });
 

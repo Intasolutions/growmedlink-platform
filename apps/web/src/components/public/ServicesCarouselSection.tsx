@@ -452,6 +452,7 @@ function ServiceCard({
             src={img}
             alt={title}
             fill
+            sizes="(max-width: 767px) 82vw, 320px"
             style={{ objectFit: 'cover', objectPosition: 'top' }}
           />
         </div>
