@@ -57,13 +57,10 @@ function resolveImg(src?: string | { url: string } | null): string | null {
 
 function extractYouTubeId(url: string): string | null {
   if (!url) return null;
-  // youtu.be/ID
   const short = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
   if (short) return short[1];
-  // youtube.com/watch?v=ID  /embed/ID  /v/ID  /shorts/ID
   const long = url.match(/youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)([A-Za-z0-9_-]{11})/);
   if (long) return long[1];
-  // bare 11-char ID
   if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) return url.trim();
   return null;
 }
@@ -74,10 +71,7 @@ function SplitHeading({ text, fontSize }: { text: string; fontSize: string }) {
   const first = space === -1 ? trimmed : trimmed.slice(0, space);
   const rest = space === -1 ? '' : trimmed.slice(space + 1);
   return (
-    <h2 style={{
-      fontFamily: FH, fontWeight: 400, fontSize,
-      lineHeight: '1.19', letterSpacing: '-0.03em', margin: 0,
-    }}>
+    <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize, lineHeight: '1.19', letterSpacing: '-0.03em', margin: 0 }}>
       <span style={{ color: DARK }}>{first}</span>
       {rest && <span style={{ color: GREEN }}>{' '}{rest}</span>}
     </h2>
@@ -119,24 +113,77 @@ function TagIcon({ size = 24, color = BLACK }: { size?: number; color?: string }
   );
 }
 
+/* ── single reusable reveal hook ── */
+function useReveal(threshold = 0.08) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
 const STYLES = `
 .pdt * { box-sizing:border-box; margin:0; padding:0; }
 .pdt a  { text-decoration:none; }
 .pdt img { display:block; }
 
-@keyframes pdt-fadein {
-  from { opacity:0; transform:translate3d(0,22px,0); }
-  to   { opacity:1; transform:translate3d(0,0,0);  }
-}
-
+/* ── universal reveal ── */
 .pdt-rv {
-  opacity:0; transform:translateY(32px);
-  transition:opacity 0.72s cubic-bezier(.22,.68,0,1.2),
-             transform 0.72s cubic-bezier(.22,.68,0,1.2);
+  opacity:0;
+  transform:translateY(36px);
+  transition:opacity 0.75s cubic-bezier(.22,.68,0,1.2),
+             transform 0.75s cubic-bezier(.22,.68,0,1.2);
   will-change:opacity,transform;
 }
 .pdt-rv.pdt-in { opacity:1; transform:translateY(0); }
 
+/* slide-in from left */
+.pdt-sl {
+  opacity:0;
+  transform:translateX(-32px);
+  transition:opacity 0.75s cubic-bezier(.22,.68,0,1.2),
+             transform 0.75s cubic-bezier(.22,.68,0,1.2);
+  will-change:opacity,transform;
+}
+.pdt-sl.pdt-in { opacity:1; transform:translateX(0); }
+
+/* slide-in from right */
+.pdt-sr {
+  opacity:0;
+  transform:translateX(32px);
+  transition:opacity 0.75s cubic-bezier(.22,.68,0,1.2),
+             transform 0.75s cubic-bezier(.22,.68,0,1.2);
+  will-change:opacity,transform;
+}
+.pdt-sr.pdt-in { opacity:1; transform:translateX(0); }
+
+/* scale-up pop */
+.pdt-pop {
+  opacity:0;
+  transform:scale(0.88);
+  transition:opacity 0.6s cubic-bezier(.22,.68,0,1.4),
+             transform 0.6s cubic-bezier(.22,.68,0,1.4);
+  will-change:opacity,transform;
+}
+.pdt-pop.pdt-in { opacity:1; transform:scale(1); }
+
+/* accent underline wipe */
+.pdt-wipe {
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform 0.6s cubic-bezier(.77,0,.175,1);
+  will-change:transform;
+}
+.pdt-wipe.pdt-in { transform:scaleX(1); }
+
+/* image reveal wipe */
 .pdt-exc-img { position:relative; border-radius:14px; overflow:hidden; }
 .pdt-exc-img::after {
   content:''; position:absolute; inset:0; z-index:3; background:#fff;
@@ -146,26 +193,24 @@ const STYLES = `
 }
 .pdt-exc-img.pdt-in::after { transform:scaleX(0); }
 .pdt-exc-img-inner {
-  transform:scale(1.1);
+  transform:scale(1.08);
   transition:transform 1.9s cubic-bezier(.22,.68,0,1.05) 0.12s;
   will-change:transform; position:absolute; inset:0;
 }
 .pdt-exc-img.pdt-in .pdt-exc-img-inner { transform:scale(1); }
 
+/* stat chip hover */
 .pdt-stat {
-  transition: transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
+  transition:transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
 }
-.pdt-stat:hover { transform: translateY(-4px); }
+.pdt-stat:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.14); }
 
+/* related cards */
 .pdt-rc {
-  transition:transform 0.32s cubic-bezier(.22,.68,0,1.2),
-             box-shadow 0.32s ease;
+  transition:transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
   will-change:transform,box-shadow;
 }
-.pdt-rc:hover {
-  transform:translateY(-8px);
-  box-shadow:0 24px 56px rgba(0,0,0,0.22);
-}
+.pdt-rc:hover { transform:translateY(-8px); box-shadow:0 24px 56px rgba(0,0,0,0.22); }
 .pdt-rc-img-inner {
   transition:transform 0.55s cubic-bezier(.22,.68,0,1.2);
   will-change:transform; width:100%; height:100%;
@@ -174,58 +219,15 @@ const STYLES = `
 .pdt-rc-arrow {
   display:inline-flex; align-items:center; justify-content:center;
   transition:transform 0.28s cubic-bezier(.22,.68,0,1.2);
-  will-change:transform;
 }
 .pdt-rc:hover .pdt-rc-arrow { transform:translate(3px,-3px); }
 
-.pdt-exc-wrap {
-  display: flex; gap: clamp(24px, 4vw, 64px); align-items: flex-start;
-}
-.pdt-rc-wrap {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; width: 100%;
-}
-.pdt-stat-row {
-  display: flex; gap: 20px;
-}
-
-/* decorative collage — scales with viewport */
-.pdt-exc-deco {
-  position: relative; flex-shrink: 0;
-  width: clamp(260px, 36vw, 440px);
-  height: clamp(280px, 38vw, 380px);
-}
-
-@media (max-width:991px) {
-  .pdt-exc-wrap { flex-direction: column; align-items: center; }
-  .pdt-exc-text { max-width: 100% !important; }
-  /* hide decorative collage when stacked */
-  .pdt-exc-deco { display: none; }
-}
-@media (max-width:767px) {
-  .pdt-rc-wrap { grid-template-columns: 1fr; }
-  .pdt-stat-row { flex-direction: column; }
-}
-@media (max-width:479px) {
-  .pdt-rc-wrap { gap: 16px; }
-}
-@media (prefers-reduced-motion:reduce) {
-  .pdt-rv { opacity:1 !important; transform:none !important; transition:none !important; }
-  .pdt-exc-img::after { transform:scaleX(0) !important; transition:none !important; }
-  .pdt-rc { transition:none !important; }
-}
-
-/* ── Related service card (imported from ServiceDetailPage) ── */
-.svc-rc-wrap {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 26px; width: 100%;
-}
+/* related service cards */
 .svc-rc {
   transition:transform 0.32s cubic-bezier(.22,.68,0,1.2), box-shadow 0.32s ease;
   will-change:transform,box-shadow;
 }
-.svc-rc:hover {
-  transform:translateY(-8px);
-  box-shadow:0 24px 56px rgba(0,0,0,0.22);
-}
+.svc-rc:hover { transform:translateY(-8px); box-shadow:0 24px 56px rgba(0,0,0,0.22); }
 .svc-rc-img-inner {
   transition:transform 0.55s cubic-bezier(.22,.68,0,1.2);
   will-change:transform; width:100%; height:100%;
@@ -234,116 +236,133 @@ const STYLES = `
 .svc-rc-arrow {
   display:inline-flex; align-items:center; justify-content:center;
   transition:transform 0.28s cubic-bezier(.22,.68,0,1.2);
-  will-change:transform;
 }
 .svc-rc:hover .svc-rc-arrow { transform:translate(3px,-3px); }
-.svc-rv {
-  opacity:0; transform:translateY(32px);
-  transition:opacity 0.72s cubic-bezier(.22,.68,0,1.2), transform 0.72s cubic-bezier(.22,.68,0,1.2);
-  will-change:opacity,transform;
-}
-.svc-rv.svc-in { opacity:1; transform:translateY(0); }
-`;
 
-function useReveal(threshold = 0.08) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { el.classList.add('pdt-in'); obs.disconnect(); }
-    }, { threshold });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return ref;
+/* layout helpers */
+.pdt-exc-wrap {
+  display:flex; gap:clamp(24px,4vw,64px); align-items:flex-start;
 }
+.pdt-rc-wrap {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:26px; width:100%;
+}
+.pdt-stat-row {
+  display:flex; gap:16px; flex-wrap:wrap;
+}
+.pdt-stat-row > * { flex:1; min-width:180px; }
+
+.pdt-exc-deco {
+  position:relative; flex-shrink:0;
+  width:clamp(260px,36vw,440px);
+  height:clamp(280px,38vw,380px);
+}
+
+.svc-rc-wrap {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:26px; width:100%;
+}
+
+/* ── responsive breakpoints ── */
+@media (max-width:991px) {
+  .pdt-exc-wrap { flex-direction:column; align-items:stretch; }
+  .pdt-exc-deco { display:none; }
+}
+@media (max-width:767px) {
+  .pdt-rc-wrap  { grid-template-columns:1fr; }
+  .svc-rc-wrap  { grid-template-columns:1fr; }
+  .pdt-stat-row { flex-direction:column; }
+  .pdt-stat-row > * { min-width:0; }
+}
+@media (max-width:479px) {
+  .pdt-rc-wrap  { gap:14px; }
+  .svc-rc-wrap  { gap:14px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .pdt-rv,.pdt-sl,.pdt-sr,.pdt-pop { opacity:1 !important; transform:none !important; transition:none !important; }
+  .pdt-wipe { transform:scaleX(1) !important; transition:none !important; }
+  .pdt-exc-img::after { transform:scaleX(0) !important; transition:none !important; }
+  .pdt-rc,.svc-rc { transition:none !important; }
+}
+`;
 
 /* ══════════════════════ §1 HERO ══════════════════════ */
 function HeroSection({ product }: { product: ProductDetail }) {
   const heroImg = resolveImg(product.image) ?? product.imageUrl ?? null;
-
   return (
     <section style={{
       position: 'relative', width: '100%',
-      height: 'clamp(420px,53.1vw,765px)',
-      overflow: 'hidden', display: 'flex', alignItems: 'flex-end',
+      height: 'clamp(260px,56vw,760px)',
+      overflow: 'hidden',
     }}>
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        {heroImg ? (
-          <Image src={heroImg} alt={product.name} fill sizes="100vw"
-            style={{ objectFit: 'cover' }} priority />
-        ) : (
-          <div style={{ position: 'absolute', inset: 0, background: '#111' }} />
-        )}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(56.72% 50% at 50% 50%, rgba(0,0,0,0) 0%, #000 100%)',
+      {heroImg ? (
+        <Image
+          src={heroImg}
+          alt={product.name}
+          fill
+          sizes="100vw"
+          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+          priority
+        />
+      ) : (
+        <div style={{ position: 'absolute', inset: 0, background: '#111' }} />
+      )}
+    </section>
+  );
+}
+
+/* ══════════════════════ NAMEPLATE ══════════════════════ */
+function NameplateSection({ name }: { name: string }) {
+  const { ref, visible } = useReveal(0.1);
+  return (
+    <div ref={ref} style={{
+      background: '#fff',
+      padding: 'clamp(24px,3.5vw,44px) clamp(16px,5vw,60px) clamp(16px,2.5vw,28px)',
+      borderBottom: '1px solid #f0f0f0',
+    }}>
+      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+        <h1 className={`pdt-sl${visible ? ' pdt-in' : ''}`} style={{
+          fontFamily: FH, fontWeight: 600, color: DARK,
+          fontSize: 'clamp(24px,3.8vw,52px)',
+          lineHeight: 1.15, letterSpacing: '-0.03em',
+          marginBottom: 14,
+        }}>
+          {name}
+        </h1>
+        <div className={`pdt-wipe${visible ? ' pdt-in' : ''}`} style={{
+          width: 56, height: 4, borderRadius: 2, background: GREEN,
+          transitionDelay: '0.3s',
         }} />
       </div>
-
-      <div style={{
-        position: 'relative', zIndex: 2, width: '100%', textAlign: 'center',
-        padding: '0 24px clamp(36px,5.5vw,80px)',
-      }}>
-        <h1 style={{
-          fontFamily: FH, fontWeight: 500, color: '#fff',
-          fontSize: 'clamp(24px,4vw,48px)',
-          lineHeight: '1.19', letterSpacing: '-0.03em',
-          marginBottom: 'clamp(14px,2vw,28px)',
-          animation: 'pdt-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.18s both',
-        }}>
-          {product.name}
-        </h1>
-
-        <div style={{
-          display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap',
-          animation: 'pdt-fadein 0.9s cubic-bezier(.22,.68,0,1.2) 0.42s both',
-        }}>
-          {product.fees && (
-            <span style={{ fontFamily: FM, fontSize: 18, color: GREEN, fontWeight: 600 }}>
-              ₹{product.fees}
-            </span>
-          )}
-          {product.duration && (
-            <span style={{ fontFamily: FM, fontSize: 18, color: '#fff', fontWeight: 600 }}>
-              {product.duration}
-            </span>
-          )}
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }
 
 /* ══════════════════════ §1b VIDEO OVERVIEW ══════════════════════ */
 function VideoSection({ videoUrl }: { videoUrl: string }) {
   const videoId = extractYouTubeId(videoUrl);
+  const { ref, visible } = useReveal(0.08);
   if (!videoId) return null;
   return (
-    <section style={{ background: '#f8f8f8', padding: 'clamp(40px,7vw,80px) clamp(20px,5vw,60px)' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <h2 style={{
+    <section style={{ background: '#f8f8f8', padding: 'clamp(40px,7vw,80px) clamp(16px,5vw,60px)' }}>
+      <div ref={ref} style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <h2 className={`pdt-rv${visible ? ' pdt-in' : ''}`} style={{
           fontFamily: FH, fontWeight: 400, fontSize: 'clamp(22px,3.5vw,40px)',
           letterSpacing: '-0.03em', marginBottom: 'clamp(20px,3vw,40px)', color: DARK,
         }}>
           See It in <span style={{ color: GREEN }}>Action</span>
         </h2>
-        {/* 16:9 responsive wrapper */}
-        <div style={{
+        <div className={`pdt-rv${visible ? ' pdt-in' : ''}`} style={{
           position: 'relative', paddingBottom: '56.25%', height: 0,
           borderRadius: 14, overflow: 'hidden',
           boxShadow: '0 12px 48px rgba(0,0,0,0.12)',
+          transitionDelay: '0.15s',
         }}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
             title="Product Overview Video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            style={{
-              position: 'absolute', top: 0, left: 0,
-              width: '100%', height: '100%', border: 0,
-            }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
           />
         </div>
       </div>
@@ -357,41 +376,28 @@ function DetailsSection({ product }: { product: ProductDetail }) {
   const heroImg = resolveImg(product.image) ?? product.imageUrl ?? null;
   const secImg = resolveImg(product.secondaryImage) ?? null;
 
-  const textRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLDivElement>(null);
-  const [textVis, setTextVis] = useState(false);
-  const [imgVis, setImgVis] = useState(false);
+  const { ref: textRef, visible: textVis } = useReveal(0.06);
+  const { ref: imgRef,  visible: imgVis  } = useReveal(0.06);
 
-  useEffect(() => {
-    const makeObs = (el: HTMLElement | null, set: (v: boolean) => void) => {
-      if (!el) return;
-      const obs = new IntersectionObserver(([e]) => {
-        if (e.isIntersecting) { set(true); obs.disconnect(); }
-      }, { threshold: 0.06 });
-      obs.observe(el);
-      return () => obs.disconnect();
-    };
-    const d1 = makeObs(textRef.current, setTextVis);
-    const d2 = makeObs(imgRef.current, setImgVis);
-    return () => { d1?.(); d2?.(); };
-  }, []);
+  const paras = text.includes('\n\n')
+    ? text.split('\n\n').filter(Boolean)
+    : text ? [text] : [];
 
   return (
-    <section style={{ background: '#fff', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px)', overflow: 'hidden' }}>
+    <section style={{ background: '#fff', padding: 'clamp(36px,7vw,72px) clamp(16px,5vw,60px)', overflow: 'hidden' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto' }}>
-
-        <div className={`pdt-rv${textVis ? ' pdt-in' : ''}`} ref={textRef} style={{ marginBottom: 48 }}>
-          <SplitHeading text="Product Details" fontSize="clamp(24px,4vw,48px)" />
-        </div>
-
         <div className="pdt-exc-wrap">
-          <div className="pdt-exc-text" style={{ flex: 1.2, minWidth: 0 }}>
-            {/* Fees / Duration stat chips */}
+
+          {/* ── text side ── */}
+          <div ref={textRef} className="pdt-exc-text" style={{ flex: 1.2, minWidth: 0 }}>
+
+            {/* stat chips */}
             <div className="pdt-stat-row" style={{ marginBottom: 28 }}>
               {product.fees && (
-                <div className={`pdt-stat pdt-rv${textVis ? ' pdt-in' : ''}`} style={{
-                  flex: 1, background: DARK, borderRadius: 14, padding: '18px 22px',
-                  display: 'flex', alignItems: 'center', gap: 14, transitionDelay: '0.08s',
+                <div className={`pdt-stat pdt-pop${textVis ? ' pdt-in' : ''}`} style={{
+                  background: DARK, borderRadius: 14, padding: 'clamp(14px,1.5vw,18px) clamp(16px,1.8vw,22px)',
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  transitionDelay: '0.08s',
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: 8, background: GREEN,
@@ -406,9 +412,10 @@ function DetailsSection({ product }: { product: ProductDetail }) {
                 </div>
               )}
               {product.duration && (
-                <div className={`pdt-stat pdt-rv${textVis ? ' pdt-in' : ''}`} style={{
-                  flex: 1, background: GREEN, borderRadius: 14, padding: '18px 22px',
-                  display: 'flex', alignItems: 'center', gap: 14, transitionDelay: '0.16s',
+                <div className={`pdt-stat pdt-pop${textVis ? ' pdt-in' : ''}`} style={{
+                  background: GREEN, borderRadius: 14, padding: 'clamp(14px,1.5vw,18px) clamp(16px,1.8vw,22px)',
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  transitionDelay: '0.18s',
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: 8, background: '#fff',
@@ -424,98 +431,78 @@ function DetailsSection({ product }: { product: ProductDetail }) {
               )}
             </div>
 
-            {text.split('\n\n').filter(Boolean).map((para, i) => (
+            {/* paragraphs */}
+            {paras.map((para, i) => (
               <p key={i}
                 className={`pdt-rv${textVis ? ' pdt-in' : ''}`}
                 style={{
-                  fontFamily: FH, fontWeight: 400, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%',
-                  letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000',
-                  textAlign: 'justify',
-                  marginBottom: i < text.split('\n\n').length - 1 ? 24 : 0,
-                  transitionDelay: `${i * 0.1 + 0.24}s`,
+                  fontFamily: FH, fontWeight: 400,
+                  fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%',
+                  letterSpacing: '0.01em', color: '#000', textAlign: 'justify',
+                  marginBottom: i < paras.length - 1 ? 20 : 0,
+                  transitionDelay: `${i * 0.1 + 0.3}s`,
                 }}>
                 {para}
               </p>
             ))}
-            {!text.includes('\n\n') && text && (
-              <p className={`pdt-rv${textVis ? ' pdt-in' : ''}`} style={{
-                fontFamily: FH, fontWeight: 400, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%',
-                letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000',
-                textAlign: 'justify',
-                transitionDelay: '0.24s',
-              }}>
-                {text}
-              </p>
-            )}
           </div>
 
+          {/* ── decorative collage (hidden below 992px via CSS) ── */}
           <div className="pdt-exc-deco" ref={imgRef}>
-            {/* Green tilted card — contains the hero/main product image */}
+            {/* tilted back card */}
             <div style={{
               position: 'absolute', left: 90, top: 0, width: 310, height: 325,
-              borderRadius: 14,
-              transform: 'rotate(6.68deg)',
-              transformOrigin: 'center center',
+              borderRadius: 14, transform: 'rotate(6.68deg)',
               opacity: imgVis ? 1 : 0,
               transition: 'opacity 0.9s ease 0.05s',
-              willChange: 'opacity',
-              overflow: 'hidden',
+              willChange: 'opacity', overflow: 'hidden',
             }}>
-              {heroImg ? (
-                <Image src={heroImg} alt={product.name} fill sizes="310px"
-                  style={{ objectFit: 'cover' }} />
-              ) : null}
-              {/* Green colour overlay on top of the hero photo */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: GREEN,
-                opacity: heroImg ? 0.55 : 1,
-              }} />
+              {heroImg && (
+                <Image src={heroImg} alt={product.name} fill sizes="310px" style={{ objectFit: 'cover' }} />
+              )}
             </div>
 
-            {/* Foreground square — secondary image */}
+            {/* foreground card with wipe reveal */}
             <div className={`pdt-exc-img${imgVis ? ' pdt-in' : ''}`} style={{
-              position: 'absolute', left: 0, top: 34,
-              width: 335, height: 335,
+              position: 'absolute', left: 0, top: 34, width: 335, height: 335,
               borderRadius: 14, zIndex: 1,
             }}>
               <div className="pdt-exc-img-inner">
                 {secImg ? (
-                  <Image src={secImg} alt={product.name} fill sizes="335px"
-                    style={{ objectFit: 'cover' }} />
+                  <Image src={secImg} alt={product.name} fill sizes="335px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div style={{ position: 'absolute', inset: 0, background: '#ccc', borderRadius: 14 }} />
                 )}
               </div>
             </div>
 
+            {/* sparkle top-left */}
             <div style={{
               position: 'absolute', left: 20, top: 53, zIndex: 3,
               opacity: imgVis ? 1 : 0,
               transform: imgVis ? 'scale(1) rotate(0deg)' : 'scale(0) rotate(-30deg)',
               transition: 'opacity 0.55s ease 0.55s, transform 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.55s',
-              willChange: 'opacity,transform',
             }}>
               <SparkleIcon size={42} />
             </div>
 
+            {/* arrow bottom-right */}
             <div style={{
               position: 'absolute', left: 240, top: 335, zIndex: 3,
               opacity: imgVis ? 1 : 0,
               transform: imgVis ? 'scale(0.7) translateY(0)' : 'scale(0.7) translateY(10px)',
               transition: 'opacity 0.55s ease 0.7s, transform 0.55s ease 0.7s',
-              willChange: 'opacity,transform',
               transformOrigin: 'top left',
             }}>
               <svg width={82} height={70} viewBox="0 0 82 70" fill="none">
                 <path d="M5 65 C20 48 40 33 55 18 C65 8 73 2 77 0"
                   stroke={GREEN} strokeWidth={5} fill="none" strokeLinecap="round" />
                 <path d="M65 0 L77 0 L77 12"
-                  stroke={GREEN} strokeWidth={5} fill="none"
-                  strokeLinecap="round" strokeLinejoin="round" />
+                  stroke={GREEN} strokeWidth={5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -524,34 +511,27 @@ function DetailsSection({ product }: { product: ProductDetail }) {
 
 /* ══════════════════════ §3 OTHER DETAILS ══════════════════════ */
 function OtherDetailsSection({ text }: { text: string }) {
-  const secRef = useRef<HTMLDivElement>(null);
-  const [vis, setVis] = useState(false);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
-    }, { threshold: 0.08 });
-    if (secRef.current) obs.observe(secRef.current);
-    return () => obs.disconnect();
-  }, []);
-
+  const { ref, visible } = useReveal(0.08);
   if (!text) return null;
 
+  const paras = text.includes('\n\n') ? text.split('\n\n').filter(Boolean) : [text];
+
   return (
-    <section ref={secRef} style={{ background: '#f7f7f7', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px)' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
-        <div className={`pdt-rv${vis ? ' pdt-in' : ''}`} style={{ marginBottom: 32 }}>
+    <section style={{ background: '#f7f7f7', padding: 'clamp(40px,8vw,80px) clamp(16px,5vw,60px)' }}>
+      <div ref={ref} style={{ maxWidth: 1320, margin: '0 auto' }}>
+        <div className={`pdt-rv${visible ? ' pdt-in' : ''}`} style={{ marginBottom: 32 }}>
           <SplitHeading text="Other Details" fontSize="clamp(24px,4vw,48px)" />
         </div>
-        {text.split('\n\n').filter(Boolean).map((para, i) => (
+        {paras.map((para, i) => (
           <p key={i}
-            className={`pdt-rv${vis ? ' pdt-in' : ''}`}
+            className={`pdt-rv${visible ? ' pdt-in' : ''}`}
             style={{
-              fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,17px)', lineHeight: '169%',
-              letterSpacing: '0.01em', textTransform: 'capitalize', color: DARK,
+              fontFamily: FH, fontWeight: 400,
+              fontSize: 'clamp(13px,1.3vw,17px)', lineHeight: '169%',
+              letterSpacing: '0.01em', color: DARK,
               textAlign: 'justify', maxWidth: 900,
-              marginBottom: i < text.split('\n\n').length - 1 ? 20 : 0,
-              transitionDelay: `${i * 0.1 + 0.1}s`,
+              marginBottom: i < paras.length - 1 ? 20 : 0,
+              transitionDelay: `${i * 0.1 + 0.15}s`,
             }}>
             {para}
           </p>
@@ -563,25 +543,15 @@ function OtherDetailsSection({ text }: { text: string }) {
 
 /* ══════════════════════ §4 RELATED PRODUCTS ══════════════════════ */
 function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
-  const secRef = useRef<HTMLDivElement>(null);
-  const [vis, setVis] = useState(false);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
-    }, { threshold: 0.05 });
-    if (secRef.current) obs.observe(secRef.current);
-    return () => obs.disconnect();
-  }, []);
-
+  const { ref, visible } = useReveal(0.05);
   if (!products?.length) return null;
 
   const CARD_COLORS = [DARK, '#D9D9D9'] as const;
 
   return (
-    <section ref={secRef} style={{ background: '#fff', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px)' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
-        <div className={`pdt-rv${vis ? ' pdt-in' : ''}`} style={{ marginBottom: 40 }}>
+    <section style={{ background: '#fff', padding: 'clamp(40px,8vw,80px) clamp(16px,5vw,60px)' }}>
+      <div ref={ref} style={{ maxWidth: 1320, margin: '0 auto' }}>
+        <div className={`pdt-rv${visible ? ' pdt-in' : ''}`} style={{ marginBottom: 40 }}>
           <h2 style={{
             fontFamily: FH, fontWeight: 400,
             fontSize: 'clamp(24px,4vw,48px)',
@@ -597,60 +567,49 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
             const img = resolveImg(p.image) ?? p.imageUrl ?? null;
             const bg = CARD_COLORS[i % CARD_COLORS.length];
             const isDark = bg === DARK;
-
             return (
               <div key={p.id ?? i}
-                className={`pdt-rc pdt-rv${vis ? ' pdt-in' : ''}`}
+                className={`pdt-rc pdt-rv${visible ? ' pdt-in' : ''}`}
                 style={{
                   background: bg, borderRadius: 32,
                   display: 'flex', flexDirection: 'column',
-                  padding: 24, position: 'relative', overflow: 'hidden',
+                  padding: 'clamp(16px,2vw,24px)',
+                  position: 'relative', overflow: 'hidden',
                   transitionDelay: `${i * 0.15}s`,
                 }}>
-                <div style={{ position: 'relative', width: '100%', height: 235, borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: '100%', height: 'clamp(180px,22vw,235px)', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
                   <div className="pdt-rc-img-inner" style={{ position: 'absolute', inset: 0 }}>
                     {img ? (
-                      <Image src={img} alt={p.name} fill sizes="(max-width: 768px) 100vw, 50vw"
+                      <Image src={img} alt={p.name} fill sizes="(max-width:768px) 100vw, 50vw"
                         style={{ objectFit: 'cover', borderRadius: 14 }} />
                     ) : (
-                      <div style={{
-                        width: '100%', height: '100%', borderRadius: 14,
-                        background: isDark ? 'rgba(150,202,69,0.12)' : 'rgba(0,0,0,0.08)',
-                      }} />
+                      <div style={{ width: '100%', height: '100%', borderRadius: 14, background: isDark ? 'rgba(150,202,69,0.12)' : 'rgba(0,0,0,0.08)' }} />
                     )}
                   </div>
                 </div>
-
                 <h3 style={{
-                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(17px,2vw,24px)', lineHeight: '1.2',
-                  color: isDark ? '#fff' : '#000', marginTop: 24,
+                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(16px,2vw,24px)', lineHeight: '1.2',
+                  color: isDark ? '#fff' : '#000', marginTop: 20,
                 }}>
                   {p.name}
                 </h3>
-
                 <p style={{
                   fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,16px)', lineHeight: '150%',
-                  letterSpacing: '0.01em', textTransform: 'capitalize',
-                  color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
+                  letterSpacing: '0.01em', color: isDark ? '#fff' : '#000', marginTop: 10, marginBottom: 20,
                 }}>
                   {[p.fees ? `₹${p.fees}` : null, p.duration].filter(Boolean).join(' · ')}
                 </p>
-
                 <div style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>
-                  <Link href={`/products/${p.slug}`} style={{ textDecoration: 'none' }}>
+                  <Link href={`/products/${p.slug}`}>
                     <div style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
+                      display: 'flex', alignItems: 'center', gap: 10,
                       background: '#fff', borderRadius: 6,
-                      padding: '0 24px', height: 48, width: 'fit-content',
+                      padding: '0 20px', height: 46, width: 'fit-content',
                     }}>
-                      <span style={{ fontFamily: FM, fontWeight: 600, fontSize: 16, color: '#000', textAlign: 'center' }}>
-                        Explore Product
-                      </span>
+                      <span style={{ fontFamily: FM, fontWeight: 600, fontSize: 15, color: '#000' }}>Explore Product</span>
                       <span className="pdt-rc-arrow">
-                        <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                          <path d="M7 17L17 7M17 7H7M17 7V17"
-                            stroke="#000" strokeWidth={2.2}
-                            strokeLinecap="round" strokeLinejoin="round" />
+                        <svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </span>
                     </div>
@@ -665,27 +624,17 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
   );
 }
 
+/* ══════════════════════ §5 RELATED SERVICES ══════════════════════ */
 function RelativeServicesSection({ services }: { services: RelatedService[] }) {
-  const secRef = useRef<HTMLDivElement>(null);
-  const [vis, setVis] = useState(false);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVis(true); obs.disconnect(); }
-    }, { threshold: 0.05 });
-    if (secRef.current) obs.observe(secRef.current);
-    return () => obs.disconnect();
-  }, []);
-
+  const { ref, visible } = useReveal(0.05);
   if (!services?.length) return null;
 
   const CARD_COLORS = [DARK, '#D9D9D9'] as const;
 
   return (
-    <section ref={secRef} style={{ background: '#fff', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 5vw, 60px)' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
-        {/* Heading */}
-        <div className={`svc-rv${vis ? ' svc-in' : ''}`} style={{ marginBottom: 40 }}>
+    <section style={{ background: '#f8f8f8', padding: 'clamp(40px,8vw,80px) clamp(16px,5vw,60px)' }}>
+      <div ref={ref} style={{ maxWidth: 1320, margin: '0 auto' }}>
+        <div className={`pdt-rv${visible ? ' pdt-in' : ''}`} style={{ marginBottom: 40 }}>
           <h2 style={{
             fontFamily: FH, fontWeight: 400,
             fontSize: 'clamp(24px,4vw,48px)',
@@ -696,78 +645,56 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
           </h2>
         </div>
 
-        {/* Cards row */}
         <div className="svc-rc-wrap">
           {services.slice(0, 2).map((svc, i) => {
             const img = resolveImg(svc.image) ?? svc.imageUrl ?? null;
             const desc = svc.shortDescription ?? svc.description ?? '';
             const bg = CARD_COLORS[i % CARD_COLORS.length];
             const isDark = bg === DARK;
-
             return (
               <div key={svc.id ?? i}
-                className={`svc-rc svc-rv${vis ? ' svc-in' : ''}`}
+                className={`svc-rc pdt-rv${visible ? ' pdt-in' : ''}`}
                 style={{
                   background: bg, borderRadius: 32,
                   display: 'flex', flexDirection: 'column',
-                  padding: 24, position: 'relative', overflow: 'hidden',
+                  padding: 'clamp(16px,2vw,24px)',
+                  position: 'relative', overflow: 'hidden',
                   transitionDelay: `${i * 0.15}s`,
                 }}>
-
-                {/* Photo */}
-                <div className="svc-rc-img-h" style={{
-                  position: 'relative', width: '100%', height: 235,
-                  borderRadius: 14, overflow: 'hidden', flexShrink: 0,
-                }}>
+                <div style={{ position: 'relative', width: '100%', height: 'clamp(180px,22vw,235px)', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
                   <div className="svc-rc-img-inner" style={{ position: 'absolute', inset: 0 }}>
                     {img ? (
-                      <Image src={img} alt={svc.name} fill sizes="(max-width: 768px) 100vw, 50vw"
+                      <Image src={img} alt={svc.name} fill sizes="(max-width:768px) 100vw, 50vw"
                         style={{ objectFit: 'cover', borderRadius: 14 }} />
                     ) : (
-                      <div style={{
-                        width: '100%', height: '100%', borderRadius: 14,
-                        background: isDark ? 'rgba(150,202,69,0.12)' : 'rgba(0,0,0,0.08)',
-                      }} />
+                      <div style={{ width: '100%', height: '100%', borderRadius: 14, background: isDark ? 'rgba(150,202,69,0.12)' : 'rgba(0,0,0,0.08)' }} />
                     )}
                   </div>
                 </div>
-
-                {/* Service name */}
                 <h3 style={{
-                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(17px,2vw,24px)', lineHeight: '1.2',
-                  color: isDark ? '#fff' : '#000', marginTop: 24,
+                  fontFamily: FM, fontWeight: 500, fontSize: 'clamp(16px,2vw,24px)', lineHeight: '1.2',
+                  color: isDark ? '#fff' : '#000', marginTop: 20,
                 }}>
                   {svc.name}
                 </h3>
-
-                {/* Description */}
                 <p style={{
                   fontFamily: FH, fontWeight: 400, fontSize: 'clamp(13px,1.3vw,16px)', lineHeight: '150%',
-                  letterSpacing: '0.01em', textTransform: 'capitalize', textAlign: 'justify',
-                  color: isDark ? '#fff' : '#000', marginTop: 12, marginBottom: 24,
+                  letterSpacing: '0.01em', textAlign: 'justify',
+                  color: isDark ? '#fff' : '#000', marginTop: 10, marginBottom: 20,
                 }}>
                   {desc}
                 </p>
-
-                {/* CTA button */}
                 <div style={{ marginTop: 'auto', alignSelf: 'flex-start' }}>
-                  <Link href={`/services/${svc.slug}`} style={{ textDecoration: 'none' }}>
+                  <Link href={`/services/${svc.slug}`}>
                     <div style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
+                      display: 'flex', alignItems: 'center', gap: 10,
                       background: '#fff', borderRadius: 6,
-                      padding: '0 24px', height: 48, width: 'fit-content',
+                      padding: '0 20px', height: 46, width: 'fit-content',
                     }}>
-                      <span style={{
-                        fontFamily: FM, fontWeight: 600, fontSize: 16,
-                        color: '#000', textAlign: 'center',
-                      }}>
-                        Explore Service
-                      </span>
+                      <span style={{ fontFamily: FM, fontWeight: 600, fontSize: 15, color: '#000' }}>Explore Service</span>
                       <span className="svc-rc-arrow">
-                        <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                          <path d="M7 17L17 7M17 7H7M17 7V17"
-                            stroke="#000" strokeWidth={2.2}
-                            strokeLinecap="round" strokeLinejoin="round" />
+                        <svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </span>
                     </div>
@@ -789,24 +716,13 @@ export default function ProductDetailPage({ product }: { product: ProductDetail 
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       <HeroSection product={product} />
-
+      <NameplateSection name={product.name} />
       <DetailsSection product={product} />
 
-      {!!product.videoUrl && (
-        <VideoSection videoUrl={product.videoUrl} />
-      )}
-
-      {!!product.otherDetails && (
-        <OtherDetailsSection text={product.otherDetails} />
-      )}
-
-      {!!product.relatedServices?.length && (
-        <RelativeServicesSection services={product.relatedServices} />
-      )}
-
-      {!!product.relatedProducts?.length && (
-        <RelatedProductsSection products={product.relatedProducts} />
-      )}
+      {!!product.videoUrl && <VideoSection videoUrl={product.videoUrl} />}
+      {!!product.otherDetails && <OtherDetailsSection text={product.otherDetails} />}
+      {!!product.relatedServices?.length && <RelativeServicesSection services={product.relatedServices} />}
+      {!!product.relatedProducts?.length && <RelatedProductsSection products={product.relatedProducts} />}
 
       <FAQSection />
       <WhatsAppButton pageType="product_detail" itemName={product.name} />

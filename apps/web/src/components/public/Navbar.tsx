@@ -96,9 +96,80 @@ function LogoCarousel() {
   );
 }
 
+const IDLE_MS = 1000;
+
 export default function Navbar({ settings }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(false);
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hiddenRef = useRef(false);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    // GSAP owns the full transform — set initial state so xPercent centres it
+    // (mirrors Tailwind's -translate-x-1/2 which we keep as a CSS fallback before JS runs)
+    let gsapInstance: any = null;
+
+    const cleanup = { fns: [] as (() => void)[] };
+
+    import('gsap').then(({ gsap }) => {
+      gsapInstance = gsap;
+      // Initialise transform so GSAP controls both axes
+      gsap.set(el, { xPercent: -50, yPercent: 0, opacity: 1 });
+      // Remove Tailwind's translate so they don't fight
+      el.style.left = '50%';
+      el.style.transform = '';
+
+      function hide() {
+        if (hiddenRef.current || isOpenRef.current) return;
+        hiddenRef.current = true;
+        gsap.to(el, {
+          yPercent: -200,
+          opacity: 0,
+          duration: 0.5,
+          ease: 'power3.in',
+          onComplete: () => { el.style.pointerEvents = 'none'; },
+        });
+      }
+
+      function show() {
+        if (!hiddenRef.current) return;
+        hiddenRef.current = false;
+        el.style.pointerEvents = 'auto';
+        gsap.to(el, {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.45,
+          ease: 'power3.out',
+        });
+      }
+
+      function wake() {
+        show();
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(hide, IDLE_MS);
+      }
+
+      const events = ['mousemove', 'mousedown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+      events.forEach(e => window.addEventListener(e, wake, { passive: true }));
+      timerRef.current = setTimeout(hide, IDLE_MS);
+
+      cleanup.fns.push(() => {
+        events.forEach(e => window.removeEventListener(e, wake));
+        if (timerRef.current) clearTimeout(timerRef.current);
+        gsap.killTweensOf(el);
+      });
+    });
+
+    return () => {
+      cleanup.fns.forEach(fn => fn());
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -110,14 +181,18 @@ export default function Navbar({ settings }: NavbarProps) {
   ];
 
   return (
-    <header className="fixed top-4 md:top-6 lg:top-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-full max-w-[680px] lg:max-w-[1180px] transition-all">
+    <header
+      ref={headerRef}
+      className="fixed top-4 md:top-6 lg:top-8 left-1/2 z-50 w-[95%] md:w-full max-w-[680px] lg:max-w-[1180px]"
+      style={{ transform: 'translateX(-50%)' }}
+    >
       {/* Floating Pill / Bar Container — pill shape on mobile/tablet, wide bar on desktop */}
       <div className="h-[68px] md:h-[76px] lg:h-[84px] w-full rounded-full lg:rounded-[42px] bg-[rgba(37,37,37,1)] overflow-hidden shadow-2xl flex items-center justify-between py-2 pl-4 md:pl-7 lg:pl-8 pr-2 lg:pr-3 box-border border border-white/10">
 
         {/* Left: Menu Toggle (mobile/tablet) — hidden on desktop in favor of inline links */}
         <div className="flex flex-col items-start justify-center h-full lg:hidden">
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => { const next = !isOpen; isOpenRef.current = next; setIsOpen(next); }}
             className="flex items-center gap-2 md:gap-3.5 text-white hover:text-[#96ca45] transition-colors"
           >
             {isOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <Menu className="h-5 w-5 md:h-6 md:w-6" />}
@@ -190,7 +265,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { isOpenRef.current = false; setIsOpen(false); }}
                   className={`px-7 py-4 font-['Power_Grotesk'] text-base font-medium transition-colors ${
                     isActive
                       ? 'bg-white/5 text-[rgba(150,202,69,1)] border-l-4 border-[rgba(150,202,69,1)]'

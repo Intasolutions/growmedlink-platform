@@ -1563,6 +1563,7 @@ const BRAND_LOGOS = [
   { name: 'Web Logo',       src: '/certifications/Web-Logo-Retina.png.webp' },
   { name: 'AN',             src: '/certifications/AN_Logo_RGB_Primary_Resized.svg' },
   { name: 'NSDC',           src: '/certifications/logo_nsdc.svg' },
+  { name: 'Skills',           src: '/certifications/skills.svg' },
   { name: 'Aussie Locums',  src: '/certifications/aussie-locums.svg' },
   { name: 'NCSBN',          src: '/certifications/ncsbn.svg' },
   { name: 'Asset1',         src: '/certifications/Asset+1.webp' },
