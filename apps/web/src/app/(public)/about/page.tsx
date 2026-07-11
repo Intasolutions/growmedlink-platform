@@ -1562,6 +1562,7 @@ const BRAND_LOGOS = [
   { name: 'TRS',            src: '/certifications/trs_logo-e1708510431638.png' },
   { name: 'Web Logo',       src: '/certifications/Web-Logo-Retina.png.webp' },
   { name: 'AN',             src: '/certifications/AN_Logo_RGB_Primary_Resized.svg' },
+  { name: 'NSDC',           src: '/certifications/logo_nsdc.svg' },
   { name: 'Aussie Locums',  src: '/certifications/aussie-locums.svg' },
   { name: 'NCSBN',          src: '/certifications/ncsbn.svg' },
   { name: 'Asset1',         src: '/certifications/Asset+1.webp' },
@@ -1578,10 +1579,9 @@ const BRAND_LOGOS = [
   { name: 'Nursing Cred',   src: '/certifications/logo.svg' },
   { name: 'UofT SCS',       src: '/certifications/uoft-scs-ces-logo.svg' },
   { name: 'NMBI Ireland',   src: '/certifications/logo (1).png' },
-  { name: 'Promedi',        src: '/certifications/logo-promedi-zeile.png' },
   { name: 'qt95',           src: '/certifications/qt=q_95.webp' },
   { name: 'Greenstaff',     src: '/certifications/greenstaff-ca.png' },
-  { name: 'NSDC',           src: '/certifications/logo_nsdc.svg' },
+ 
 ];
 /* duplicate twice so the seamless loop never shows a gap */
 const MARQUEE_LOGOS = [...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS];

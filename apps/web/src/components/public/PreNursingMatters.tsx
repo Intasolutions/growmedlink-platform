@@ -268,7 +268,7 @@ export default function PreNursingMatters({ products = [] }: Props) {
                 Starts Here.
               </p>
               <Link
-                href="/services"
+                href="/products"
                 style={{
                   background: '#fff',
                   color: '#252525',
