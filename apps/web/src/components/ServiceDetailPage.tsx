@@ -295,7 +295,7 @@ const STYLES = `
    HOOK
 ══════════════════════════════════════════════════════════════════════ */
 function useReveal(threshold = 0.08) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -322,7 +322,7 @@ function NameplateSection({ name }: { name: string }) {
       background: '#fff',
       textAlign: 'center',
     }}>
-      <h1 ref={h1Ref} className="svc-rv" style={{
+      <h1 ref={h1Ref as React.RefObject<HTMLHeadingElement>} className="svc-rv" style={{
         fontFamily: FH, fontWeight: 500,
         fontSize: 'clamp(26px,4.5vw,56px)',
         lineHeight: '1.15', letterSpacing: '-0.03em',
