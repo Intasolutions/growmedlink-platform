@@ -378,6 +378,7 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
   const text     = service.excellenceDescription ?? service.longDescription
                    ?? service.description ?? '';
   const secImg   = resolveImg(service.secondaryImage);
+  const heroImg  = resolveImg(service.image) ?? service.imageUrl ?? null;
 
   /* Separate observers for text block and image collage */
   const textRef  = useRef<HTMLDivElement>(null);
@@ -447,16 +448,23 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
           <div className="svc-exc-deco"
             ref={imgRef}>
 
-            {/* Green tilted background rectangle */}
+            {/* Tilted background image (primary image fallback) */}
             <div style={{
               position:'absolute', left:90, top:0, width:310, height:325,
-              background:GREEN, borderRadius:14,
+              borderRadius:14, overflow:'hidden',
               transform:'rotate(6.68deg)',
               transformOrigin:'center center',
               opacity: imgVis ? 1 : 0,
               transition:'opacity 0.9s ease 0.05s',
               willChange:'opacity',
-            }} />
+            }}>
+              {heroImg ? (
+                <Image src={heroImg} alt="" fill sizes="310px"
+                  style={{ objectFit:'cover', objectPosition:'center top' }} />
+              ) : (
+                <div style={{ position:'absolute', inset:0, background:GREEN }} />
+              )}
+            </div>
 
             {/* Main photo (flipped horizontally) with wipe reveal + Ken Burns */}
             <div
@@ -471,8 +479,11 @@ function ExcellenceSection({ service }: { service: ServiceDetail }) {
                 {secImg ? (
                   <Image src={secImg} alt="Excellence" fill sizes="335px"
                     style={{ objectFit:'cover' }} />
+                ) : heroImg ? (
+                  <Image src={heroImg} alt="Excellence" fill sizes="335px"
+                    style={{ objectFit:'cover', objectPosition:'center top' }} />
                 ) : (
-                  <div style={{ position:'absolute', inset:0, background:'#ccc', borderRadius:14 }} />
+                  <div style={{ position:'absolute', inset:0, background:GREEN, borderRadius:14 }} />
                 )}
               </div>
             </div>
