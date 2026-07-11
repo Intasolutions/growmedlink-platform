@@ -96,91 +96,45 @@ function LogoCarousel() {
   );
 }
 
-const IDLE_MS = 1000;
+const SCROLL_HIDE_THRESHOLD = 80; // px scrolled down before we consider hiding
+const SCROLL_DELTA_MIN = 6;       // ignore sub-pixel/jitter scroll deltas
 
 export default function Navbar({ settings }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const isOpenRef = useRef(false);
+  const [hidden, setHidden] = useState(false);
   const pathname = usePathname();
-  const headerRef = useRef<HTMLElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hiddenRef = useRef(false);
 
+  // Hide on scroll-down, reveal on scroll-up — pure state derived from a single
+  // scroll listener, no timers/tweens racing each other, so there's nothing to
+  // get stuck: `hidden` always reflects the last known scroll direction.
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
+    let lastY = window.scrollY;
 
-    // GSAP owns the full transform — set initial state so xPercent centres it
-    // (mirrors Tailwind's -translate-x-1/2 which we keep as a CSS fallback before JS runs)
-    let gsapInstance: any = null;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
 
-    const cleanup = { fns: [] as (() => void)[] };
-    let cancelled = false;
+      if (Math.abs(delta) < SCROLL_DELTA_MIN) return;
 
-    const navEl = el;
-
-    // Auto-hide-on-idle only makes sense with a mouse/trackpad — on touch
-    // devices there's no hover to "wake" the nav between taps, so it would
-    // stay hidden and unreachable. Skip the whole behaviour there.
-    const isCoarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-    if (isCoarsePointer) return;
-
-    import('gsap').then(({ gsap }) => {
-      if (cancelled) return;
-      gsapInstance = gsap;
-      // Initialise transform so GSAP controls both axes
-      gsap.set(navEl, { xPercent: -50, yPercent: 0, opacity: 1 });
-      // Remove Tailwind's translate so they don't fight
-      navEl.style.left = '50%';
-      navEl.style.transform = '';
-
-      function hide() {
-        if (hiddenRef.current || isOpenRef.current) return;
-        hiddenRef.current = true;
-        gsap.to(navEl, {
-          yPercent: -200,
-          opacity: 0,
-          duration: 0.5,
-          ease: 'power3.in',
-          onComplete: () => { navEl.style.pointerEvents = 'none'; },
-        });
+      if (y <= SCROLL_HIDE_THRESHOLD) {
+        setHidden(false);
+      } else if (delta > 0) {
+        setHidden(true);
+      } else {
+        setHidden(false);
       }
 
-      function show() {
-        if (!hiddenRef.current) return;
-        hiddenRef.current = false;
-        navEl.style.pointerEvents = 'auto';
-        gsap.to(navEl, {
-          yPercent: 0,
-          opacity: 1,
-          duration: 0.45,
-          ease: 'power3.out',
-        });
-      }
-
-      function wake() {
-        show();
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(hide, IDLE_MS);
-      }
-
-      const events = ['mousemove', 'mousedown', 'touchstart', 'keydown', 'scroll', 'wheel'];
-      events.forEach(e => window.addEventListener(e, wake, { passive: true }));
-      timerRef.current = setTimeout(hide, IDLE_MS);
-
-      cleanup.fns.push(() => {
-        events.forEach(e => window.removeEventListener(e, wake));
-        if (timerRef.current) clearTimeout(timerRef.current);
-        gsap.killTweensOf(navEl);
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      cleanup.fns.forEach(fn => fn());
-      if (timerRef.current) clearTimeout(timerRef.current);
+      lastY = y;
     };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Menu open should always reveal the header and keep it visible.
+  useEffect(() => {
+    if (isOpen) setHidden(false);
+  }, [isOpen]);
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -193,9 +147,9 @@ export default function Navbar({ settings }: NavbarProps) {
 
   return (
     <header
-      ref={headerRef}
-      className="fixed top-4 md:top-6 lg:top-8 left-1/2 z-50 w-[95%] md:w-full max-w-[680px] lg:max-w-[1180px]"
-      style={{ transform: 'translateX(-50%)' }}
+      className={`fixed top-4 md:top-6 lg:top-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-full max-w-[680px] lg:max-w-[1180px] transition-transform duration-300 ease-out ${
+        hidden ? '-translate-y-[150%]' : 'translate-y-0'
+      }`}
     >
       {/* Floating Pill / Bar Container — pill shape on mobile/tablet, wide bar on desktop */}
       <div className="h-[68px] md:h-[76px] lg:h-[84px] w-full rounded-full lg:rounded-[42px] bg-[rgba(37,37,37,1)] overflow-hidden shadow-2xl flex items-center justify-between py-2 pl-4 md:pl-7 lg:pl-8 pr-2 lg:pr-3 box-border border border-white/10">
@@ -203,7 +157,7 @@ export default function Navbar({ settings }: NavbarProps) {
         {/* Left: Menu Toggle (mobile/tablet) — hidden on desktop in favor of inline links */}
         <div className="flex flex-col items-start justify-center h-full lg:hidden">
           <button
-            onClick={() => { const next = !isOpen; isOpenRef.current = next; setIsOpen(next); }}
+            onClick={() => setIsOpen((prev) => !prev)}
             className="flex items-center gap-2 md:gap-3.5 text-white hover:text-[#96ca45] transition-colors"
           >
             {isOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <Menu className="h-5 w-5 md:h-6 md:w-6" />}
@@ -276,7 +230,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => { isOpenRef.current = false; setIsOpen(false); }}
+                  onClick={() => setIsOpen(false)}
                   className={`px-7 py-4 font-['Power_Grotesk'] text-base font-medium transition-colors ${
                     isActive
                       ? 'bg-white/5 text-[rgba(150,202,69,1)] border-l-4 border-[rgba(150,202,69,1)]'
