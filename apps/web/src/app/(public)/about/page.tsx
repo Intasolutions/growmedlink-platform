@@ -16,12 +16,12 @@ const BLUE  = '#155BA9';
 const RED   = '#AF1515';
 
 const TEAM = [
-  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', photo:'/about/1.jpg',  grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. She shapes our medical curriculum to meet the highest international standards.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', photo:'/about/2.jpg',  grad:['#96CA45','#4a7a10'], bio:'Dr. Patel leads the design of our NCLEX and PLAB preparation tracks, ensuring candidates achieve excellent results.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', photo:'/about/3.jpg',  grad:['#6938EF','#3d1d9e'], bio:'Priya oversees student journeys, ensuring candidates receive dedicated support from enrollment up to recruitment.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', photo:'/about/4.jpg',  grad:['#F79009','#a55c00'], bio:'James manages our adaptive learning platform, providing real-time dashboards to measure student progress.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', photo:'/about/5.jpg',  grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our OSCE coaching and simulation labs.', social:{ ig:'#', fb:'#', tw:'#' } },
-  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', photo:'/about/6.jpg',  grad:['#EE46BC','#8a1460'], bio:'Ananya coordinates hospital hiring partnerships, securing placement options for our successful candidates.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Sarah Mitchell',  role:'Chief Medical Officer',    initials:'SM', photo:'/Nurses/smiling-woman-healthcare-worker-in-teal-scrubs-2026-03-19-10-42-05-utc.jpg',                  grad:['#155BA9','#0a3d7a'], bio:'A distinguished physician with over 18 years of clinical and academic experience across the UK and India. She shapes our medical curriculum to meet the highest international standards.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Arjun Patel',     role:'Academic Director',        initials:'AP', photo:'/Nurses/smiling-man-in-scrubs-with-arms-crossed-2026-03-25-07-27-01-utc.jpg',                      grad:['#96CA45','#4a7a10'], bio:'Dr. Patel leads the design of our NCLEX and PLAB preparation tracks, ensuring candidates achieve excellent results.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Priya Nair',      role:'Head of Student Affairs',  initials:'PN', photo:'/Nurses/smiling-woman-in-blue-scrubs-with-arms-crossed-2026-01-09-10-55-49-utc.jpg',                   grad:['#6938EF','#3d1d9e'], bio:'Priya oversees student journeys, ensuring candidates receive dedicated support from enrollment up to recruitment.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Mr. James Wilson',    role:'Chief Technology Officer', initials:'JW', photo:'/Nurses/smiling-man-in-scrubs-gesturing-to-copy-space-2026-01-08-23-04-07-utc.jpg.jpeg',               grad:['#F79009','#a55c00'], bio:'James manages our adaptive learning platform, providing real-time dashboards to measure student progress.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Dr. Meera Krishnan',  role:'Clinical Training Lead',   initials:'MK', photo:'/Nurses/smiling-woman-wearing-blue-scrubs-in-hospital-sett-2026-03-26-11-52-07-utc.jpg',               grad:['#0BA5EC','#0669a0'], bio:'Dr. Krishnan brings 12 years of ICU and surgical experience to our OSCE coaching and simulation labs.', social:{ ig:'#', fb:'#', tw:'#' } },
+  { name:'Ms. Ananya Roy',      role:'International Relations',  initials:'AR', photo:'/Nurses/young-asian-woman-nurse-in-clinic-2026-03-19-08-10-57-utc.JPG',                                  grad:['#EE46BC','#8a1460'], bio:'Ananya coordinates hospital hiring partnerships, securing placement options for our successful candidates.', social:{ ig:'#', fb:'#', tw:'#' } },
 ];
 
 const CERTS = [
@@ -41,20 +41,20 @@ const QUICK_LINKS = ['Home', 'About', 'Products', 'Blog', 'Enroll', 'Talk to An 
 const OTHER_LINKS = ['GrowMedLink', 'Privacy Policy', 'Contact Us'];
 
 const ARCH_ITEMS = [
-  { src:'/about/1.jpg',  border:GREEN },
-  { src:'/about/2.jpg',  border:DARK  },
-  { src:'/about/3.jpg',  border:GREEN },
-  { src:'/about/4.jpg',  border:DARK  },
-  { src:'/about/5.jpg',  border:GREEN },
-  { src:'/about/6.jpg',  border:DARK  },
-  { src:'/about/7.jpg',  border:GREEN },
-  { src:'/about/8.jpg',  border:DARK  },
-  { src:'/about/9.jpg',  border:GREEN },
-  { src:'/about/10.jpg', border:DARK  },
-  { src:'/about/11.jpg', border:GREEN },
-  { src:'/about/12.jpg', border:DARK  },
-  { src:'/about/13.jpg', border:GREEN },
-  { src:'/about/14.jpg', border:DARK  },
+  { src:'/Nurses/covid-19-social-distancing-and-coronavirus-pandem-2026-03-19-23-10-09-utc.jpg',            border:GREEN },
+  { src:'/Nurses/female-doctor-thinking-with-stethoscope-on-yellow-2026-01-07-01-46-35-utc.jpg',            border:DARK  },
+  { src:'/Nurses/medical-student-smiling-at-the-camera-at-the-unive-2026-04-13-23-28-54-utc.jpg',           border:GREEN },
+  { src:'/Nurses/portrait-of-a-woman-doctor-in-blue-scrubs-2026-03-24-15-23-35-utc.jpg',                   border:DARK  },
+  { src:'/Nurses/portrait-of-mature-smiling-female-doctor-wearing-s-2026-03-10-04-01-46-utc.jpg',           border:GREEN },
+  { src:'/Nurses/portrait-of-smiling-female-doctor-wearing-scrubs-i-2026-03-10-03-22-38-utc.jpg',           border:DARK  },
+  { src:'/Nurses/smiling-healthcare-professional-with-medical-team-2026-03-25-08-15-33-utc.jpg',            border:GREEN },
+  { src:'/Nurses/smiling-medical-professional-in-blue-uniform-at-wo-2026-03-25-08-39-54-utc.jpg',           border:DARK  },
+  { src:'/Nurses/smiling-woman-doctor-in-blue-scrubs-in-hospital-2026-03-25-03-14-19-utc.jpg',              border:GREEN },
+  { src:'/Nurses/smiling-woman-doctor-in-blue-uniform-with-colleagu-2026-03-16-22-58-28-utc.jpg',           border:DARK  },
+  { src:'/Nurses/smiling-woman-doctor-wearing-stethoscope-in-hospit-2026-03-17-00-03-00-utc.jpg.jpeg',      border:GREEN },
+  { src:'/Nurses/smiling-woman-wearing-medical-scrubs-and-stethosco-2026-03-25-00-33-21-utc.jpg',           border:DARK  },
+  { src:'/Nurses/young-female-doctor-or-doctor-s-assistant-with-a-p-2026-04-14-04-44-08-utc.jpg',           border:GREEN },
+  { src:'/Nurses/your-health-is-of-the-utmost-importance-shot-of-d-2026-03-25-04-44-38-utc.jpg',            border:DARK  },
 ];
 const ARCH_COLORS = ['#1a3a1a','#2c1b0e','#0e1f2c','#2a1a0e','#1a2c1a','#0e2c2a','#2c1a2a','#1a1a2c','#2a2c1a','#2c0e1a','#0e2a2c','#2a0e2c','#1a2c2a'];
 
