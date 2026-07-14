@@ -147,17 +147,33 @@ export default function FeaturedServices({ services }: { services: any[] }) {
       style={{ background: '#fff', padding: 'clamp(24px,4vw,32px) 0 clamp(40px,6vw,64px)', overflow: 'hidden' }}
     >
       <style>{`
-        .fs-row { display: flex; flex-direction: row; gap: 16px; flex-wrap: wrap; }
+        .fs-row   { display: flex; flex-direction: row; gap: 20px; align-items: stretch; }
         .fs-left  { width: clamp(280px,42%,600px); flex: 0 0 auto; border-radius: 28px; position: relative; overflow: hidden; background: linear-gradient(150deg,#004a9c 0%,#002f6c 55%,#001a45 100%); height: clamp(340px,46vw,560px); cursor: default; }
         .fs-right { flex: 1; min-width: 0; border-radius: 28px; position: relative; display: flex; flex-direction: column; overflow: hidden; background-color: #1a1a1a; height: clamp(340px,46vw,560px); }
+
+        /* ── Desktop: centred card inside the deck ── */
+        .fs-deck  { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px 20px 16px; position: relative; }
+        .fs-deck-card { position: absolute; width: calc(100% - 40px); }
+        .fs-deck-card[data-active="false"] { pointer-events: none; }
+        .fs-deck-card-img { display: block; width: 100%; height: auto; max-height: clamp(160px,18vw,240px); object-fit: contain; object-position: center; }
+
+        /* pagination: vertical strip on right edge */
+        .fs-pagination { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 20; }
+
+        /* ── Mobile: stack, auto height, flow layout ── */
         @media (max-width: 767px) {
           .fs-row   { flex-direction: column !important; gap: 14px !important; }
           .fs-left  { width: 100% !important; flex: none !important; height: clamp(280px,75vw,380px) !important; }
-          .fs-right { width: 100% !important; min-width: 0 !important; height: clamp(480px,130vw,560px) !important; }
+          .fs-right { width: 100% !important; height: auto !important; }
+          .fs-deck  { flex: none !important; display: block !important; padding: 0 12px 16px !important; }
+          .fs-deck-card { position: relative !important; top: auto !important; left: auto !important; right: auto !important; width: 100% !important; margin: 0 !important; transform: none !important; }
+          .fs-deck-card[data-active="false"] { display: none !important; }
+          .fs-deck-card-img { max-height: none !important; object-fit: unset !important; }
+          .fs-pagination { position: relative !important; top: auto !important; right: auto !important; transform: none !important; flex-direction: row !important; justify-content: center !important; padding: 10px 0 14px !important; }
         }
         @media (max-width: 479px) {
           .fs-left  { height: clamp(240px,72vw,300px) !important; border-radius: 20px !important; }
-          .fs-right { height: clamp(440px,120vw,520px) !important; border-radius: 20px !important; }
+          .fs-right { border-radius: 20px !important; }
         }
       `}</style>
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(16px,4vw,48px)' }}>
@@ -282,7 +298,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
             }} />
 
             {/* Header */}
-            <div style={{ position: 'relative', zIndex: 10, paddingTop: '20px', paddingBottom: '0px', textAlign: 'center', flexShrink: 0 }}>
+            <div style={{ position: 'relative', zIndex: 10, paddingTop: '14px', paddingBottom: '0px', textAlign: 'center', flexShrink: 0 }}>
               <h2 style={{ color: '#fff', fontWeight: 500, fontSize: 'clamp(16px,1.6vw,22px)', margin: 0, letterSpacing: '-0.01em' }}>
                 Our Featured{' '}
                 <span style={{ fontWeight: 700, color: '#96CA45' }}>Products</span>
@@ -298,10 +314,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
             />
 
             {/* Pagination dots */}
-            <div style={{
-              position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
-              zIndex: 20, display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center',
-            }}>
+            <div className="fs-pagination">
               {services.map((_, idx) => (
                 <button
                   key={idx}
@@ -543,16 +556,14 @@ function DeckStack({
   };
 
   return (
-    <div style={{ flex: 1, position: 'relative', zIndex: 10, padding: '0 clamp(10px,2.5vw,28px) 28px' }}>
+    <div className="fs-deck" style={{ zIndex: 10 }}>
       {services.map((svc, i) => (
         <div
           key={i}
           ref={el => { wrapRefs.current[i] = el; }}
+          className="fs-deck-card"
+          data-active={posOf(i, activeIndex) === 0 ? 'true' : 'false'}
           style={{
-            position: 'absolute',
-            left: 'clamp(10px,2.5vw,28px)',
-            right: 'clamp(10px,2.5vw,28px)',
-            top: '52%', marginTop: 'clamp(-160px,-17vw,-110px)',
             willChange: 'transform, opacity',
             transformOrigin: 'center center',
           }}
@@ -576,60 +587,51 @@ function DeckStack({
                   backgroundColor: bg,
                   borderRadius: '20px',
                   border: `3px solid ${accent}`,
-                  padding: 'clamp(10px,1.4vw,18px)',
-                  display: 'flex', flexDirection: 'row',
-                  gap: 'clamp(12px,1.6vw,20px)',
+                  overflow: 'hidden',
                   boxShadow: isGreen
                     ? '0 10px 36px rgba(150,202,69,0.35)'
                     : '0 10px 36px rgba(0,0,0,0.22)',
-                  minHeight: 'clamp(160px,18vw,220px)',
                 }}>
-                  <div style={{
-                    flexShrink: 0,
-                    width: 'clamp(100px,38%,170px)',
-                    aspectRatio: '2/3',
-                    borderRadius: '13px',
-                    border: `3px solid ${accent}`,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    backgroundColor: isGreen ? 'rgba(255,255,255,0.15)' : '#f0f0f0',
-                  }}>
-                    <Image src={getImage(svc)} alt={svc?.title || 'Service'} fill
-                      style={{ objectFit: 'cover', objectPosition: 'top' }} />
-                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getImage(svc)}
+                    alt={svc?.title || 'Service'}
+                    className="fs-deck-card-img"
+                    loading="lazy"
+                  />
 
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
+                  {/* Text below the image */}
+                  <div style={{ padding: 'clamp(10px,1.4vw,16px)', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <h3 style={{
                       fontFamily: "'Courier New', monospace", fontWeight: 900,
-                      fontSize: 'clamp(13px,1.5vw,20px)', color: title,
-                      margin: '0 0 8px', lineHeight: 1.15,
-                      display: '-webkit-box', WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                      fontSize: 'clamp(13px,1.5vw,18px)', color: title,
+                      margin: 0, lineHeight: 1.2,
                     }}>
                       {svc?.title || 'Course Name'}
                     </h3>
                     <p style={{
                       fontSize: 'clamp(10px,0.88vw,13px)', color: body,
-                      lineHeight: 1.65, margin: 0, flex: 1,
-                      display: '-webkit-box', WebkitLineClamp: 5,
+                      lineHeight: 1.6, margin: 0,
+                      display: '-webkit-box', WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical', overflow: 'hidden',
                     }}>
-                      {svc?.description || 'Purus in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare.'}
+                      {svc?.description || ''}
                     </p>
-                    <div
-                      ref={el => { arrowRefs.current[i] = el; }}
-                      style={{
-                        marginTop: '10px', alignSelf: 'flex-end',
-                        width: '38px', height: '38px', borderRadius: '10px',
-                        backgroundColor: accent,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0,
-                        boxShadow: isGreen
-                          ? '0 4px 14px rgba(255,255,255,0.3)'
-                          : '0 4px 14px rgba(150,202,69,0.45)',
-                      }}
-                    >
-                      <ArrowUpRight style={{ width: '18px', height: '18px', color: isGreen ? '#96CA45' : '#fff' }} />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <div
+                        ref={el => { arrowRefs.current[i] = el; }}
+                        style={{
+                          width: '34px', height: '34px', borderRadius: '10px',
+                          backgroundColor: accent,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                          boxShadow: isGreen
+                            ? '0 4px 14px rgba(255,255,255,0.3)'
+                            : '0 4px 14px rgba(150,202,69,0.45)',
+                        }}
+                      >
+                        <ArrowUpRight style={{ width: '16px', height: '16px', color: isGreen ? '#96CA45' : '#fff' }} />
+                      </div>
                     </div>
                   </div>
                 </div>

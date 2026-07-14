@@ -875,6 +875,13 @@ function ServicesInner() {
           name: s.name ?? s.title,
           shortDescription: s.shortDescription ?? s.description,
         })));
+        /* Scroll to anchor after data loads */
+        if (window.location.hash) {
+          const id = window.location.hash.slice(1);
+          requestAnimationFrame(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+          });
+        }
       })
       .catch((err: unknown) => { console.error('[ServicesPage]', err); });
   }, [category]);

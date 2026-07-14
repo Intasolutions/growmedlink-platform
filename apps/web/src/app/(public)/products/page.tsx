@@ -548,6 +548,13 @@ export default function ProductsPage() {
           return ao - bo;
         });
         setProducts(ordered);
+        /* Scroll to anchor after data loads */
+        if (window.location.hash) {
+          const id = window.location.hash.slice(1);
+          requestAnimationFrame(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+          });
+        }
       })
       .catch((err: unknown) => console.error('[ProductsPage] Load products error:', err));
 

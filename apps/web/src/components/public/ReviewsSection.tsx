@@ -319,124 +319,65 @@ const STYLES = `
      RESPONSIVE
   ══════════════════════════════════════ */
 
-  /* ── Tablet 768–1023px: single column stack ── */
+  /* ── Tablet 768–1023px ── */
   @media (max-width: 1023px) {
     .rvs-section .rvs-grid { grid-template-columns: 1fr; }
-
-    /* left panel expands with content */
     .rvs-section .rvs-left { height: auto; min-height: clamp(280px,48vw,400px); }
-
-    /* right panel: de-absolute everything, use normal flow */
-    .rvs-section .rvs-right {
-      height: auto; overflow: visible;
-      padding: clamp(20px,3.5vw,36px) clamp(16px,3vw,28px) clamp(28px,5vw,44px);
-    }
-    .rvs-section .rvs-heading {
-      position: relative; top: auto; left: auto; transform: none;
-      font-size: clamp(32px,5.5vw,52px); line-height: 1.15;
-      text-align: center; display: block;
-      margin-bottom: clamp(20px,3vw,32px); white-space: normal;
-    }
-    .rvs-section .rvs-carousel-row {
-      position: relative; top: auto; left: auto; right: auto;
-      justify-content: center;
-    }
-    /* review card needs a solid height now it's not absolutely positioned */
-    .rvs-section .rvs-card {
-      height: clamp(260px,36vw,360px);
-    }
-    .rvs-section .rvs-write-btn {
-      position: relative; right: auto; top: auto;
-      margin-bottom: 16px; display: inline-flex;
-    }
-    /* indicator bars go horizontal */
+    .rvs-section .rvs-right { height: auto; overflow: visible; padding: clamp(20px,3.5vw,36px) clamp(16px,3vw,28px) clamp(28px,5vw,44px); }
+    .rvs-section .rvs-heading { position: relative; top: auto; left: auto; transform: none; font-size: clamp(32px,5.5vw,52px); line-height: 1.15; text-align: center; display: block; margin-bottom: clamp(20px,3vw,32px); white-space: normal; }
+    .rvs-section .rvs-carousel-row { position: relative; top: auto; left: auto; right: auto; justify-content: center; }
+    .rvs-section .rvs-card { height: clamp(260px,36vw,360px); }
+    .rvs-section .rvs-write-btn { position: relative; right: auto; top: auto; margin-bottom: 16px; display: inline-flex; }
     .rvs-section .rvs-indicator { flex-direction: row; align-items: center; gap: 10px; }
   }
 
-  /* ── Mobile ≤ 767px ── */
-  @media (max-width: 767px) {
-    .rvs-section .rvs-outer { padding: 0 clamp(10px,4vw,16px); }
-
-    .rvs-section .rvs-left { min-height: clamp(240px,72vw,340px); }
-    .rvs-section .rvs-country-grid {
-      gap: clamp(6px,2vw,10px);
-      padding: clamp(14px,4vw,20px) clamp(14px,4vw,20px) clamp(8px,2vw,12px);
-    }
-    .rvs-section .rvs-ccard-pct { font-size: clamp(20px,6vw,30px); }
-    .rvs-section .rvs-ccard-map { width: clamp(36px,10vw,52px); height: clamp(36px,10vw,52px); }
-
-    /* right panel */
-    .rvs-section .rvs-right { padding: clamp(16px,4vw,28px) clamp(12px,3.5vw,20px) clamp(20px,5vw,32px); }
-    .rvs-section .rvs-heading { font-size: clamp(26px,7vw,40px); margin-bottom: clamp(14px,3.5vw,24px); }
-    .rvs-section .rvs-card { height: clamp(240px,55vw,320px); }
+  /* desktop: show desktop card, hide mobile card */
+  @media (min-width: 768px) {
+    .rvs-section .rvs-card-desktop { display: block; }
+    .rvs-section .rvs-card-mobile  { display: none; }
   }
 
-  /* ── Small mobile ≤ 479px: review card switches to flex column ── */
-  @media (max-width: 479px) {
-    .rvs-section .rvs-heading { font-size: clamp(22px,7vw,30px); }
+  /* ── Mobile card (clean flex layout, no absolute children) ── */
+  .rvs-section .rvs-card-mobile {
+    background: #155BA9; border-radius: 12px; overflow: hidden;
+    display: none; flex-direction: column; width: 100%; box-sizing: border-box;
+    will-change: transform;
+  }
+  .rvs-section .rvs-card-mobile .mob-deco { display: flex; gap: 8px; padding-left: 16px; }
+  .rvs-section .rvs-card-mobile .mob-strip { width: 28px; height: 68px; border-radius: 0 0 6px 6px; }
+  .rvs-section .rvs-card-mobile .mob-top { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px 0; }
+  .rvs-section .rvs-card-mobile .mob-avatar { width: 50px; height: 50px; border-radius: 50%; background: #fff; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 -4px 8px rgba(0,0,0,0.12); }
+  .rvs-section .rvs-card-mobile .mob-comment { font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif; font-size: 12px; line-height: 1.6; color: #fff; flex: 1; }
+  .rvs-section .rvs-card-mobile .mob-name { font-family:'Great Day Personal Use','Brush Script MT',cursive; font-size: 16px; color: #96CA45; padding: 10px 16px 0; display: block; }
+  .rvs-section .rvs-card-mobile .mob-role { font-family:'Haffer VF-TRIAL','Helvetica Neue',Arial,sans-serif; font-size: 11px; color: #fff; padding: 2px 16px 0; display: block; }
+  .rvs-section .rvs-card-mobile .mob-footer { display: flex; padding: 10px 16px 14px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+  .rvs-section .rvs-card-mobile .mob-date { font-family:'Haffer VF-TRIAL','Helvetica Neue',Arial,sans-serif; font-size: 10px; color: rgba(255,255,255,0.6); }
 
-    /* left country cards: compact */
-    .rvs-section .rvs-left { min-height: clamp(210px,85vw,290px); }
-    .rvs-section .rvs-country-grid { gap: 6px; padding: 12px 12px 6px; }
-    .rvs-section .rvs-ccard { padding: 10px 8px; gap: 5px; }
-    .rvs-section .rvs-ccard-map { width: 36px; height: 36px; }
-    .rvs-section .rvs-ccard-pct { font-size: 20px; }
-    .rvs-section .rvs-ccard-name { font-size: 10px; }
-
-    /* review card: flow layout instead of absolute children */
-    .rvs-section .rvs-card {
-      height: auto !important; min-height: 0 !important;
-      display: flex; flex-direction: column;
-      padding: 0 0 14px 0; overflow: hidden;
-    }
-    .rvs-section .rvs-deco {
-      position: relative; left: auto; top: auto;
-      padding-left: 14px; margin-bottom: 10px;
-    }
-    .rvs-section .rvs-avatar {
-      position: relative; left: auto; top: auto;
-      width: 48px; height: 48px; flex-shrink: 0;
-    }
-    .rvs-section .rvs-text {
-      position: relative; left: auto; top: auto; right: auto;
-      width: auto !important; height: auto !important;
-      max-height: none !important; text-align: left;
-      font-size: 12px; overflow: visible; padding: 0;
-    }
-    .rvs-section .rvs-mobile-top {
-      display: flex; align-items: flex-start;
-      gap: 10px; padding: 0 14px; margin-bottom: 10px;
-    }
-    .rvs-section .rvs-name {
-      position: relative; left: auto; top: auto;
-      padding: 0 14px; font-size: 15px;
-    }
-    .rvs-section .rvs-role {
-      position: relative; left: auto; top: auto;
-      padding: 2px 14px 0; font-size: 11px;
-      max-width: 100%; white-space: normal;
-    }
-    .rvs-section .rvs-footer-row {
-      display: flex; justify-content: space-between;
-      padding: 10px 14px 0;
-      border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px;
-    }
-    .rvs-section .rvs-date,
-    .rvs-section .rvs-time {
-      position: relative; left: auto; top: auto; right: auto; bottom: auto;
-      font-size: 10px;
-    }
-    .rvs-section .rvs-indicator { flex-direction: row; justify-content: center; gap: 8px; margin-top: 12px; }
-    .rvs-section .rvs-carousel-row { flex-direction: column; gap: 0; }
-    .rvs-section .rvs-right { padding: 12px 12px 16px; }
+  /* ── Mobile ≤ 767px ── */
+  @media (max-width: 767px) {
+    .rvs-section .rvs-outer { padding: 0 12px; }
+    .rvs-section .rvs-write-btn { position: relative !important; right: auto !important; top: auto !important; margin-bottom: 12px !important; display: inline-flex !important; }
+    .rvs-section .rvs-left { height: auto !important; min-height: 0 !important; }
+    .rvs-section .rvs-country-grid { gap: 8px !important; padding: 14px 14px 8px !important; }
+    .rvs-section .rvs-ccard { padding: 10px 8px !important; gap: 6px !important; }
+    .rvs-section .rvs-ccard-map { width: 40px !important; height: 40px !important; }
+    .rvs-section .rvs-ccard-pct { font-size: 22px !important; }
+    .rvs-section .rvs-ccard-name { font-size: 10px !important; }
+    .rvs-section .rvs-right { height: auto !important; overflow: visible !important; padding: 18px 14px 20px !important; }
+    .rvs-section .rvs-heading { position: relative !important; top: auto !important; left: auto !important; transform: none !important; font-size: 26px !important; white-space: normal !important; text-align: center !important; display: block !important; margin-bottom: 14px !important; }
+    .rvs-section .rvs-carousel-row { position: relative !important; top: auto !important; left: auto !important; right: auto !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; align-items: stretch !important; }
+    .rvs-section .rvs-indicator { flex-direction: row !important; justify-content: center !important; align-items: center !important; gap: 8px !important; }
+    /* hide desktop card, show mobile card */
+    .rvs-section .rvs-card-desktop { display: none !important; }
+    .rvs-section .rvs-card-mobile  { display: flex !important; }
   }
 
   /* ── Tiny ≤ 359px ── */
   @media (max-width: 359px) {
     .rvs-section .rvs-outer { padding: 0 10px; }
-    .rvs-section .rvs-heading { font-size: 20px; }
-    .rvs-section .rvs-ccard-pct { font-size: 17px; }
-    .rvs-section .rvs-ccard-map { width: 28px; height: 28px; }
+    .rvs-section .rvs-heading { font-size: 22px !important; }
+    .rvs-section .rvs-ccard-pct { font-size: 18px !important; }
+    .rvs-section .rvs-ccard-map { width: 32px !important; height: 32px !important; }
   }
 `;
 
@@ -510,6 +451,12 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     };
     if (!els.left || !els.right) return;
 
+    /* On mobile skip entrance animation entirely — just show everything */
+    if (window.innerWidth < 768) {
+      triggeredRef.current = true;
+      return;
+    }
+
     gsap.set(els.left,      { opacity: 0, x: -56 });
     gsap.set(els.right,     { opacity: 0, x:  56 });
     gsap.set(els.connect,   { opacity: 0, y: 18 });
@@ -523,10 +470,9 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     dotRefs.current.forEach((d) => d && gsap.set(d, { scale: 0, opacity: 0, y: 0 }));
     ccardRefs.current.forEach((c) => c && gsap.set(c, { opacity: 0, y: 22, scale: 0.88 }));
 
-    const io = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting || triggeredRef.current) return;
+    const trigger = () => {
+      if (triggeredRef.current) return;
       triggeredRef.current = true;
-      io.disconnect();
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
@@ -574,16 +520,25 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
           gsap.to(d, { y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.14 });
         });
       }, [], 0.9);
-    }, { threshold: 0.07 });
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) trigger();
+    }, { threshold: 0.01 });
 
     if (sectionRef.current) io.observe(sectionRef.current);
-    return () => { io.disconnect(); };
+
+    /* Fallback: if IO never fires (e.g. section already in view on load), trigger after 400ms */
+    const fallback = setTimeout(trigger, 400);
+
+    return () => { io.disconnect(); clearTimeout(fallback); };
   }, []);
 
   /* ── GSAP carousel: exit up-back, enter from below ── */
   const animateOut = useCallback((onDone: () => void) => {
     const card = cardRef.current;
-    if (!card) { onDone(); return; }
+    /* On mobile there is no desktop card to animate */
+    if (!card || window.innerWidth < 768) { onDone(); return; }
     gsap.to(card, {
       y: '-60%', opacity: 0, scale: 0.88,
       duration: 0.38, ease: 'power2.in',
@@ -596,7 +551,7 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
 
   const animateIn = useCallback(() => {
     const card = cardRef.current;
-    if (!card) return;
+    if (!card || window.innerWidth < 768) return;
     gsap.to(card, { y: '0%', opacity: 1, scale: 1, duration: 0.48, ease: 'back.out(1.3)' });
   }, []);
 
@@ -661,7 +616,15 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
     finally { setIsSubmitting(false); }
   };
 
-  const fmtDate = (s: string) => { try { return new Date(s).toLocaleDateString('en-GB'); } catch { return '24/06/2026'; } };
+  const fmtDate = (s: string) => {
+    if (!s) return '';
+    /* YYYY-MM-DD from date input — parse as local to avoid UTC off-by-one */
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      const [y, m, d] = s.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    try { return new Date(s).toLocaleDateString('en-GB'); } catch { return ''; }
+  };
   const getBg   = (n: string) => { const h = n.split('').reduce((a,c)=>a+c.charCodeAt(0),0); return `linear-gradient(135deg,hsl(${h%360},65%,65%),hsl(${(h+60)%360},65%,45%))`; };
   const getInit = (n: string) => n ? n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : 'S';
 
@@ -743,32 +706,46 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
 
             <div ref={carouselRef} className="rvs-carousel-row">
 
-              {/* clip wrapper — overflow:hidden keeps exit-up inside bounds */}
-              <div ref={cardClipRef} style={{ flex: '1 1 0', minWidth: 0, overflow: 'hidden', borderRadius: 12 }}>
+              {/* ── DESKTOP card (absolute-positioned children) ── */}
+              <div ref={cardClipRef} className="rvs-card-desktop" style={{ flex: '1 1 0', minWidth: 0, overflow: 'hidden', borderRadius: 12 }}>
                 <div ref={cardRef} className="rvs-card" style={{ width: '100%' }}>
                   <div className="rvs-deco">
                     <div ref={strip1Ref} className="rvs-deco-strip rvs-deco-white" />
                     <div ref={strip2Ref} className="rvs-deco-strip rvs-deco-green" />
                   </div>
-
-                  {/* Mobile top row: avatar + comment side by side */}
-                  <div className="rvs-mobile-top">
-                    <div className="rvs-avatar">
-                      {rev.studentImage
-                        ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
-                        : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
-                      }
-                    </div>
-                    <p className="rvs-text">&quot;{rev.comment}&quot;</p>
+                  <div className="rvs-avatar">
+                    {rev.studentImage
+                      ? <Image src={rev.studentImage} alt={rev.studentName} fill style={{objectFit:'cover'}} onError={e=>{(e.currentTarget as HTMLImageElement).style.visibility='hidden';}} />
+                      : <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl" style={{background:getBg(rev.studentName)}}>{getInit(rev.studentName)}</div>
+                    }
                   </div>
-
+                  <p className="rvs-text">&quot;{rev.comment}&quot;</p>
                   <div className="rvs-name">{rev.studentName}</div>
                   <div className="rvs-role">{rev.service || 'Verified Student'}</div>
+                  <div className="rvs-date">{fmtDate(rev.date || rev.createdAt)}</div>
+                </div>
+              </div>
 
-                  {/* Mobile footer row: date only */}
-                  <div className="rvs-footer-row">
-                    <div className="rvs-date">{fmtDate(rev.date || rev.createdAt)}</div>
+              {/* ── MOBILE card (flex column, no absolute children) ── */}
+              <div className="rvs-card-mobile">
+                <div className="mob-deco">
+                  <div className="mob-strip" style={{ background: '#fff' }} />
+                  <div className="mob-strip" style={{ background: '#96CA45' }} />
+                </div>
+                <div className="mob-top">
+                  <div className="mob-avatar">
+                    {rev.studentImage
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      ? <img src={rev.studentImage} alt={rev.studentName} style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}} />
+                      : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:16,background:getBg(rev.studentName),borderRadius:'50%'}}>{getInit(rev.studentName)}</div>
+                    }
                   </div>
+                  <p className="mob-comment">&quot;{rev.comment}&quot;</p>
+                </div>
+                <span className="mob-name">{rev.studentName}</span>
+                <span className="mob-role">{rev.service || 'Verified Student'}</span>
+                <div className="mob-footer">
+                  <span className="mob-date">{fmtDate(rev.date || rev.createdAt)}</span>
                 </div>
               </div>
 

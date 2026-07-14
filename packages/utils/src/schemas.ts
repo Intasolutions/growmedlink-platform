@@ -32,6 +32,7 @@ export const ServiceFeatureSchema = z.object({
 export const CategorySchema = z.object({
   name: z.string().min(2, 'Category name must be at least 2 characters long'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. immigration-prep)').optional().or(z.literal('')),
+  order: z.number().int().min(0).optional(),
 });
 
 export const ServiceSchema = z.object({
@@ -155,6 +156,7 @@ export const ReviewSchema = z.object({
   service: z.string().optional().or(z.literal('')),
   status: z.enum([REVIEW_STATUSES.PENDING, REVIEW_STATUSES.APPROVED, REVIEW_STATUSES.REJECTED]).default(REVIEW_STATUSES.PENDING),
   isFeatured: z.boolean().default(false),
+  date: z.string().optional().or(z.literal('')),
 });
 
 export const ReviewUpdateSchema = ReviewSchema.partial();

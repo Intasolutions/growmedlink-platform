@@ -253,7 +253,7 @@ export default function AdminCategoriesPage() {
                 {formError.slug && <p className="text-red-400 text-xs mt-1">{formError.slug[0]}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wide mb-2">Display Order <span className="normal-case font-normal text-gray-500">(1+ to show; 0 = hidden)</span></label>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wide mb-2">Display Order <span className="normal-case font-normal text-gray-500">(1, 2, 3… = sorted first; 0 = appears last)</span></label>
                 <input
                   type="number"
                   min={0}
