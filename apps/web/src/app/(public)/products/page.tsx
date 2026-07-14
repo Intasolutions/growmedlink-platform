@@ -563,13 +563,15 @@ export default function ProductsPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const sorted = [...data.data].sort((a: ICategory, b: ICategory) => {
-            const ao = a.order ?? 0, bo = b.order ?? 0;
-            if (ao === 0 && bo === 0) return 0;
-            if (ao === 0) return 1;
-            if (bo === 0) return -1;
-            return ao - bo;
-          });
+          const sorted = [...data.data]
+            .filter((c: ICategory) => c.isActive !== false)
+            .sort((a: ICategory, b: ICategory) => {
+              const ao = a.order ?? 0, bo = b.order ?? 0;
+              if (ao === 0 && bo === 0) return 0;
+              if (ao === 0) return 1;
+              if (bo === 0) return -1;
+              return ao - bo;
+            });
           setCategories(sorted);
         }
       })

@@ -66,7 +66,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    let { name, slug, order } = validationResult.data;
+    let { name, slug, order, isActive } = validationResult.data;
     if (!slug) {
       slug = slugify(name);
     }
@@ -91,7 +91,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    const category = new Category({ name, slug, order: order ?? 0 });
+    const category = new Category({ name, slug, order: order ?? 0, isActive: isActive ?? true });
     await category.save();
 
     res.status(201).json({
@@ -129,7 +129,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    let { name, slug, order } = validationResult.data;
+    let { name, slug, order, isActive } = validationResult.data;
     if (!slug) {
       slug = slugify(name);
     }
@@ -157,6 +157,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     category.name = name;
     category.slug = slug;
     if (order !== undefined) (category as any).order = order;
+    if (isActive !== undefined) (category as any).isActive = isActive;
     await category.save();
 
     res.status(200).json({

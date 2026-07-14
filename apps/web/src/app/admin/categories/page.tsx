@@ -20,6 +20,7 @@ export default function AdminCategoriesPage() {
   const [formName, setFormName] = useState<string>('');
   const [formSlug, setFormSlug] = useState<string>('');
   const [formOrder, setFormOrder] = useState<number>(0);
+  const [formIsActive, setFormIsActive] = useState<boolean>(true);
   const [formError, setFormError] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -56,6 +57,7 @@ export default function AdminCategoriesPage() {
     setFormName('');
     setFormSlug('');
     setFormOrder(0);
+    setFormIsActive(true);
     setFormError({});
     setIsModalOpen(true);
   };
@@ -65,6 +67,7 @@ export default function AdminCategoriesPage() {
     setFormName(cat.name);
     setFormSlug(cat.slug);
     setFormOrder(cat.order ?? 0);
+    setFormIsActive(cat.isActive !== false);
     setFormError({});
     setIsModalOpen(true);
   };
@@ -79,7 +82,7 @@ export default function AdminCategoriesPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formName, slug: formSlug, order: formOrder }),
+        body: JSON.stringify({ name: formName, slug: formSlug, order: formOrder, isActive: formIsActive }),
         credentials: 'include',
       });
       const data = await res.json();
@@ -191,6 +194,7 @@ export default function AdminCategoriesPage() {
                   <th className="py-4 px-6">Category Name</th>
                   <th className="py-4 px-6">Slug Prefix</th>
                   <th className="py-4 px-6">Order</th>
+                  <th className="py-4 px-6">Status</th>
                   <th className="py-4 px-6">Created Date</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
@@ -201,6 +205,11 @@ export default function AdminCategoriesPage() {
                     <td className="py-4 px-6 font-semibold text-white">{cat.name}</td>
                     <td className="py-4 px-6 font-mono text-xs text-gray-400">/{cat.slug}</td>
                     <td className="py-4 px-6 text-gray-400 font-mono text-sm">{cat.order ?? 0}</td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cat.isActive !== false ? 'bg-green-500/15 text-green-400 border border-green-500/20' : 'bg-red-500/15 text-red-400 border border-red-500/20'}`}>
+                        {cat.isActive !== false ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
                     <td className="py-4 px-6 text-gray-400 font-light">
                       {new Date(cat.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
@@ -262,6 +271,19 @@ export default function AdminCategoriesPage() {
                   placeholder="e.g. 1, 2, 3..."
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-secondary focus:outline-none transition-colors"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wide mb-3">Status</label>
+                <button
+                  type="button"
+                  onClick={() => setFormIsActive(v => !v)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-all w-full ${formIsActive ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}
+                >
+                  <span className={`w-9 h-5 rounded-full relative flex-shrink-0 transition-colors ${formIsActive ? 'bg-green-500' : 'bg-gray-600'}`}>
+                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${formIsActive ? 'left-[18px]' : 'left-0.5'}`} />
+                  </span>
+                  {formIsActive ? 'Active — visible in product filters' : 'Inactive — hidden from product filters'}
+                </button>
               </div>
               <div className="flex gap-3 justify-end pt-4 border-t border-white/5">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold rounded-lg border border-white/10 transition-colors">

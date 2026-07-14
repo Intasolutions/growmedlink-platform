@@ -33,6 +33,7 @@ export const CategorySchema = z.object({
   name: z.string().min(2, 'Category name must be at least 2 characters long'),
   slug: z.string().regex(slugRegex, 'Slug must be URL-safe (e.g. immigration-prep)').optional().or(z.literal('')),
   order: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
 });
 
 export const ServiceSchema = z.object({
