@@ -44,8 +44,6 @@ const ARCH_ITEMS = [
   { src:'/Nurses/covid-19-social-distancing-and-coronavirus-pandem-2026-03-19-23-10-09-utc.jpg',            border:GREEN },
   { src:'/Nurses/female-doctor-thinking-with-stethoscope-on-yellow-2026-01-07-01-46-35-utc.jpg',            border:DARK  },
   { src:'/Nurses/medical-student-smiling-at-the-camera-at-the-unive-2026-04-13-23-28-54-utc.jpg',           border:GREEN },
-  { src:'/Nurses/portrait-of-a-woman-doctor-in-blue-scrubs-2026-03-24-15-23-35-utc.jpg',                   border:DARK  },
-  { src:'/Nurses/portrait-of-mature-smiling-female-doctor-wearing-s-2026-03-10-04-01-46-utc.jpg',           border:GREEN },
   { src:'/Nurses/portrait-of-smiling-female-doctor-wearing-scrubs-i-2026-03-10-03-22-38-utc.jpg',           border:DARK  },
   { src:'/Nurses/smiling-healthcare-professional-with-medical-team-2026-03-25-08-15-33-utc.jpg',            border:GREEN },
   { src:'/Nurses/smiling-medical-professional-in-blue-uniform-at-wo-2026-03-25-08-39-54-utc.jpg',           border:DARK  },
@@ -1215,7 +1213,7 @@ function ShelfCollage({ vis }: { vis: boolean }) {
             position: 'relative',
           }}
         >
-          <Image src="/about/3.jpg" alt="" fill style={{ objectFit: 'cover' }}
+          <Image src="/Nurses/nurse-woman-or-arms-crossed-with-portrait-at-hosp-2026-01-09-10-24-59-utc.jpg" alt="" fill style={{ objectFit: 'cover', objectPosition: 'center top' }}
             onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
         </div>
       </div>
@@ -1290,7 +1288,7 @@ function ShelfCollage({ vis }: { vis: boolean }) {
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
         }}
       >
-        <Image src="/about/7.jpg" alt="" fill style={{ objectFit: 'cover' }}
+        <Image src="/Nurses/young-confident-nurse-smiling-in-hospital-corridor-2026-03-25-07-31-28-utc.jpg" alt="" fill style={{ objectFit: 'cover', objectPosition: 'center top' }}
           onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }} />
         {/* subtle green tint on this card too */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(150,202,69,0.28)', zIndex: 2 }} />
@@ -1745,7 +1743,7 @@ function CertHoverCard() {
   const wrapRef   = useRef<HTMLDivElement>(null);
   const cardRef   = useRef<HTMLDivElement>(null);
   const circleRef = useRef<HTMLDivElement>(null);
-  const hoveredRef = useRef(false);
+  const expandedRef = useRef(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tlRef = useRef<any>(null);
 
@@ -1756,62 +1754,35 @@ function CertHoverCard() {
     });
   }, []);
 
-  const onEnter = async () => {
-    if (hoveredRef.current) return;
-    hoveredRef.current = true;
-    const { gsap } = await import('gsap');
-    if (tlRef.current) tlRef.current.kill();
-    const tl = gsap.timeline();
-    tlRef.current = tl;
-
-    /* scale card up — same ratio, tilt */
-    tl.to(cardRef.current, {
-      width: CARD_LG_W,
-      height: CARD_LG_H,
-      rotation: -8,
-      borderRadius: 24,
-      boxShadow: '0 28px 72px rgba(0,0,0,0.26)',
-      duration: 0.62, ease: 'power3.out',
-    }, 0);
-
-    /* green circle blooms from behind bottom-right */
-    tl.to(circleRef.current, {
-      scale: 1, opacity: 1,
-      duration: 0.55, ease: 'back.out(1.3)',
-    }, 0.08);
-  };
-
-  const onLeave = async () => {
-    if (!hoveredRef.current) return;
-    hoveredRef.current = false;
-    const { gsap } = await import('gsap');
-    if (tlRef.current) tlRef.current.kill();
-    const tl = gsap.timeline();
-    tlRef.current = tl;
-
-    /* circle shrinks first */
-    tl.to(circleRef.current, {
-      scale: 0, opacity: 0,
-      duration: 0.3, ease: 'power2.in',
-    }, 0);
-
-    /* card back to small */
-    tl.to(cardRef.current, {
-      width: CARD_SM_W,
-      height: CARD_SM_H,
-      rotation: 0,
-      borderRadius: 14,
-      boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
-      duration: 0.48, ease: 'power3.inOut',
-    }, 0.06);
-  };
+  /* scroll-triggered expand */
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(async ([e]) => {
+      if (!e.isIntersecting || expandedRef.current) return;
+      expandedRef.current = true;
+      io.disconnect();
+      const { gsap } = await import('gsap');
+      if (tlRef.current) tlRef.current.kill();
+      const tl = gsap.timeline();
+      tlRef.current = tl;
+      tl.to(cardRef.current, {
+        width: CARD_LG_W, height: CARD_LG_H, rotation: -8,
+        borderRadius: 24, boxShadow: '0 28px 72px rgba(0,0,0,0.26)',
+        duration: 0.62, ease: 'power3.out',
+      }, 0);
+      tl.to(circleRef.current, {
+        scale: 1, opacity: 1, duration: 0.55, ease: 'back.out(1.3)',
+      }, 0.08);
+    }, { threshold: 0.5 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    /* outer wrapper reserves space so surrounding layout never jumps on hover */
+    /* outer wrapper reserves space so surrounding layout never jumps */
     <div
       ref={wrapRef}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
       className="abt-cert-hover-wrap"
       style={{
         position: 'relative',

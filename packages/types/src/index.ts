@@ -32,6 +32,7 @@ export interface ICategory {
   _id: string;
   name: string;
   slug: string;
+  order?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -194,6 +195,7 @@ export interface IReview {
   service?: string;
   status: ReviewStatus;
   isFeatured: boolean;
+  date?: string;
   isDeleted?: boolean;
   deletedAt?: string;
   createdAt: string;

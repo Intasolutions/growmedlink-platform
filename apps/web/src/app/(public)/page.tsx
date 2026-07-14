@@ -26,8 +26,14 @@ export default async function Home() {
   ]);
 
   const featuredServices = allServices.slice(0, 3);
-  /* Sort products by order field for display */
-  const sortedProducts = [...allProducts].sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+  /* Sort products: order ≥ 1 first (ascending), order = 0 last */
+  const sortedProducts = [...allProducts].sort((a: any, b: any) => {
+    const ao = a.order ?? 0, bo = b.order ?? 0;
+    if (ao === 0 && bo === 0) return 0;
+    if (ao === 0) return 1;
+    if (bo === 0) return -1;
+    return ao - bo;
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -41,8 +47,8 @@ export default async function Home() {
       {/* Why Pre-Nursing Matters Section */}
       <PreNursingMatters products={sortedProducts} />
 
-      {/* Our Services Carousel (shows products, links to product detail) */}
-      <ServicesCarouselSection products={sortedProducts} />
+      {/* Our Services Carousel */}
+      <ServicesCarouselSection services={allServices} />
 
       {/* Featured Services Interactive Section (products carousel) */}
       <FeaturedServices services={featuredServices} />

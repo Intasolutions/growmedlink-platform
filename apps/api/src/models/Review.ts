@@ -42,6 +42,11 @@ const reviewSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    date: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,

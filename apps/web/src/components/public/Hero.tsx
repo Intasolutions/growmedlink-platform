@@ -581,7 +581,7 @@ export default function Hero() {
 
               {/* CTA button */}
               <Link
-                href="/products"
+                href="/products#products"
                 className="hover:brightness-90 active:scale-95 transition-all"
                 style={{
                   width: 'clamp(170px,36vw,228px)',

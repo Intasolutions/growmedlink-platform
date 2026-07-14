@@ -7,8 +7,7 @@ import gsap from 'gsap';
 
 const FS = "'Great Day Personal Use','Brush Script MT',cursive";
 
-export default function ServicesCarouselSection({ products }: { products: any[] }) {
-  const services = products; // internal alias — carousel now shows products
+export default function ServicesCarouselSection({ services }: { services: any[] }) {
   const sectionRef   = useRef<HTMLElement>(null);
   const headingRef   = useRef<HTMLHeadingElement>(null);
   const arrowWrapRef = useRef<HTMLDivElement>(null);
@@ -21,7 +20,7 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
   const cardRefs     = useRef<(HTMLDivElement | null)[]>([]);
   const triggered    = useRef(false);
 
-  const items   = services && services.length > 0 ? services : Array.from({ length: 4 });
+  const items = services ?? [];
   const numDots = 10;
 
   /* ── Progress bar + dot wave on carousel scroll ── */
@@ -313,11 +312,9 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
               }}
             >
               {items.map((service, idx) => {
-                const img = (!service || !service.title)
-                  ? '/pre-nursing-photo.png'
-                  : (service.image && typeof service.image === 'object'
-                      ? service.image.secureUrl
-                      : service.image) || '/pre-nursing-photo.png';
+                const imgSrc = service?.image && typeof service.image === 'object'
+                  ? service.image.secureUrl
+                  : (typeof service?.image === 'string' ? service.image : '') || '/pre-nursing-photo.png';
 
                 return (
                   <div
@@ -326,15 +323,15 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
                     style={{
                       flexShrink: 0,
                       width: 'clamp(260px,82vw,320px)',
-                      height: 'clamp(380px,70vw,420px)',
                       scrollSnapAlign: 'start',
+                      alignSelf: 'flex-start',
                     }}
                   >
                     <ServiceCard
-                      href={`/products/${service?.slug || '#'}`}
-                      img={img}
-                      title={service?.name || service?.title || 'NCLEX Exam application process'}
-                      description={service?.description || 'Lorem Ipsum Dolor Sit Amet Consectetur. Purus In In Fames Sit Ac Vitae.'}
+                      href={`/services/${service?.slug || '#'}`}
+                      img={imgSrc}
+                      title={service?.title || service?.name || 'Our Service'}
+                      description={service?.description || ''}
                     />
                   </div>
                 );
@@ -421,75 +418,43 @@ function ServiceCard({
       ref={cardRef}
       href={href}
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'clamp(380px,70vw,420px)',
+        display: 'block',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         textDecoration: 'none',
         willChange: 'transform',
         transformOrigin: 'center center',
+        backgroundColor: '#fff',
       }}
     >
-      {/* Top: clean image at rest, green overlay + button on hover */}
-      <div style={{
-        position: 'relative',
-        flex: '0 0 58%',
-        backgroundColor: '#111',
-        overflow: 'hidden',
-      }}>
-        {/* Clean image — no blend mode, full opacity */}
-        <div
-          ref={imgRef}
-          style={{
-            position: 'absolute', inset: 0,
-            willChange: 'transform',
-            transformOrigin: 'center center',
-          }}
-        >
-          <Image
-            src={img}
-            alt={title}
-            fill
-            sizes="(max-width: 767px) 82vw, 320px"
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-          />
-        </div>
-
-        {/* Hover overlay — opacity:0 at rest, GSAP fades to 1 on hover */}
+      {/* Image — full width, natural height, zero padding, never cropped */}
+      <div ref={imgRef} style={{ position: 'relative', width: '100%', willChange: 'transform' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={img}
+          alt={title}
+          style={{ display: 'block', width: '100%', height: 'auto' }}
+          loading="lazy"
+        />
+        {/* Hover overlay */}
         <div
           ref={overlayRef}
           style={{
             position: 'absolute', inset: 0,
             backgroundColor: 'rgba(120,175,35,0.78)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 2, pointerEvents: 'none',
-            opacity: 0,
+            zIndex: 2, pointerEvents: 'none', opacity: 0,
           }}
         >
-          {/* Top-right icon inside overlay */}
-          <div
-            style={{
-              position: 'absolute', top: '14px', right: '14px',
-              width: '48px', height: '48px',
-              pointerEvents: 'none',
-            }}
-          >
-            <Image src="/service-hover-icon.png" alt="" fill style={{ objectFit: 'contain' }} />
-          </div>
           <div
             ref={btnRef}
             style={{
-              backgroundColor: '#fff',
-              color: '#111',
-              fontWeight: 700,
+              backgroundColor: '#fff', color: '#111', fontWeight: 700,
               fontSize: 'clamp(13px,1.2vw,17px)',
               padding: 'clamp(8px,0.9vw,12px) clamp(22px,2.5vw,36px)',
-              borderRadius: '8px',
-              letterSpacing: '0.01em',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              whiteSpace: 'nowrap',
+              borderRadius: '8px', letterSpacing: '0.01em',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', whiteSpace: 'nowrap',
             }}
           >
             View Details
@@ -497,33 +462,25 @@ function ServiceCard({
         </div>
       </div>
 
-      {/* Bottom: dark text area */}
+      {/* Text area */}
       <div style={{
         backgroundColor: '#2a2a2a',
-        padding: 'clamp(14px,1.6vw,22px)',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
+        padding: 'clamp(12px,1.4vw,20px)',
       }}>
         <h4 style={{
-          color: '#96CA45',
-          fontWeight: 600,
-          fontSize: 'clamp(14px,1.4vw,20px)',
-          marginBottom: 'clamp(6px,0.7vw,10px)',
-          lineHeight: 1.25,
-          letterSpacing: '-0.01em',
+          color: '#96CA45', fontWeight: 600,
+          fontSize: 'clamp(13px,1.3vw,18px)',
+          marginBottom: 'clamp(4px,0.5vw,8px)',
+          lineHeight: 1.25, letterSpacing: '-0.01em',
         }}>
           {title}
         </h4>
         <p style={{
           color: 'rgba(255,255,255,0.65)',
-          fontSize: 'clamp(11px,0.9vw,14px)',
-          lineHeight: 1.6,
-          margin: 0,
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
+          fontSize: 'clamp(11px,0.9vw,13px)',
+          lineHeight: 1.6, margin: 0,
+          display: '-webkit-box', WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical', overflow: 'hidden',
         }}>
           {description}
         </p>
@@ -557,7 +514,7 @@ function ExploreBtn() {
   return (
     <Link
       ref={ref}
-      href="/services"
+      href="/services#services-grid"
       style={{
         backgroundColor: '#96CA45',
         color: '#111',

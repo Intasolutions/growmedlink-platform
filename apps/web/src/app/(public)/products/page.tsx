@@ -473,28 +473,34 @@ function ProductCard({ product, delay }: { product: ProductItem; delay: number }
       className={`prd-rv ${reveal.visible ? 'prd-in' : ''}`}
       style={{ transitionDelay: `${delay}s` }}
     >
-      <Link href={`/products/${product.slug}`} className="prd-card block rounded-2xl bg-white p-2.5 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
-        <div className="prd-card-img relative h-[190px] w-full rounded-lg bg-[#eee]">
-          <div className="prd-card-img-inner absolute inset-0">
-            {img ? (
-              <Image src={img} alt={product.name} fill sizes="420px" style={{ objectFit: 'cover', borderRadius: 8 }} />
-            ) : (
-              <div className="h-full w-full rounded-lg bg-[#ddd]" />
-            )}
-          </div>
+      <Link href={`/products/${product.slug}`} className="prd-card block rounded-2xl bg-white shadow-[0_2px_24px_rgba(0,0,0,0.06)] overflow-hidden" style={{ textDecoration: 'none' }}>
+        {/* Full-width image — natural height, no padding, no crop */}
+        <div className="prd-card-img w-full">
+          {img ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={img}
+              alt={product.name}
+              style={{ display: 'block', width: '100%', height: 'auto' }}
+              loading="lazy"
+            />
+          ) : (
+            <div style={{ width: '100%', aspectRatio: '16/9', background: '#ddd' }} />
+          )}
         </div>
-        <div className="relative px-2 pb-2 pt-4">
-          <h3 className="text-lg font-medium text-[#000]" style={{ fontFamily: FM }}>
+        {/* Text row below image */}
+        <div className="relative px-3 pb-3 pt-3">
+          <h3 className="text-base font-medium text-[#000] pr-10" style={{ fontFamily: FM }}>
             {product.name}
           </h3>
           <p
-            className="mt-2 max-w-[85%] text-sm leading-relaxed text-[#252525]"
+            className="mt-1 text-sm leading-relaxed text-[#252525]"
             style={{ fontFamily: FH, letterSpacing: '0.01em', textTransform: 'capitalize' }}
           >
-            ₹{product.fees} &middot; {product.duration}
+            <strong>₹{product.fees}</strong> &middot; <strong>{product.duration}</strong>
           </p>
-          <div className="prd-card-arrow absolute bottom-0 right-0 h-[42px] w-[42px] rounded-lg bg-white shadow-md">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="m-auto mt-[11px]">
+          <div className="prd-card-arrow absolute bottom-0 right-0 h-[38px] w-[38px] rounded-lg bg-white shadow-md">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="m-auto mt-[10px]">
               <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
@@ -532,7 +538,17 @@ export default function ProductsPage() {
   useEffect(() => {
     // Fetch products
     getProducts()
-      .then((data: any) => setProducts(Array.isArray(data) ? data : data?.data ?? []))
+      .then((data: any) => {
+        const raw: ProductItem[] = Array.isArray(data) ? data : (data?.data ?? []);
+        const ordered = raw.sort((a: ProductItem, b: ProductItem) => {
+          const ao = a.order ?? 0, bo = b.order ?? 0;
+          if (ao === 0 && bo === 0) return 0;
+          if (ao === 0) return 1;
+          if (bo === 0) return -1;
+          return ao - bo;
+        });
+        setProducts(ordered);
+      })
       .catch((err: unknown) => console.error('[ProductsPage] Load products error:', err));
 
     // Fetch categories
@@ -540,7 +556,14 @@ export default function ProductsPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setCategories(data.data);
+          const sorted = [...data.data].sort((a: ICategory, b: ICategory) => {
+            const ao = a.order ?? 0, bo = b.order ?? 0;
+            if (ao === 0 && bo === 0) return 0;
+            if (ao === 0) return 1;
+            if (bo === 0) return -1;
+            return ao - bo;
+          });
+          setCategories(sorted);
         }
       })
       .catch(err => console.error('[ProductsPage] Load categories error:', err));

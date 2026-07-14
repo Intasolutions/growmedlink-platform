@@ -216,7 +216,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
             {/* Arrow button — GSAP-revealed on hover */}
             <Link
               ref={arrowBtnRef}
-              href="/services"
+              href="/services#services-grid"
               style={{
                 position: 'absolute', top: '20px', right: '20px', zIndex: 40,
                 width: '42px', height: '42px', borderRadius: '12px',

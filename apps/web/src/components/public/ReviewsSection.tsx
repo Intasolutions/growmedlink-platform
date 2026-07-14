@@ -14,6 +14,7 @@ interface ReviewItem {
   rating: number;
   comment: string;
   service?: string | null;
+  date?: string;
   createdAt: string;
 }
 
@@ -661,7 +662,6 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
   };
 
   const fmtDate = (s: string) => { try { return new Date(s).toLocaleDateString('en-GB'); } catch { return '24/06/2026'; } };
-  const fmtTime = (s: string) => { try { return new Date(s).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}); } catch { return '10:00 AM'; } };
   const getBg   = (n: string) => { const h = n.split('').reduce((a,c)=>a+c.charCodeAt(0),0); return `linear-gradient(135deg,hsl(${h%360},65%,65%),hsl(${(h+60)%360},65%,45%))`; };
   const getInit = (n: string) => n ? n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : 'S';
 
@@ -765,10 +765,9 @@ export default function ReviewsSection({ initialReviews = [] }: { initialReviews
                   <div className="rvs-name">{rev.studentName}</div>
                   <div className="rvs-role">{rev.service || 'Verified Student'}</div>
 
-                  {/* Mobile footer row: date + time */}
+                  {/* Mobile footer row: date only */}
                   <div className="rvs-footer-row">
-                    <div className="rvs-date">{fmtDate(rev.createdAt)}</div>
-                    <div className="rvs-time">{fmtTime(rev.createdAt)}</div>
+                    <div className="rvs-date">{fmtDate(rev.date || rev.createdAt)}</div>
                   </div>
                 </div>
               </div>

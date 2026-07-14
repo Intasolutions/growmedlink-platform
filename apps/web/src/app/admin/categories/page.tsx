@@ -19,6 +19,7 @@ export default function AdminCategoriesPage() {
   // Form State
   const [formName, setFormName] = useState<string>('');
   const [formSlug, setFormSlug] = useState<string>('');
+  const [formOrder, setFormOrder] = useState<number>(0);
   const [formError, setFormError] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -54,6 +55,7 @@ export default function AdminCategoriesPage() {
     setEditingCategory(null);
     setFormName('');
     setFormSlug('');
+    setFormOrder(0);
     setFormError({});
     setIsModalOpen(true);
   };
@@ -62,6 +64,7 @@ export default function AdminCategoriesPage() {
     setEditingCategory(cat);
     setFormName(cat.name);
     setFormSlug(cat.slug);
+    setFormOrder(cat.order ?? 0);
     setFormError({});
     setIsModalOpen(true);
   };
@@ -76,7 +79,7 @@ export default function AdminCategoriesPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formName, slug: formSlug }),
+        body: JSON.stringify({ name: formName, slug: formSlug, order: formOrder }),
         credentials: 'include',
       });
       const data = await res.json();
@@ -187,6 +190,7 @@ export default function AdminCategoriesPage() {
                 <tr className="border-b border-white/5 bg-[#020C1B]/40 text-xs font-bold text-gray-300 uppercase tracking-widest">
                   <th className="py-4 px-6">Category Name</th>
                   <th className="py-4 px-6">Slug Prefix</th>
+                  <th className="py-4 px-6">Order</th>
                   <th className="py-4 px-6">Created Date</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
@@ -196,6 +200,7 @@ export default function AdminCategoriesPage() {
                   <tr key={cat._id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-4 px-6 font-semibold text-white">{cat.name}</td>
                     <td className="py-4 px-6 font-mono text-xs text-gray-400">/{cat.slug}</td>
+                    <td className="py-4 px-6 text-gray-400 font-mono text-sm">{cat.order ?? 0}</td>
                     <td className="py-4 px-6 text-gray-400 font-light">
                       {new Date(cat.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
@@ -246,6 +251,17 @@ export default function AdminCategoriesPage() {
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-secondary focus:outline-none transition-colors"
                 />
                 {formError.slug && <p className="text-red-400 text-xs mt-1">{formError.slug[0]}</p>}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wide mb-2">Display Order <span className="normal-case font-normal text-gray-500">(1+ to show; 0 = hidden)</span></label>
+                <input
+                  type="number"
+                  min={0}
+                  value={formOrder}
+                  onChange={e => setFormOrder(Number(e.target.value))}
+                  placeholder="e.g. 1, 2, 3..."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-secondary focus:outline-none transition-colors"
+                />
               </div>
               <div className="flex gap-3 justify-end pt-4 border-t border-white/5">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold rounded-lg border border-white/10 transition-colors">

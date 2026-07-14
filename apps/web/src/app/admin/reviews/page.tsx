@@ -32,6 +32,7 @@ interface ReviewItem {
   service?: string | null;
   status: string;
   isFeatured: boolean;
+  date?: string;
   createdAt: string;
 }
 
@@ -55,6 +56,7 @@ export default function AdminReviewsPage() {
     service: '',
     status: REVIEW_STATUSES.PENDING as string,
     isFeatured: false,
+    date: '',
   });
   const [studentImage, setStudentImage] = useState('');
   const [studentImageMedia, setStudentImageMedia] = useState<IMedia | null>(null);
@@ -200,6 +202,7 @@ export default function AdminReviewsPage() {
         service: review.service || '',
         status: review.status,
         isFeatured: review.isFeatured,
+        date: review.date || '',
       });
       setStudentImage(review.studentImage || '');
       setStudentImageMedia(review.studentImage ? { secureUrl: review.studentImage, filename: 'photo' } as IMedia : null);
@@ -211,6 +214,7 @@ export default function AdminReviewsPage() {
         service: '',
         status: REVIEW_STATUSES.PENDING as string,
         isFeatured: false,
+        date: '',
       });
       setStudentImage('');
       setStudentImageMedia(null);
@@ -248,6 +252,7 @@ export default function AdminReviewsPage() {
         service: formData.service || undefined,
         status: formData.status,
         isFeatured: formData.isFeatured,
+        date: formData.date || undefined,
       };
 
       const url = editingReview 
@@ -684,6 +689,21 @@ export default function AdminReviewsPage() {
                   value={formData.service}
                   onChange={handleInputChange}
                   placeholder="e.g. IELTS Coaching, Student Visa Pathway..."
+                  className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-secondary font-sans"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Review Date */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  Review Date <span className="text-gray-600 normal-case font-normal">(optional — overrides submitted date)</span>
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
                   className="w-full bg-[#020C1B] border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-secondary font-sans"
                   disabled={isSubmitting}
                 />

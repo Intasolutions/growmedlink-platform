@@ -34,6 +34,7 @@ interface Props { products?: any[] }
 export default function PreNursingMatters({ products = [] }: Props) {
   const sunburstRef  = useRef<HTMLDivElement>(null);
   const cardEls      = useRef<(HTMLDivElement | null)[]>([]);
+  const cardStageRef = useRef<HTMLDivElement>(null);
   /* refs for the centre card's animated layers */
   const overlayRef   = useRef<HTMLDivElement>(null);
   const overlayTxtRef = useRef<HTMLDivElement>(null);
@@ -42,8 +43,14 @@ export default function PreNursingMatters({ products = [] }: Props) {
   const revealedRef  = useRef(false);
   const fannedRef    = useRef(false);
 
-  /* Sort by order field, then take images */
-  const sortedProducts = [...products].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  /* Sort by order field (≥1 only), then take images */
+  const sortedProducts = [...products].sort((a, b) => {
+    const ao = a.order ?? 0, bo = b.order ?? 0;
+    if (ao === 0 && bo === 0) return 0;
+    if (ao === 0) return 1;
+    if (bo === 0) return -1;
+    return ao - bo;
+  });
   const centreImg = getProductImage(sortedProducts[0]) || '/pre-nursing-photo.png';
   const leftImg   = getProductImage(sortedProducts[1]) || FALLBACK[0];
   const rightImg  = getProductImage(sortedProducts[2]) || FALLBACK[1];
@@ -152,6 +159,18 @@ export default function PreNursingMatters({ products = [] }: Props) {
     });
   };
 
+  /* ── scroll-triggered fan-out (replaces hover trigger) ── */
+  useEffect(() => {
+    const el = cardStageRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) fanOut();
+    }, { threshold: 0.45 });
+    io.observe(el);
+    return () => io.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /* card size — same for all three so they stack perfectly */
   const cardStyle: React.CSSProperties = {
     width:  'clamp(180px,44vw,460px)',
@@ -208,17 +227,14 @@ export default function PreNursingMatters({ products = [] }: Props) {
 
         {/* ── card fan stage ── */}
         <div
-          className="relative flex items-center justify-center cursor-pointer select-none"
+          ref={cardStageRef}
+          className="relative flex items-center justify-center select-none"
           style={{
             width: '100%',
             maxWidth: 'clamp(320px,80vw,900px)',
             height: 'clamp(220px,40vw,460px)',
             marginBottom: 'clamp(16px,3vw,40px)',
           }}
-          onMouseEnter={fanOut}
-          onMouseLeave={fanIn}
-          onTouchStart={fanOut}
-          onTouchEnd={fanIn}
         >
           {/* watermarks */}
           <span
@@ -268,7 +284,7 @@ export default function PreNursingMatters({ products = [] }: Props) {
                 Starts Here.
               </p>
               <Link
-                href="/products"
+                href="/products#products"
                 style={{
                   background: '#fff',
                   color: '#252525',
