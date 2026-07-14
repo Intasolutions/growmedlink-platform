@@ -153,69 +153,99 @@ const STYLES = `
 }
 .abt-ms-img.abt-in .abt-ms-img-inner { transform: scale(1); }
 
-/* ══ WhySection-style BACKGROUND CARD ══════════════════════════════════ */
-.abt-bg-card {
-  opacity: 0;
-  transform: scale(0.96);
-  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.22,.68,0,1.1);
+/* ══ Background section ══════════════════════════════════════════════ */
+.abt-bg-section { padding: clamp(36px,6vw,60px) clamp(20px,4vw,40px); background:#fff; overflow:hidden; }
+.abt-bg-pill {
+  background: #F0F0F0;
+  border-radius: 999px;
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow: hidden;
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
 }
-.abt-bg-card.abt-bg-in { opacity: 1; transform: scale(1); }
-
-/* parallax helpers — set via JS scroll handler */
-.abt-bg-par-img {
-  transform: translateY(calc(var(--par,0) * -0.045px));
-  transition: transform 0.08s linear;
-  will-change: transform;
+.abt-bg-grid2 {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: stretch;
 }
-.abt-bg-par-bkt {
-  transform: translateY(calc(var(--par,0) * 0.022px));
-  transition: transform 0.08s linear;
-  will-change: transform;
+.abt-bg-text-col {
+  flex: 1;
+  min-width: 0;
+  padding: clamp(32px,4.5vw,64px) clamp(24px,3.5vw,52px) clamp(32px,4.5vw,64px) clamp(32px,4vw,60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-
-/* image wipe overlay (scaleX left→right, collapses to 0 from right edge) */
-.abt-bg-img-wrap { position:relative; overflow:hidden; }
-.abt-bg-img-wrap::after {
-  content:''; position:absolute; inset:0; z-index:3;
-  background:#F0F0F0;
-  transform-origin: right center;
-  transform: scaleX(1);
-  transition: transform 1.2s cubic-bezier(0.77,0,0.175,1) 0.1s;
-  will-change: transform;
+.abt-bg-img-col2 {
+  flex-shrink: 0;
+  width: clamp(200px, 40vw, 460px);
+  position: relative;
+  align-self: stretch;
 }
-.abt-bg-img-wrap.abt-bg-in::after { transform: scaleX(0); }
-
-/* Ken Burns zoom-out */
-.abt-bg-img-inner {
-  transform: scale(1.1);
-  transition: transform 1.8s cubic-bezier(.22,.68,0,1.05) 0.1s;
-  will-change: transform;
-  position:absolute; inset:0;
+.abt-bg-dshape {
+  width: 100%;
+  height: 100%;
+  min-height: clamp(280px, 45vw, 560px);
+  border-radius: 9999px 9999px 0 0;
+  overflow: hidden;
+  position: relative;
+  background: #bbb;
+  will-change: transform, clip-path;
 }
-.abt-bg-img-wrap.abt-bg-in .abt-bg-img-inner { transform: scale(1); }
-
-/* bracket spring entrance (from scale 0 at top-right corner) */
-.abt-bkt-outer {
+.abt-bg-bkt-wrap {
   position: absolute;
-  transform: scale(0);
-  transform-origin: top right;
-  will-change: transform;
+  right: -10px;
+  bottom: 16px;
+  width: clamp(80px,12vw,160px);
+  height: clamp(80px,12vw,160px);
+  pointer-events: none;
 }
-.abt-bkt-outer.abt-bg-in {
-  transform: scale(1);
-  transition: transform 0.7s cubic-bezier(0.34,1.56,0.64,1) var(--bd,0s);
+.abt-bg-bkt-wrap > div { will-change: transform; }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .abt-bg-pill { border-radius: 80px; }
+  .abt-bg-img-col2 { width: clamp(200px, 42vw, 380px); }
+  .abt-bg-dshape { min-height: clamp(260px, 42vw, 480px); }
 }
-/* float animation on inner (separate element so it does not fight transition) */
-.abt-bkt-inner {
-  animation-name: abt-bktfl;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-duration: var(--bfd, 3.4s);
-  animation-delay: var(--bfdel, 1.2s);
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .abt-bg-section { padding: 32px 16px; }
+  .abt-bg-pill { border-radius: 32px; overflow: hidden; }
+  .abt-bg-grid2 { flex-direction: column-reverse; }
+  .abt-bg-text-col { padding: 28px 24px 32px; }
+  .abt-bg-img-col2 { width: 100%; align-self: unset; }
+  .abt-bg-dshape {
+    height: 260px;
+    min-height: unset;
+    border-radius: 0;
+  }
+  .abt-bg-bkt-wrap { display: none; }
 }
-@keyframes abt-bktfl {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-5px); }
+
+@media (max-width: 480px) {
+  .abt-bg-section { padding: 24px 12px; }
+  .abt-bg-pill { border-radius: 24px; }
+  .abt-bg-text-col { padding: 22px 20px 28px; }
+  .abt-bg-dshape { height: 220px; }
+}
+
+@media (max-width: 768px) {
+  .abt-cert-section     { padding: 32px 0 32px !important; }
+  .abt-cert-watermark   { display: none !important; }
+  .abt-cert-crosshair   { display: none !important; }
+  .abt-cert-sunburst    { display: none !important; }
+  .abt-cert-center      { min-height: 0 !important; padding: 4px 0 !important; }
+  .abt-cert-hover-wrap  { width: auto !important; height: auto !important; padding: 8px; }
+  .abt-cert-callout     { display: none !important; }
+  .abt-cert-card-wrap   { margin: 0 auto 12px !important; }
+  .abt-cert-avatars     { margin-top: 16px !important; }
+  /* pull marquee to full section width, ignore inner padding */
+  .abt-mq-h-wrap        { margin-left: -16px !important; margin-right: -16px !important; width: calc(100% + 32px) !important; }
 }
 
 /* ── horizontal marquee ── */
@@ -235,7 +265,7 @@ const STYLES = `
   content: '';
   position: absolute;
   top: 0; bottom: 0;
-  width: 150px;
+  width: 80px;
   z-index: 2;
   pointer-events: none;
 }
@@ -249,8 +279,8 @@ const STYLES = `
 }
 .abt-mq-h-track {
   display: flex;
-  gap: 48px;
-  animation: abt-mq-horizontal 45s linear infinite;
+  gap: 40px;
+  animation: abt-mq-horizontal 60s linear infinite;
   white-space: nowrap;
   width: max-content;
   align-items: center;
@@ -258,15 +288,21 @@ const STYLES = `
 .abt-mq-h-track:hover {
   animation-play-state: paused;
 }
-/* each logo slot: fixed 180×72 */
+/* each logo slot: fixed 180×72 desktop, smaller on mobile */
 .abt-mq-logo-slot {
   flex-shrink: 0;
-  width: 180px;
-  height: 72px;
+  width: 140px;
+  height: 56px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+@media (max-width: 768px) {
+  .abt-mq-h-wrap { margin-bottom: 32px; }
+  .abt-mq-h-wrap::before, .abt-mq-h-wrap::after { width: 40px; }
+  .abt-mq-h-track { gap: 28px; animation-duration: 70s; }
+  .abt-mq-logo-slot { width: 110px; height: 44px; }
 }
 
 /* ── centerpiece animations ── */
@@ -580,7 +616,7 @@ const STYLES = `
 /* ── responsive ── */
 @media (max-width: 1199px) {
   .abt-miss-grid { flex-direction: column !important; }
-  .abt-bg-grid  { flex-direction: column !important; }
+  .abt-bg-grid  { flex-direction: column !important; align-items: center !important; }
   .abt-team-grid { flex-direction: column !important; }
   .abt-footer-grid { flex-direction: column !important; }
   .abt-footer-r  { display: none !important; }
@@ -598,10 +634,11 @@ const STYLES = `
 }
 @media (prefers-reduced-motion: reduce) {
   .abt-rv, .abt-ms, .abt-cv-s, .abt-char, .abt-word, .abt-bg-body { opacity:1 !important; transform:none !important; transition:none !important; }
-  .abt-bg-img-wrap::after, .abt-ms-img::after { transform:scaleX(0) !important; transition:none !important; }
+  .abt-ms-img::after { transform:scaleX(0) !important; transition:none !important; }
   .abt-uline { width:100% !important; }
-  .abt-bkt-outer { transform:scale(1) !important; }
-  .abt-bkt-inner, .abt-hero-burst, .abt-team-strip, .abt-vmq-up, .abt-vmq-dn { animation:none !important; }
+  .abt-hero-burst, .abt-team-strip, .abt-vmq-up, .abt-vmq-dn { animation:none !important; }
+  /* GSAP-driven elements: show them immediately at full opacity */
+  .abt-bg-pill, .abt-bg-dshape { opacity:1 !important; clip-path:none !important; transform:none !important; }
 }
 `;
 
@@ -1446,91 +1483,178 @@ const BG_BRACKETS = [
 const BG_WORD = 'BACKGROUND'.split('');
 
 function BackgroundSection() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [vis, setVis] = useState(false);
+  const sectionRef  = useRef<HTMLDivElement>(null);
+  const pillRef     = useRef<HTMLDivElement>(null);
+  const headOurRef  = useRef<HTMLSpanElement>(null);
+  const charRefs    = useRef<(HTMLSpanElement | null)[]>([]);
+  const ulineRef    = useRef<HTMLSpanElement>(null);
+  const p1Ref       = useRef<HTMLParagraphElement>(null);
+  const p2Ref       = useRef<HTMLParagraphElement>(null);
+  const imgWrapRef  = useRef<HTMLDivElement>(null);
+  const imgInnerRef = useRef<HTMLDivElement>(null);
+  const bktRefs     = useRef<(HTMLDivElement | null)[]>([]);
+  const bktInners   = useRef<(HTMLDivElement | null)[]>([]);
 
-  /* IntersectionObserver — card entrance */
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: 0.1 });
-    if (cardRef.current) obs.observe(cardRef.current);
-    return () => obs.disconnect();
-  }, []);
+    let ctx: any = null;
+    import('gsap').then(({ gsap, ScrollTrigger }: any) => {
+      if (!gsap.registerPlugin) return;
+      try { gsap.registerPlugin(ScrollTrigger); } catch {}
 
-  /* Scroll parallax — sets --par on card element */
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    const update = () => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--par', String(r.top + r.height / 2 - window.innerHeight / 2));
-    };
-    window.addEventListener('scroll', update, { passive:true });
-    window.addEventListener('resize', update, { passive:true });
-    update();
-    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
-  }, []);
+      ctx = gsap.context(() => {
+        const pill    = pillRef.current;
+        const imgWrap = imgWrapRef.current;
+        const imgIn   = imgInnerRef.current;
+        if (!pill) return;
 
-  const v = vis;
+        /* ── 1. Pill card entrance ── */
+        gsap.fromTo(pill,
+          { opacity: 0, scale: 0.96, y: 32 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.85, ease: 'power3.out',
+            scrollTrigger: { trigger: pill, start: 'top 88%', once: true } }
+        );
+
+        /* ── 2. Heading "OUR" slide-up ── */
+        gsap.fromTo(headOurRef.current,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', delay: 0.1,
+            scrollTrigger: { trigger: pill, start: 'top 85%', once: true } }
+        );
+
+        /* ── 3. "BACKGROUND" chars wave ── */
+        charRefs.current.forEach((ch, i) => {
+          if (!ch) return;
+          gsap.fromTo(ch,
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.45, ease: 'back.out(1.4)',
+              delay: 0.32 + i * 0.045,
+              scrollTrigger: { trigger: pill, start: 'top 85%', once: true } }
+          );
+        });
+
+        /* ── 4. Underline draw ── */
+        gsap.fromTo(ulineRef.current,
+          { width: '0%' },
+          { width: '100%', duration: 1, ease: 'power2.inOut', delay: 0.82,
+            scrollTrigger: { trigger: pill, start: 'top 85%', once: true } }
+        );
+
+        /* ── 5. Paragraphs fade-up ── */
+        gsap.fromTo([p1Ref.current, p2Ref.current],
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.15, delay: 0.3,
+            scrollTrigger: { trigger: pill, start: 'top 80%', once: true } }
+        );
+
+        /* ── 6. Image wipe (clip from right) ── */
+        if (imgWrap) {
+          gsap.fromTo(imgWrap,
+            { clipPath: 'inset(0 100% 0 0)' },
+            { clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power3.inOut', delay: 0.15,
+              scrollTrigger: { trigger: pill, start: 'top 82%', once: true } }
+          );
+        }
+
+        /* ── 7. Ken Burns zoom-out on image inner ── */
+        if (imgIn) {
+          gsap.fromTo(imgIn,
+            { scale: 1.1 },
+            { scale: 1, duration: 1.8, ease: 'power2.out', delay: 0.15,
+              scrollTrigger: { trigger: pill, start: 'top 82%', once: true } }
+          );
+        }
+
+        /* ── 8. Bracket spring entrance + float loop ── */
+        bktRefs.current.forEach((bkt, i) => {
+          if (!bkt) return;
+          gsap.fromTo(bkt,
+            { scale: 0, transformOrigin: 'top right' },
+            { scale: 1, duration: 0.7, ease: 'back.out(1.56)',
+              delay: 0.45 + i * 0.18,
+              scrollTrigger: { trigger: pill, start: 'top 82%', once: true } }
+          );
+        });
+        bktInners.current.forEach((bi, i) => {
+          if (!bi) return;
+          gsap.to(bi, {
+            y: -5, duration: 3.4 + i * 0.3, ease: 'sine.inOut',
+            yoyo: true, repeat: -1, delay: 1.2 + i * 0.2,
+          });
+        });
+
+        /* ── 9. Scroll parallax on image col ── */
+        if (imgWrap) {
+          gsap.to(imgWrap, {
+            y: -40,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1,
+            },
+          });
+        }
+      }, sectionRef);
+    });
+
+    return () => { if (ctx) ctx.revert(); };
+  }, []);
 
   return (
-    <section style={{ background:'#fff', padding:'60px 30px', overflow:'hidden' }}>
-      <div
-        ref={cardRef}
-        className={`abt-bg-card${v?' abt-bg-in':''}`}
-        style={{ background:'#F0F0F0', borderRadius:1000, position:'relative', maxWidth:1080, margin:'0 auto', padding:'80px 0 80px 100px', overflow:'hidden' }}
-      >
-        {/* ── HEADING: "OUR BACKGROUND" on a single line ── */}
-        <div style={{ textAlign:'center', marginBottom:48 }}>
-          <span className={`abt-word${v?' abt-in':''}`} style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(27px, 3.5vw, 51px)', color:DARK, lineHeight:'1.2', marginRight:12 }}>
-            OUR
-          </span>
-          <span style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(27px, 3.5vw, 51px)', color:GREEN, lineHeight:'1.2' }}>
-            {BG_WORD.map((ch, i) => (
-              <span key={i} className={`abt-char${v?' abt-in':''}`} style={{ transitionDelay:`${0.34 + i*0.045}s` }}>{ch}</span>
-            ))}
-          </span>
-          <span className={`abt-uline${v?' abt-in':''}`} style={{ margin:'4px auto 0', maxWidth:'clamp(150px,25vw,255px)' }} />
-        </div>
+    <section ref={sectionRef} className="abt-bg-section">
+      <div ref={pillRef} className="abt-bg-pill" style={{ opacity: 0 }}>
+        <div className="abt-bg-grid2">
 
-        {/* ── CONTENT GRID ── */}
-        <div className="abt-bg-grid" style={{ display:'flex', gap:48, alignItems:'center', position:'relative' }}>
+          {/* ── Left: text column ── */}
+          <div className="abt-bg-text-col">
 
-          {/* left text — 2 paragraphs */}
-          <div style={{ flex:1, minWidth:0 }}>
-            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525', marginBottom:36 }}>
-              GrowMedLink was founded on the belief that geography should never limit a healthcare professional's ambition. Since 2017 we have helped more than 4 200 nurses and doctors pass international licensing exams and secure placements in top hospitals across the USA, UK, Canada, and Australia.
+            {/* Heading */}
+            <div style={{ marginBottom:'clamp(20px,3vw,40px)' }}>
+              <span ref={headOurRef} style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(24px,3.8vw,51px)', color:DARK, lineHeight:'1.2', marginRight:10, opacity:0 }}>
+                OUR
+              </span>
+              <span style={{ display:'inline-block', fontFamily:FH, fontWeight:500, fontSize:'clamp(24px,3.8vw,51px)', color:GREEN, lineHeight:'1.2' }}>
+                {BG_WORD.map((ch, i) => (
+                  <span key={i} ref={el => { charRefs.current[i] = el; }} style={{ display:'inline-block', opacity:0 }}>{ch}</span>
+                ))}
+              </span>
+              <span ref={ulineRef} style={{ display:'block', height:2, background:GREEN, width:'0%', marginTop:6 }} />
+            </div>
+
+            {/* Body paragraphs */}
+            <p ref={p1Ref} style={{ fontFamily:FH, fontSize:'clamp(13px,1.25vw,15px)', lineHeight:'175%', letterSpacing:'0.01em', color:'#3a3a3a', textAlign:'justify', marginBottom:'clamp(16px,2vw,28px)', opacity:0 }}>
+              GrowMedLink was founded on the belief that geography should never limit a healthcare professional's ambition. Since 2017 we have helped more than 4,200 nurses and doctors pass international licensing exams and secure placements in top hospitals across the USA, UK, Canada, and Australia.
             </p>
-            <p className={`abt-bg-body${v?' abt-in':''}`} style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525', transitionDelay:'0.15s' }}>
+            <p ref={p2Ref} style={{ fontFamily:FH, fontSize:'clamp(13px,1.25vw,15px)', lineHeight:'175%', letterSpacing:'0.01em', color:'#3a3a3a', textAlign:'justify', opacity:0 }}>
               Our faculty are active clinicians and internationally licensed educators who bring real-world experience into every session. We don't just teach syllabi — we teach clinical reasoning, cultural competency, and the resilience needed to thrive in a foreign healthcare system.
             </p>
           </div>
 
-          {/* right — D-shaped image with wipe + Ken Burns + parallax */}
-          <div className="abt-bg-par-img" style={{ flexShrink:0, width:'min(563px,45%)', position:'relative' }}>
-            <div
-              className={`abt-bg-img-wrap${v?' abt-bg-in':''}`}
-              style={{ width:'100%', paddingBottom:'84%', borderRadius:'9999px 0 0 9999px', overflow:'hidden', position:'relative', background:'#bbb' }}
-            >
-              <div className="abt-bg-img-inner">
-                <Image src="/about/background-man.png" alt="Our Background" fill style={{ objectFit:'cover' }}
+          {/* ── Right: image flush to pill edge ── */}
+          <div className="abt-bg-img-col2">
+            <div ref={imgWrapRef} className="abt-bg-dshape" style={{ clipPath:'inset(0 100% 0 0)' }}>
+              <div ref={imgInnerRef} style={{ position:'absolute', inset:0, transform:'scale(1.1)' }}>
+                <Image src="/about/background-man.png" alt="Our Background" fill
+                  style={{ objectFit:'cover', objectPosition:'center top' }}
                   onError={e => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
               </div>
             </div>
 
-            {/* bracket stack — spring + float (now at bottom-right corner of D-shape image) */}
-            <div style={{ position:'absolute', right: 80, bottom: -10, width:180, height:180, pointerEvents:'none' }}>
+            {/* Bracket decoration */}
+            <div className="abt-bg-bkt-wrap">
               {BG_BRACKETS.map((b, i) => (
-                <div key={i}
-                  className={`abt-bkt-outer${v?' abt-bg-in':''}`}
-                  style={{ position:'absolute', left:b.l, top:b.t, width:b.w, height:b.h, ['--bd' as string]:b.bd }}
+                <div key={i} ref={el => { bktRefs.current[i] = el; }}
+                  style={{ position:'absolute', left:b.l, top:b.t, width:b.w, height:b.h, transform:'scale(0)', transformOrigin:'top right' }}
                 >
-                  <div className="abt-bkt-inner" style={{ ['--bfd' as string]:b.bfd, ['--bfdel' as string]:b.bfdel, width:'100%', height:'100%' }}>
+                  <div ref={el => { bktInners.current[i] = el; }} style={{ width:'100%', height:'100%' }}>
                     <BracketIcon size="100%" />
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -1683,11 +1807,12 @@ function CertHoverCard() {
   };
 
   return (
-    /* outer wrapper reserves space so surrounding layout never jumps */
+    /* outer wrapper reserves space so surrounding layout never jumps on hover */
     <div
       ref={wrapRef}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
+      className="abt-cert-hover-wrap"
       style={{
         position: 'relative',
         display: 'flex',
@@ -1778,12 +1903,12 @@ function CertificationSection() {
   }, []);
 
   return (
-    <section style={{ background:'#fff', padding:'80px 0 80px', overflow:'hidden' }}>
-      <div style={{ maxWidth:1440, margin:'0 auto', padding:'0 40px' }}>
+    <section className="abt-cert-section" style={{ background:'#fff', padding:'clamp(48px,7vw,80px) 0', overflow:'hidden' }}>
+      <div style={{ maxWidth:1440, margin:'0 auto', padding:'0 clamp(16px,4vw,40px)' }}>
 
         {/* heading */}
-        <div ref={rh} className="abt-rv" style={{ marginBottom:48, textAlign:'center' }}>
-          <h2 style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(28px,4.7vw,68px)', color:DARK, textTransform:'uppercase', letterSpacing:'-0.03em' }}>
+        <div ref={rh} className="abt-rv" style={{ marginBottom:'clamp(28px,4vw,48px)', textAlign:'center' }}>
+          <h2 style={{ fontFamily:FH, fontWeight:400, fontSize:'clamp(22px,4.7vw,68px)', color:DARK, textTransform:'uppercase', letterSpacing:'-0.03em' }}>
             CERTIFICATIONS <span style={{ color: GREEN }}>&amp; AFFILIATIONS</span>
           </h2>
         </div>
@@ -1798,27 +1923,28 @@ function CertificationSection() {
         </div>
 
         {/* Description Paragraph */}
-        <div style={{ maxWidth:920, margin:'0 auto 60px', textAlign:'center' }}>
-          <p style={{ fontFamily:FH, fontSize:16, lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525' }}>
+        <div style={{ maxWidth:860, margin:'0 auto clamp(20px,5vw,60px)', textAlign:'center', padding:'0 8px' }}>
+          <p style={{ fontFamily:FH, fontSize:'clamp(13px,1.2vw,16px)', lineHeight:'170%', letterSpacing:'0.01em', textTransform:'capitalize', color:'#252525' }}>
             GrowMedLink is affiliated with globally recognised certification bodies and healthcare institutions. Our programmes align with WHO standards, NCLEX-RN licensing, NMC UK registration, USMLE pathways, and OET &amp; IELTS language proficiency requirements — ensuring every student we guide meets the exact criteria demanded by hospitals and health systems worldwide.
           </p>
         </div>
 
         {/* CENTERPIECE ROTATING SECTION */}
-        <div style={{ position:'relative', width:'100%', minHeight:540, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden', padding:'40px 0' }}>
-          {/* Crosshair lines */}
-          <div style={{ position:'absolute', top:'50%', left:0, right:0, height:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
-          <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
+        <div className="abt-cert-center" style={{ position:'relative', width:'100%', minHeight:'clamp(200px,45vw,540px)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', overflow:'hidden', padding:'clamp(8px,4vw,40px) 0' }}>
+          {/* Crosshair lines — desktop only */}
+          <div className="abt-cert-crosshair" style={{ position:'absolute', top:'50%', left:0, right:0, height:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
+          <div className="abt-cert-crosshair" style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'#E5E7EB', pointerEvents:'none', zIndex:0 }} />
 
           {/* Rotating sunburst */}
           <div
             ref={sunburstRef}
+            className="abt-cert-sunburst"
             style={{
               position:'absolute',
               top:'50%',
               left:'50%',
-              width:750,
-              height:750,
+              width:'clamp(280px,60vw,750px)',
+              height:'clamp(280px,60vw,750px)',
               pointerEvents:'none',
               zIndex:0,
               opacity:0.35,
@@ -1830,10 +1956,10 @@ function CertificationSection() {
           </div>
 
           {/* Centerpiece Image Card & Callout Container */}
-          <div ref={calloutRef} style={{ position:'relative', zIndex:10, width:'100%', maxWidth:700, display:'flex', justifyContent:'center', margin:'20px auto 48px' }}>
+          <div ref={calloutRef} className="abt-cert-card-wrap" style={{ position:'relative', zIndex:10, width:'100%', maxWidth:700, display:'flex', justifyContent:'center', margin:'20px auto 48px' }}>
             
-            {/* Faint watermarks */}
-            <div style={{
+            {/* Faint watermarks — hidden on mobile */}
+            <div className="abt-cert-watermark" style={{
               position: 'absolute',
               bottom: '50%',
               left: 'clamp(-220px, -15vw, -4px)',
@@ -1851,8 +1977,8 @@ function CertificationSection() {
             }}>
               EXPLORE
             </div>
-            
-            <div style={{
+
+            <div className="abt-cert-watermark" style={{
               position: 'absolute',
               bottom: '50%',
               right: 'clamp(-200px, -14vw, -4px)',
@@ -1876,7 +2002,7 @@ function CertificationSection() {
 
             {/* Handwritten callout pointing to the photo */}
             <div
-              className={`abt-arrow-callout abt-cp-callout${calloutIn ? ' abt-in' : ''}`}
+              className={`abt-arrow-callout abt-cp-callout abt-cert-callout${calloutIn ? ' abt-in' : ''}`}
               style={{
                 position:'absolute',
                 bottom:-65,
@@ -1919,7 +2045,7 @@ function CertificationSection() {
         </div>
 
         {/* Avatars at bottom */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginTop:48, position:'relative', zIndex:10 }}>
+        <div className="abt-cert-avatars" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginTop:48, position:'relative', zIndex:10 }}>
           <Image src="/avatars-group.png" alt="Trusted Students" width={160} height={32} style={{ height:32, width:'auto' }} />
           <span style={{ fontFamily:FP, fontSize:14, color:DARK, fontWeight:500 }}>7000 + Trusted Students</span>
         </div>
@@ -2150,9 +2276,7 @@ function CoreValuesSection() {
       <div style={{ maxWidth: 1440, margin: '0 auto' }}>
 
         <div className={`abt-rv${vis ? ' abt-in' : ''}`} style={{ textAlign: 'center', marginBottom: 'clamp(28px,4vw,52px)' }}>
-          <p style={{ fontFamily: FH, fontSize: 'clamp(14px,1.4vw,18px)', lineHeight: '169%', letterSpacing: '0.01em', textTransform: 'capitalize', color: '#000', maxWidth: 900, margin: '0 auto 20px' }}>
-            Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit. Donec tristique placerat consectetur molestie est ornare. Suspendisse aliquet semper quam volutpat bibendum est mattis.
-          </p>
+          
           <h2 style={{ fontFamily: FH, fontWeight: 400, fontSize: 'clamp(32px,4.7vw,68px)', color: DARK, textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
             OUR <span style={{ color: GREEN }}>CORE VALUES</span>
           </h2>

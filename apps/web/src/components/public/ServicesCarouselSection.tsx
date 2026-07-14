@@ -326,7 +326,7 @@ export default function ServicesCarouselSection({ products }: { products: any[] 
                     style={{
                       flexShrink: 0,
                       width: 'clamp(260px,82vw,320px)',
-                      height: 'clamp(340px,55vw,420px)',
+                      height: 'clamp(380px,70vw,420px)',
                       scrollSnapAlign: 'start',
                     }}
                   >
@@ -423,7 +423,7 @@ function ServiceCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'clamp(340px,55vw,420px)',
+        height: 'clamp(380px,70vw,420px)',
         borderRadius: '14px',
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
@@ -453,7 +453,7 @@ function ServiceCard({
             alt={title}
             fill
             sizes="(max-width: 767px) 82vw, 320px"
-            style={{ objectFit: 'cover', objectPosition: 'top' }}
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
           />
         </div>
 

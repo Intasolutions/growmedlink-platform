@@ -132,32 +132,59 @@
   }
 }
 
+/* Tablet layout */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .why-card {
+    border-radius: 60px;
+    height: clamp(320px, 48vw, 520px);
+  }
+  .why-img-wrap {
+    width: 48%;
+  }
+  .why-text-col {
+    padding: 24px 28px 24px 20px !important;
+  }
+}
+
 /* Mobile layout */
 @media (max-width: 767px) {
   .why-card {
     flex-direction: column;
-    border-radius: 48px;
+    border-radius: 36px;
     height: auto;
     max-width: 100%;
-    padding-bottom: 36px;
-    overflow: visible; /* allow brackets to show */
+    overflow: hidden;
   }
   .why-img-wrap {
     width: 100%;
-    height: clamp(180px, 55vw, 260px);
-    border-radius: 0 0 80px 80px;
+    height: clamp(200px, 58vw, 300px);
+    border-radius: 0;
     align-self: unset;
     transform: none !important;
+    flex-shrink: 0;
+  }
+  .why-text-col {
+    padding: 24px 24px 28px !important;
+  }
+  /* brackets overlap badly in stacked layout — hide on mobile */
+  .why-brackets-wrap {
+    display: none !important;
+  }
+  /* body text: remove max-width constraint so it fills the column */
+  .why-body-text {
+    max-width: 100% !important;
   }
 }
 
 @media (max-width: 479px) {
   .why-card {
-    border-radius: 28px;
+    border-radius: 24px;
   }
   .why-img-wrap {
-    height: clamp(160px, 60vw, 220px);
-    border-radius: 0 0 48px 48px;
+    height: clamp(170px, 62vw, 240px);
+  }
+  .why-text-col {
+    padding: 20px 20px 24px !important;
   }
 }
 

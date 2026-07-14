@@ -276,7 +276,7 @@ export default function WhySection() {
         {/* ── BRACKETS: spring + float ── */}
         <div
           ref={bracketsWrap}
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none why-brackets-wrap"
           style={{
             /* positioned over the image/text boundary */
             left:   'clamp(28%, 30%, 32%)',
@@ -308,7 +308,7 @@ export default function WhySection() {
 
         {/* ── RIGHT COLUMN: text content ── */}
         <div
-          className="flex flex-col justify-center"
+          className="flex flex-col justify-center why-text-col"
           style={{
             flex: 1,
             padding: 'clamp(20px,3vw,48px) clamp(20px,4.5vw,64px) clamp(20px,3vw,48px) clamp(12px,2.5vw,32px)',
@@ -388,9 +388,10 @@ export default function WhySection() {
           {/* Body copy */}
           <p
             ref={bodyRef}
+            className="why-body-text"
             style={{
               fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-              fontSize: 'clamp(11px,1.1vw,14px)',
+              fontSize: 'clamp(12px,1.1vw,14px)',
               lineHeight: 1.7,
               color: '#555',
               fontWeight: 400,

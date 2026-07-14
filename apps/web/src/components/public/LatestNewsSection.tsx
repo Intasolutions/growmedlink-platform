@@ -512,6 +512,11 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
 
         {/* ── Mobile single-card slider (< 640px) ── */}
         <div className="lns-mobile">
+          {list.length === 0 && (
+            <div style={{ textAlign:'center', padding:'32px 16px', color:'rgba(255,255,255,0.4)', fontFamily:"'Haffer XH-TRIAL',sans-serif", fontSize:14 }}>
+              No news articles yet — check back soon.
+            </div>
+          )}
           <div className="lns-mobile-viewport">
             <div ref={mobileTrackRef} className="lns-mobile-track">
               {list.map((news, i) => (
