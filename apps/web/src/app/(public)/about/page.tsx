@@ -839,7 +839,6 @@ function ArchCarousel() {
       ref={wrapRef}
       className="abt-arch"
       onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp}
-      onTouchStart={onDown} onTouchMove={onMove} onTouchEnd={onUp}
       style={{ touchAction: 'pan-y' }}
     >
       {ARCH_ITEMS.map((item, i) => (

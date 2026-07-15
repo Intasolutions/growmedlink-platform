@@ -309,6 +309,7 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
                 paddingBottom: 'clamp(12px,1.5vw,20px)',
                 paddingTop: '4px',
                 scrollBehavior: 'smooth',
+                touchAction: 'pan-x',
               }}
             >
               {items.map((service, idx) => {

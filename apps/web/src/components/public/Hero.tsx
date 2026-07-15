@@ -293,26 +293,26 @@ function CountryCard({ country, isActive, onClick }: {
         transition: 'opacity 0.32s ease, transform 0.36s cubic-bezier(.22,.68,0,1.2)',
         pointerEvents: 'none', zIndex: 2,
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: 'clamp(14px,2vw,20px)', fontWeight: 400, lineHeight: '1.4', color: '#000', fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif" }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4, minWidth: 0 }}>
+          <span style={{ fontSize: 'clamp(12px,1.6vw,18px)', fontWeight: 400, lineHeight: '1.4', color: '#000', fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif", minWidth: 0, flexShrink: 1 }}>
             {country.name}
           </span>
           {/* Fixed box — map fills it with object-fit:contain so tall shapes (S.America) never overflow */}
-          <div style={{ width: 'clamp(60px,10vw,100px)', height: 'clamp(50px,8vw,80px)', flexShrink: 0, position: 'relative' }}>
+          <div style={{ width: 'clamp(44px,8vw,80px)', height: 'clamp(36px,6vw,64px)', flexShrink: 0, position: 'relative' }}>
             <Image src={country.mapSrc} alt={country.name} fill
               style={{ objectFit: 'contain', objectPosition: 'top right' }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             />
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 4, minWidth: 0 }}>
+          <div style={{ flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
             <Image src="/avatars-group.png" alt="Students" width={200} height={56}
-              style={{ height: 'clamp(32px,5vw,44px)', width: 'auto', display: 'block' }}
+              style={{ height: 'clamp(26px,4vw,40px)', width: 'auto', display: 'block', maxWidth: '100%' }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             />
           </div>
-          <span style={{ fontSize: 'clamp(28px,5.5vw,54px)', fontWeight: 500, lineHeight: 1, color: '#96CA45', letterSpacing: '-0.02em', fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif" }}>
+          <span style={{ fontSize: 'clamp(22px,4.5vw,48px)', fontWeight: 500, lineHeight: 1, color: '#96CA45', letterSpacing: '-0.02em', fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif", flexShrink: 0, whiteSpace: 'nowrap' }}>
             {count}%
           </span>
         </div>

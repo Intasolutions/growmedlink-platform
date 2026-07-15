@@ -439,7 +439,7 @@ export default function LatestNewsSection({ initialNews = [] }: { initialNews?: 
 
   /* ══════════════════════════════════════════════════════════════════════ */
   return (
-    <section ref={sectionRef} className="lns" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <section ref={sectionRef} className="lns" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{ touchAction: 'pan-y' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       {/* Ambient orbs */}

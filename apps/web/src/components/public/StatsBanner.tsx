@@ -138,6 +138,7 @@ export default function StatsBanner() {
             if (touchResumeTimer.current) clearTimeout(touchResumeTimer.current);
             touchResumeTimer.current = setTimeout(() => { paused.current = false; }, 4000);
           }}
+          style={{ touchAction: 'pan-y' }}
         >
           {/* ── GREEN BAR ── */}
           <div
