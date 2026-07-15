@@ -795,11 +795,10 @@ function ArchCarousel() {
 
       ticker = gsap.ticker.add(() => {
         if (!isDrag.current) {
-          // Smoother momentum decay — ease velocity back to auto-scroll speed
-          velRef.current += (0.03 - velRef.current) * 0.04;
+          const targetVel = window.innerWidth < 768 ? 0.07 : 0.03;
+          velRef.current += (targetVel - velRef.current) * 0.04;
           offsetRef.current -= velRef.current;
         } else {
-          // Smooth drag momentum decay
           velRef.current *= 0.88;
         }
         render();
