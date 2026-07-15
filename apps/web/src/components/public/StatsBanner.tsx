@@ -130,7 +130,7 @@ export default function StatsBanner() {
         */}
         <div
           className="relative"
-          style={{ padding: 'clamp(18px,4vw,48px) 0' }}
+          style={{ padding: 'clamp(18px,4vw,48px) 0', touchAction: 'pan-y' }}
           onMouseEnter={() => { paused.current = true; }}
           onMouseLeave={() => { paused.current = false; }}
           onTouchStart={() => {
@@ -138,7 +138,6 @@ export default function StatsBanner() {
             if (touchResumeTimer.current) clearTimeout(touchResumeTimer.current);
             touchResumeTimer.current = setTimeout(() => { paused.current = false; }, 4000);
           }}
-          style={{ touchAction: 'pan-y' }}
         >
           {/* ── GREEN BAR ── */}
           <div
