@@ -577,7 +577,7 @@ function RelatedProductsSection({ products }: { products: RelatedProduct[] }) {
                   position: 'relative', overflow: 'hidden',
                   transitionDelay: `${i * 0.15}s`,
                 }}>
-                <div style={{ position: 'relative', width: '100%', height: 'clamp(180px,22vw,235px)', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
                   <div className="pdt-rc-img-inner" style={{ position: 'absolute', inset: 0 }}>
                     {img ? (
                       <Image src={img} alt={p.name} fill sizes="(max-width:768px) 100vw, 50vw"
@@ -661,7 +661,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
                   position: 'relative', overflow: 'hidden',
                   transitionDelay: `${i * 0.15}s`,
                 }}>
-                <div style={{ position: 'relative', width: '100%', height: 'clamp(180px,22vw,235px)', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
                   <div className="svc-rc-img-inner" style={{ position: 'absolute', inset: 0 }}>
                     {img ? (
                       <Image src={img} alt={svc.name} fill sizes="(max-width:768px) 100vw, 50vw"

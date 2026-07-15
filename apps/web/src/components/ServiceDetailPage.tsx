@@ -690,7 +690,7 @@ function RelativeServicesSection({ services }: { services: RelatedService[] }) {
 
                 {/* Photo */}
                 <div className="svc-rc-img-h" style={{
-                  position:'relative', width: '100%', height: 235, 
+                  position:'relative', width: '100%', aspectRatio: '16/9',
                   borderRadius:14, overflow:'hidden', flexShrink: 0,
                 }}>
                   <div className="svc-rc-img-inner" style={{ position:'absolute', inset:0 }}>
