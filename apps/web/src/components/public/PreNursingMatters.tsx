@@ -23,15 +23,22 @@ const REST = [
 ];
 
 /* ── fanned: back cards slide out, centre stays put ── */
-const FAN = [
+const FAN_DESKTOP = [
   { x: '-62%', rotate: -18, scale: 0.90, z: 1 },
   { x:   '0%', rotate:   0, scale: 1.00, z: 3 },
   { x:  '62%', rotate:  18, scale: 0.90, z: 2 },
+];
+/* ── mobile fan: tighter spread so cards stay inside viewport ── */
+const FAN_MOBILE = [
+  { x: '-38%', rotate: -10, scale: 0.88, z: 1 },
+  { x:   '0%', rotate:   0, scale: 1.00, z: 3 },
+  { x:  '38%', rotate:  10, scale: 0.88, z: 2 },
 ];
 
 interface Props { products?: any[] }
 
 export default function PreNursingMatters({ products = [] }: Props) {
+  const [isMobile, setIsMobile] = React.useState(false);
   const sunburstRef  = useRef<HTMLDivElement>(null);
   const cardEls      = useRef<(HTMLDivElement | null)[]>([]);
   const cardStageRef = useRef<HTMLDivElement>(null);
@@ -54,6 +61,14 @@ export default function PreNursingMatters({ products = [] }: Props) {
   const centreImg = getProductImage(sortedProducts[0]) || '/pre-nursing-photo.png';
   const leftImg   = getProductImage(sortedProducts[1]) || FALLBACK[0];
   const rightImg  = getProductImage(sortedProducts[2]) || FALLBACK[1];
+
+  /* ── detect mobile on mount ── */
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   /* ── rAF-throttled sunburst parallax ── */
   useEffect(() => {
@@ -113,12 +128,16 @@ export default function PreNursingMatters({ products = [] }: Props) {
         scale: REST[i].scale, zIndex: REST[i].z,
       });
     });
-  }, []);
+    /* reset fan state so scroll-trigger re-fans with correct spread */
+    fannedRef.current = false;
+  }, [isMobile]);
 
   /* ── fan out: back cards slide, centre overlay fades in ── */
   const fanOut = () => {
     if (fannedRef.current) return;
     fannedRef.current = true;
+
+    const FAN = window.innerWidth < 768 ? FAN_MOBILE : FAN_DESKTOP;
 
     /* back cards */
     [0, 2].forEach(i => {
@@ -171,7 +190,9 @@ export default function PreNursingMatters({ products = [] }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* card size — same for all three so they stack perfectly */
+  /* card size — same for all three so they stack perfectly
+     On mobile: fixed 52vw wide so the 3-card fan fits in 100vw with ~12px side padding.
+     Math: centre(52vw) + 2 × side(52vw × 0.88 × 0.44) ≈ 52 + 40 = 92vw  ✓  */
   const cardStyle: React.CSSProperties = {
     width:  'clamp(180px,44vw,460px)',
     height: 'clamp(130px,26vw,300px)',
@@ -184,12 +205,36 @@ export default function PreNursingMatters({ products = [] }: Props) {
     borderRadius: '16px',
     overflow: 'hidden',
   };
+  const mobileCardStyle: React.CSSProperties = {
+    width:  '48vw',
+    height: '30vw',
+    position: 'absolute',
+    left: '50%', top: '50%',
+    marginLeft: 'calc(48vw / -2)',
+    marginTop:  'calc(30vw / -2)',
+    willChange: 'transform',
+    transformOrigin: 'bottom center',
+    borderRadius: '14px',
+    overflow: 'hidden',
+  };
 
   return (
     <section
-      className="bg-white relative overflow-hidden font-['Power_Grotesk'] text-[#252525]"
-      style={{ paddingTop: 'clamp(48px,8vw,96px)', paddingBottom: 'clamp(64px,10vw,128px)' }}
+      className="bg-white relative font-['Power_Grotesk'] text-[#252525] pnm-section"
+      style={{ paddingTop: 'clamp(48px,8vw,96px)', paddingBottom: 'clamp(64px,10vw,128px)', overflow: 'hidden' }}
     >
+      <style>{`
+        @media (max-width: 767px) {
+          .pnm-section { overflow: visible !important; }
+          .pnm-watermark { display: none !important; }
+          .pnm-stage {
+            width: calc(100vw - 24px) !important;
+            max-width: calc(100vw - 24px) !important;
+            margin-left: calc(-1 * clamp(16px,4vw,64px) + 12px) !important;
+            height: 40vw !important;
+          }
+        }
+      `}</style>
       {/* crosshair lines */}
       <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-200 pointer-events-none z-0" />
       <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-200 pointer-events-none z-0" />
@@ -228,7 +273,7 @@ export default function PreNursingMatters({ products = [] }: Props) {
         {/* ── card fan stage ── */}
         <div
           ref={cardStageRef}
-          className="relative flex items-center justify-center select-none"
+          className="relative flex items-center justify-center select-none pnm-stage"
           style={{
             width: '100%',
             maxWidth: 'clamp(320px,80vw,900px)',
@@ -238,22 +283,22 @@ export default function PreNursingMatters({ products = [] }: Props) {
         >
           {/* watermarks */}
           <span
-            className="absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest"
+            className="pnm-watermark absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest"
             style={{ fontSize: 'clamp(20px,4vw,60px)', left: 0, top: '50%', transform: 'translateY(-50%) translateX(-30%)', whiteSpace: 'nowrap', zIndex: 0 }}
           >EXPLORE</span>
           <span
-            className="absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest"
+            className="pnm-watermark absolute pointer-events-none select-none font-bold text-gray-200 tracking-widest"
             style={{ fontSize: 'clamp(20px,4vw,60px)', right: 0, top: '50%', transform: 'translateY(-50%) translateX(30%)', whiteSpace: 'nowrap', zIndex: 0 }}
           >MORE !</span>
 
           {/* card 0 — left back (photo, dark tint) */}
-          <div ref={el => { cardEls.current[0] = el; }} style={{ ...cardStyle, boxShadow: '0 25px 60px rgba(0,0,0,0.25)' }}>
+          <div ref={el => { cardEls.current[0] = el; }} style={{ ...(isMobile ? mobileCardStyle : cardStyle), boxShadow: '0 25px 60px rgba(0,0,0,0.25)' }}>
             <Image src={leftImg} alt="Product" fill className="object-cover" sizes="50vw" />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
           </div>
 
           {/* card 1 — centre (first-order product image at rest, green overlay on hover) */}
-          <div ref={el => { cardEls.current[1] = el; }} style={{ ...cardStyle, boxShadow: '0 30px 70px rgba(0,0,0,0.30)' }}>
+          <div ref={el => { cardEls.current[1] = el; }} style={{ ...(isMobile ? mobileCardStyle : cardStyle), boxShadow: '0 30px 70px rgba(0,0,0,0.30)' }}>
             {/* always-visible clear photo — product with order=0 */}
             <Image src={centreImg} alt="GrowMedLink" fill className="object-cover" sizes="50vw" />
 
@@ -307,7 +352,7 @@ export default function PreNursingMatters({ products = [] }: Props) {
           </div>
 
           {/* card 2 — right back (photo, dark tint) */}
-          <div ref={el => { cardEls.current[2] = el; }} style={{ ...cardStyle, boxShadow: '0 25px 60px rgba(0,0,0,0.25)' }}>
+          <div ref={el => { cardEls.current[2] = el; }} style={{ ...(isMobile ? mobileCardStyle : cardStyle), boxShadow: '0 25px 60px rgba(0,0,0,0.25)' }}>
             <Image src={rightImg} alt="Service" fill className="object-cover" sizes="50vw" />
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
           </div>

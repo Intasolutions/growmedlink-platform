@@ -221,11 +221,25 @@ const STYLES = `
 @media (max-width:767px) {
   .srv-h1          { font-size:clamp(32px,8vw,64px) !important; }
   .srv-sh          { font-size:clamp(15px,4vw,22px) !important; line-height:1.25 !important; }
-  .srv-wide-inner  { flex-direction:column !important; }
-  .srv-wide-img    { width:calc(100% - 36px) !important; aspect-ratio:16/9 !important; min-height:unset !important; }
   .srv-cards-wrap  { padding:0 14px !important; }
   /* narrow pair: stack to 1 column on small screens */
   .srv-narrow-row  { grid-template-columns:1fr !important; }
+
+  /* Wide card: make it look like a narrow card on mobile */
+  .srv-wide-card   { border-radius:22px !important; }
+  .srv-wide-inner  { flex-direction:column !important; min-height:unset !important; }
+  .srv-wide-img    {
+    width:calc(100% - 34px) !important;
+    min-height:unset !important;
+    margin:17px 17px 0 17px !important;
+    aspect-ratio:5/2 !important;
+  }
+  .srv-wide-text   {
+    padding:12px 17px 22px !important;
+  }
+  .srv-wide-text h3 { font-size:clamp(16px,5vw,22px) !important; }
+  .srv-wide-text p  { font-size:13px !important; }
+  .srv-wide-btn    { justify-content:flex-end !important; }
 }
 @media (max-width:479px) {
   .srv-h1 { font-size:28px !important; }
@@ -741,7 +755,7 @@ function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:numbe
             </div>
           </div>
           {/* Text */}
-          <div style={{
+          <div className="srv-wide-text" style={{
             flex:1, padding:'clamp(20px,3vw,37px) clamp(16px,2vw,22px) clamp(20px,3vw,37px) 0',
             display:'flex', flexDirection:'column', minWidth:0,
           }}>
@@ -759,7 +773,7 @@ function WideCard({ service, bg }: { service:ServiceItem; bg:string; index:numbe
             }}>
               {desc || 'Purus in in fames sit ac vitae. Curabitur scelerisque nunc mauris blandit.'}
             </p>
-            <div style={{ marginTop:18 }}>
+            <div className="srv-wide-btn" style={{ marginTop:18, display:'flex' }}>
               <CardButton href={`/services/${service.slug}`} />
             </div>
           </div>

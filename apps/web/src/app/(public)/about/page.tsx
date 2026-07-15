@@ -120,6 +120,9 @@ const STYLES = `
 /* ── arch carousel ── */
 .abt-arch { position:relative; height:clamp(220px,30vw,360px); overflow:visible; cursor:grab; user-select:none; }
 .abt-arch:active { cursor:grabbing; }
+@media (max-width:767px) {
+  .abt-arch { height: clamp(200px,55vw,280px); }
+}
 
 /* ── mission stagger ── */
 .abt-ms {
@@ -720,27 +723,26 @@ function ArchCarousel() {
    *  - Cards loop infinitely: we render SLOTS virtual slots spread across 360°,
    *    each mapped to a real card via modulo so the stream never ends.
    */
-  const STEP_DEG = 19; // degrees between adjacent cards
-  const VIS_HALF = 42; // cards within ±42° of top (~4 cards visible at once)
-  // Fill the full circle so looping is seamless: ceil(360/STEP_DEG) slots
-  const SLOTS    = Math.ceil(360 / STEP_DEG); // ~19 virtual positions
-
   const getDims = () => {
-    const vw    = window.innerWidth;
-    const contH = wrapRef.current ? wrapRef.current.offsetHeight : Math.round(vw * 0.25);
+    const vw      = window.innerWidth;
+    const mobile  = vw < 768;
+    // More angular gap on mobile so cards have breathing room
+    const STEP_DEG = mobile ? 28 : 19;
+    const VIS_HALF = mobile ? 56 : 42;
+    const contH   = wrapRef.current ? wrapRef.current.offsetHeight : Math.round(vw * 0.25);
     // Radius large enough that the top arc spans the full container width
-    const radius = Math.round(Math.max(520, vw * 0.85));
-    // Circle centre Y: apex of arc sits at ~28% from top of container
-    // cy_apex = ctrY - radius  =>  ctrY = apex_y + radius
-    const apexY  = Math.round(contH * 0.28);
-    const ctrY   = apexY + radius;
-    // Card width = 94% of the horizontal gap between adjacent card centres
-    // gap = radius * sin(STEP_DEG°) — guarantees no overlap at any viewport
-    const arcGap = radius * Math.sin((STEP_DEG * Math.PI) / 180);
-    const cardW  = Math.round(Math.min(Math.max(100, arcGap * 0.94), 240));
-    const cardH  = Math.round(cardW * 0.70);
-    return { radius, ctrY, cardW, cardH };
+    const radius  = Math.round(Math.max(520, vw * (mobile ? 1.2 : 0.85)));
+    const apexY   = Math.round(contH * 0.28);
+    const ctrY    = apexY + radius;
+    // Card width fraction: 0.72 on mobile gives clear gaps, 0.94 on desktop preserves original look
+    const arcGap  = radius * Math.sin((STEP_DEG * Math.PI) / 180);
+    const cardW   = Math.round(Math.min(Math.max(100, arcGap * (mobile ? 0.72 : 0.94)), 240));
+    const cardH   = Math.round(cardW * 0.70);
+    return { radius, ctrY, cardW, cardH, STEP_DEG, VIS_HALF };
   };
+
+  // Stable slot count — use max possible STEP_DEG denominator so array never shrinks
+  const SLOTS = Math.ceil(360 / 19); // ~19 virtual positions
 
   useEffect(() => {
     let gsapInst: any = null;
@@ -752,7 +754,7 @@ function ArchCarousel() {
       const render = () => {
         const wrap = wrapRef.current;
         if (!wrap) return;
-        const { radius, ctrY, cardW, cardH } = getDims();
+        const { radius, ctrY, cardW, cardH, STEP_DEG, VIS_HALF } = getDims();
         const ctrX = wrap.offsetWidth / 2;
 
         // First hide all real card elements, then show only those in the visible window
@@ -793,11 +795,12 @@ function ArchCarousel() {
 
       ticker = gsap.ticker.add(() => {
         if (!isDrag.current) {
-          // Bleed off drag momentum back toward base auto-scroll speed
-          velRef.current += (0.03 - velRef.current) * 0.015;
+          // Smoother momentum decay — ease velocity back to auto-scroll speed
+          velRef.current += (0.03 - velRef.current) * 0.04;
           offsetRef.current -= velRef.current;
         } else {
-          velRef.current *= 0.92;
+          // Smooth drag momentum decay
+          velRef.current *= 0.88;
         }
         render();
       });
