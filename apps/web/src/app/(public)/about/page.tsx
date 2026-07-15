@@ -826,6 +826,7 @@ function ArchCarousel() {
     if (!isDrag.current) return;
     const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const dx = cx - lastX.current;
+    const { STEP_DEG } = getDims();
     const degPerPx = STEP_DEG / 80; // ~1 card per 80px drag
     offsetRef.current += dx * degPerPx;
     velRef.current     = dx * degPerPx * 0.5;
