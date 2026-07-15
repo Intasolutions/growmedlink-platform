@@ -272,14 +272,12 @@ const STYLES = `
     position: absolute;
     right: clamp(12px,2vw,25px); top: clamp(46px,5.5vw,65px);
     width: clamp(140px,20vw,280px); height: clamp(110px,14vw,190px);
-    overflow-y: auto;
+    overflow: hidden;
     font-family:'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif;
     font-size: clamp(11px,1.1vw,13.5px); font-weight:400; line-height:165%;
     letter-spacing:0.01em; text-transform:capitalize;
     color:#fff; text-align:right; padding-right:4px;
   }
-  .rvs-section .rvs-text::-webkit-scrollbar { width: 3px; }
-  .rvs-section .rvs-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
   .rvs-section .rvs-name {
     position: absolute; left: clamp(14px,2.5vw,30px); top: clamp(112px,13.5vw,160px);
     font-family:'Great Day Personal Use','Brush Script MT',cursive;

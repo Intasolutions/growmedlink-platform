@@ -306,9 +306,9 @@ function CountryCard({ country, isActive, onClick }: {
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div style={{ width: 'clamp(80px,14vw,130px)', height: 'clamp(32px,5vw,48px)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+          <div style={{ flexShrink: 0 }}>
             <Image src="/avatars-group.png" alt="Students" width={200} height={56}
-              style={{ height: 'clamp(32px,5vw,48px)', width: 'auto', maxWidth: 'none', objectFit: 'cover', objectPosition: 'left' }}
+              style={{ height: 'clamp(32px,5vw,44px)', width: 'auto', display: 'block' }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             />
           </div>
@@ -448,10 +448,19 @@ export default function Hero() {
 
   return (
     <>
-      {/* Hide scrollbars on the cards row */}
       <style>{`
         .cards-scroll::-webkit-scrollbar { display: none; }
         .cards-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+        @media (max-width: 767px) {
+          .hero-cards-desktop { display: none !important; }
+          .hero-cards-mobile  { display: flex !important; }
+          .hero-map-wrap      { margin: -20px 0 !important; }
+        }
+        @media (min-width: 768px) {
+          .hero-cards-desktop { display: flex !important; }
+          .hero-cards-mobile  { display: none !important; }
+        }
       `}</style>
 
       <section
@@ -535,7 +544,7 @@ export default function Hero() {
           </div>
 
           {/* ── ROW 2: World map — sits between heading and bottom content ── */}
-          <div className="pointer-events-none flex justify-center" style={{ margin: 'clamp(-40px,-6vw,-80px) 0' }}>
+          <div className="pointer-events-none flex justify-center hero-map-wrap" style={{ margin: 'clamp(-40px,-6vw,-80px) 0' }}>
             <Image
               src="/world-map-bg.png"
               alt="World Map"
@@ -653,57 +662,117 @@ export default function Hero() {
               className="w-full lg:w-auto flex flex-col gap-3"
               style={{ opacity: 0, flexShrink: 0, minWidth: 0 }}
             >
-              {/* Horizontal scroll-snap row, no scrollbar.
-                  Inactive cards are on the LEFT, active (wide) card on the RIGHT. */}
-              <div
-                className="cards-scroll"
-                style={{
-                  display: 'flex',
-                  gap: 4,
-                  overflowX: 'auto',
-                  scrollSnapType: 'x mandatory',
-                  WebkitOverflowScrolling: 'touch',
-                  width: '100%',
-                  maxWidth: '100%',
-                }}
-              >
-                {COUNTRIES.map((country, idx) => (
-                  <div key={country.id} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                    <CountryCard
-                      country={country}
-                      isActive={idx === activeIdx}
-                      onClick={() => handleCardClick(idx)}
+              {/* ── DESKTOP: horizontal accordion row ── */}
+              <div className="hero-cards-desktop" style={{ flexDirection: 'column', gap: 12 }}>
+                <div
+                  className="cards-scroll"
+                  style={{ display: 'flex', gap: 4, width: '100%', maxWidth: '100%' }}
+                >
+                  {COUNTRIES.map((country, idx) => (
+                    <div key={country.id} style={{ flexShrink: 0 }}>
+                      <CountryCard
+                        country={country}
+                        isActive={idx === activeIdx}
+                        onClick={() => handleCardClick(idx)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <AutoCycleBar key={cycleKey} duration={AUTO_CYCLE_MS} />
+                <div className="flex items-center justify-end gap-1.5 pr-1">
+                  {COUNTRIES.map((c, i) => (
+                    <button key={c.id} onClick={() => handleCardClick(i)}
+                      style={{
+                        width: activeIdx === i ? 22 : 8, height: 8, borderRadius: 4,
+                        background: activeIdx === i ? '#96CA45' : 'rgba(255,255,255,0.28)',
+                        border: 'none', cursor: 'pointer', padding: 0,
+                        transition: 'width 0.4s cubic-bezier(.34,1.56,.64,1), background 0.3s ease',
+                      }}
+                      aria-label={`Show ${c.name}`}
                     />
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <WaveDots />
               </div>
 
-              {/* Progress bar */}
-              <AutoCycleBar key={cycleKey} duration={AUTO_CYCLE_MS} />
-
-              {/* Dot indicators */}
-              <div className="flex items-center justify-end gap-1.5 pr-1">
-                {COUNTRIES.map((c, i) => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleCardClick(i)}
-                    style={{
-                      width: activeIdx === i ? 22 : 8,
-                      height: 8,
-                      borderRadius: 4,
-                      background: activeIdx === i ? '#96CA45' : 'rgba(255,255,255,0.28)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 0,
-                      transition: 'width 0.4s cubic-bezier(.34,1.56,.64,1), background 0.3s ease',
-                    }}
-                    aria-label={`Show ${c.name}`}
-                  />
-                ))}
+              {/* ── MOBILE: compact vertical list ── */}
+              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%' }}>
+                {COUNTRIES.map((country, idx) => {
+                  const isActive = idx === activeIdx;
+                  return (
+                    <div
+                      key={country.id}
+                      onClick={() => handleCardClick(idx)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 14px',
+                        borderRadius: 10,
+                        background: isActive ? '#fff' : 'rgba(255,255,255,0.06)',
+                        border: isActive ? '1.5px solid rgba(150,202,69,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
+                        cursor: isActive ? 'default' : 'pointer',
+                        transition: 'background 0.3s ease, border-color 0.3s ease',
+                        boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.25)' : 'none',
+                      }}
+                    >
+                      {/* Map icon */}
+                      <div style={{ width: 36, height: 36, flexShrink: 0, position: 'relative' }}>
+                        <Image src={country.mapSrc} alt={country.name} fill
+                          style={{ objectFit: 'contain', filter: isActive ? 'none' : GREEN_TINT }}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                        />
+                      </div>
+                      {/* Name */}
+                      <span style={{
+                        flex: 1,
+                        fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
+                        fontSize: 14, fontWeight: 600,
+                        color: isActive ? '#000' : '#fff',
+                      }}>
+                        {country.name}
+                      </span>
+                      {/* Avatars */}
+                      {isActive && (
+                        <Image src="/avatars-group.png" alt="Students" width={80} height={28}
+                          style={{ height: 28, width: 'auto', display: 'block', flexShrink: 0 }}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
+                        />
+                      )}
+                      {/* Percentage */}
+                      <span style={{
+                        fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
+                        fontSize: isActive ? 22 : 14,
+                        fontWeight: 600,
+                        color: '#96CA45',
+                        letterSpacing: '-0.02em',
+                        flexShrink: 0,
+                        minWidth: 46,
+                        textAlign: 'right',
+                        transition: 'font-size 0.3s ease',
+                      }}>
+                        {country.percentage}%
+                      </span>
+                    </div>
+                  );
+                })}
+                {/* Progress bar */}
+                <AutoCycleBar key={`mob-${cycleKey}`} duration={AUTO_CYCLE_MS} />
+                {/* Dot indicators */}
+                <div className="flex items-center justify-end gap-1.5 pr-1">
+                  {COUNTRIES.map((c, i) => (
+                    <button key={c.id} onClick={() => handleCardClick(i)}
+                      style={{
+                        width: activeIdx === i ? 22 : 8, height: 8, borderRadius: 4,
+                        background: activeIdx === i ? '#96CA45' : 'rgba(255,255,255,0.28)',
+                        border: 'none', cursor: 'pointer', padding: 0,
+                        transition: 'width 0.4s cubic-bezier(.34,1.56,.64,1), background 0.3s ease',
+                      }}
+                      aria-label={`Show ${c.name}`}
+                    />
+                  ))}
+                </div>
               </div>
-
-              {/* Wave dots */}
-              <WaveDots />
             </div>
 
           </div>

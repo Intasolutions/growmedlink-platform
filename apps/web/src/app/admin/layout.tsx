@@ -10,7 +10,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'EDITOR']}>
-      <div className="min-h-screen flex bg-[#020C1B]">
+      <style>{`
+        /* Restore scrollbars inside admin panel */
+        .admin-root ::-webkit-scrollbar { width: 6px; height: 6px; background: transparent; }
+        .admin-root ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        .admin-root * { scrollbar-width: thin; -ms-overflow-style: auto; }
+      `}</style>
+      <div className="admin-root min-h-screen flex bg-[#020C1B]">
         {/* Sidebar Navigation */}
         <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 

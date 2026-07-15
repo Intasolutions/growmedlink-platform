@@ -428,7 +428,7 @@ interface FilterPillsProps {
 
 function FilterPills({ categories, activeCategory, setActiveCategory }: FilterPillsProps) {
   return (
-    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any, paddingBottom: 4 }}>
+    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any, paddingBottom: 4, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}>
       <div className="flex items-center gap-2 px-4 py-10" style={{ width: 'max-content', minWidth: '100%', justifyContent: 'center' }}>
         <button
           onClick={() => setActiveCategory('all')}
