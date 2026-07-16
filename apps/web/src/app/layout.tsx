@@ -48,7 +48,9 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <SiteLoader />
         <AuthProvider>
-          {children}
+          <div className="overflow-x-clip w-full relative flex flex-col flex-1">
+            {children}
+          </div>
         </AuthProvider>
       </body>
     </html>
