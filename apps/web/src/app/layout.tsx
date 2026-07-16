@@ -16,6 +16,7 @@ const outfit = Outfit({
 });
 
 import { getGlobalSettings } from "@/lib/api/settings";
+import SmoothScroll from "@/components/SmoothScroll";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -48,9 +49,11 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <SiteLoader />
         <AuthProvider>
-          <div className="overflow-x-clip w-full relative flex flex-col flex-1">
-            {children}
-          </div>
+          <SmoothScroll>
+            <div className="overflow-x-clip w-full relative flex flex-col flex-1">
+              {children}
+            </div>
+          </SmoothScroll>
         </AuthProvider>
       </body>
     </html>
