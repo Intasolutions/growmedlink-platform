@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -208,8 +209,6 @@ function CountryCard({ country, isActive, onClick }: {
   const [contentReady, setContentReady] = useState(isActive);
   const [hovered,      setHovered     ] = useState(false);
   const countRef = useRef<HTMLSpanElement>(null);
-  const [contentReady, setContentReady] = useState(isActive);
-  const [hovered,      setHovered     ] = useState(false);
 
   const prevActive = useRef(isActive);
   const showTmr    = useRef<ReturnType<typeof setTimeout>  | null>(null);
