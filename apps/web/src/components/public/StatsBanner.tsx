@@ -130,7 +130,7 @@ export default function StatsBanner() {
         */}
         <div
           className="relative"
-          style={{ padding: 'clamp(18px,4vw,48px) 0', touchAction: 'pan-y' }}
+          style={{ padding: 'clamp(18px,4vw,48px) 0' }}
           onMouseEnter={() => { paused.current = true; }}
           onMouseLeave={() => { paused.current = false; }}
         >
