@@ -205,20 +205,20 @@ function WaveDots() {
 function CountryCard({ country, isActive, onClick }: {
   country: Country; isActive: boolean; onClick: () => void;
 }) {
-  const [count,        setCount       ] = useState(isActive ? country.percentage : 0);
+  const [contentReady, setContentReady] = useState(isActive);
+  const [hovered,      setHovered     ] = useState(false);
+  const countRef = useRef<HTMLSpanElement>(null);
   const [contentReady, setContentReady] = useState(isActive);
   const [hovered,      setHovered     ] = useState(false);
 
-  /* Track previous isActive so we only animate on a real false→true edge */
   const prevActive = useRef(isActive);
   const showTmr    = useRef<ReturnType<typeof setTimeout>  | null>(null);
   const cntTmr     = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const intTmr     = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearAll = () => {
     if (showTmr.current) clearTimeout(showTmr.current);
     if (cntTmr.current)  clearTimeout(cntTmr.current);
-    if (intTmr.current)  clearInterval(intTmr.current);
+    gsap.killTweensOf(countRef.current);
   };
 
   useEffect(() => {
@@ -231,7 +231,7 @@ function CountryCard({ country, isActive, onClick }: {
       /* Only reset if we were previously active — avoids resetting on mount */
       if (wasActive) {
         setContentReady(false);
-        setCount(0);
+        if (countRef.current) countRef.current.innerHTML = '0';
       }
       return;
     }
@@ -240,14 +240,15 @@ function CountryCard({ country, isActive, onClick }: {
     if (!wasActive) {
       showTmr.current = setTimeout(() => setContentReady(true), 260);
       cntTmr.current  = setTimeout(() => {
-        let v = 0;
-        const step = country.percentage / (550 / 16);
-        intTmr.current = setInterval(() => {
-          v = Math.min(v + step, country.percentage);
-          setCount(Math.round(v));
-          if (v >= country.percentage) clearInterval(intTmr.current!);
-        }, 16);
+        if (countRef.current) {
+          gsap.fromTo(countRef.current,
+            { innerHTML: 0 },
+            { innerHTML: country.percentage, duration: 0.55, ease: 'none', snap: { innerHTML: 1 } }
+          );
+        }
       }, 380);
+    } else {
+      if (countRef.current) countRef.current.innerHTML = String(country.percentage);
     }
 
     return clearAll;
@@ -313,7 +314,7 @@ function CountryCard({ country, isActive, onClick }: {
             />
           </div>
           <span style={{ fontSize: 'clamp(22px,4.5vw,48px)', fontWeight: 500, lineHeight: 1, color: '#96CA45', letterSpacing: '-0.02em', fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif", flexShrink: 0, whiteSpace: 'nowrap' }}>
-            {count}%
+            <span ref={countRef}>{isActive ? country.percentage : 0}</span>%
           </span>
         </div>
       </div>
@@ -346,8 +347,8 @@ function AutoCycleBar({ duration }: { duration: number }) {
     return () => cancelAnimationFrame(raf);
   }, [duration]);
   return (
-    <div style={{ width: '100%', height: 2, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden', marginTop: 6 }}>
-      <div style={{ height: '100%', background: '#96CA45', borderRadius: 2, width: `${width}%`, transition: `width ${duration}ms linear` }} />
+    <div style={{ width: '100%', height: 2, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden', marginTop: 6, transform: 'translateZ(0)' }}>
+      <div style={{ height: '100%', background: '#96CA45', borderRadius: 2, width: `${width}%`, transition: `width ${duration}ms linear`, willChange: 'width' }} />
     </div>
   );
 }
@@ -472,7 +473,7 @@ export default function Hero() {
 
       <section
         ref={sectionRef}
-        className="relative w-full bg-black overflow-x-clip font-['Power_Grotesk'] text-white"
+        className="relative w-full bg-black overflow-hidden font-['Power_Grotesk'] text-white"
         style={{ paddingBottom: 'clamp(60px,8vw,100px)' }}
       >
         <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -511,6 +512,7 @@ export default function Hero() {
                   letterSpacing: '-0.02em',
                   maxWidth: '100%',
                   textAlign: 'center',
+                  willChange: 'transform, opacity',
                 }}
               >
                 {'Your Global Nursing Career Starts '}
