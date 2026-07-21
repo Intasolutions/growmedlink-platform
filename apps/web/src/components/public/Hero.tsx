@@ -430,13 +430,17 @@ export default function Hero() {
     return () => gsapCtx.current?.revert();
   }, []);
 
-  /* ── Auto-cycle ── */
+  /* ── Auto-cycle — faster on mobile so users aren't waiting to scroll ── */
+  const cycleMs = typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    ? 2000
+    : AUTO_CYCLE_MS;
+
   const startAutoPlay = useCallback(() => {
     if (autoTimer.current) clearInterval(autoTimer.current);
     autoTimer.current = setInterval(() => {
       setActiveIdx(i => { setCycleKey(k => k + 1); return (i + 1) % COUNTRIES.length; });
-    }, AUTO_CYCLE_MS);
-  }, []);
+    }, cycleMs);
+  }, [cycleMs]);
 
   useEffect(() => {
     startAutoPlay();
@@ -698,14 +702,13 @@ export default function Hero() {
                 <WaveDots />
               </div>
 
-              {/* ── MOBILE: compact vertical list ── */}
-              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%', touchAction: 'pan-y' }}>
+              {/* ── MOBILE: compact vertical list — no onClick/touch handlers, auto-cycle only ── */}
+              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%', touchAction: 'pan-y', pointerEvents: 'none' }}>
                 {COUNTRIES.map((country, idx) => {
                   const isActive = idx === activeIdx;
                   return (
                     <div
                       key={country.id}
-                      onClick={() => handleCardClick(idx)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -714,10 +717,8 @@ export default function Hero() {
                         borderRadius: 10,
                         background: isActive ? '#fff' : 'rgba(255,255,255,0.06)',
                         border: isActive ? '1.5px solid rgba(150,202,69,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
-                        cursor: isActive ? 'default' : 'pointer',
                         transition: 'background 0.3s ease, border-color 0.3s ease',
                         boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.25)' : 'none',
-                        touchAction: 'pan-y',
                       }}
                     >
                       {/* Map icon */}
@@ -762,20 +763,6 @@ export default function Hero() {
                 })}
                 {/* Progress bar */}
                 <AutoCycleBar key={`mob-${cycleKey}`} duration={AUTO_CYCLE_MS} />
-                {/* Dot indicators */}
-                <div className="flex items-center justify-end gap-1.5 pr-1">
-                  {COUNTRIES.map((c, i) => (
-                    <button key={c.id} onClick={() => handleCardClick(i)}
-                      style={{
-                        width: activeIdx === i ? 22 : 8, height: 8, borderRadius: 4,
-                        background: activeIdx === i ? '#96CA45' : 'rgba(255,255,255,0.28)',
-                        border: 'none', cursor: 'pointer', padding: 0,
-                        transition: 'width 0.4s cubic-bezier(.34,1.56,.64,1), background 0.3s ease',
-                      }}
-                      aria-label={`Show ${c.name}`}
-                    />
-                  ))}
-                </div>
               </div>
             </div>
 
