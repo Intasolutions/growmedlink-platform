@@ -473,7 +473,7 @@ export default function Hero() {
 
       <section
         ref={sectionRef}
-        className="relative w-full bg-black overflow-hidden font-['Power_Grotesk'] text-white"
+        className="relative w-full bg-black overflow-x-hidden font-['Power_Grotesk'] text-white"
         style={{ paddingBottom: 'clamp(60px,8vw,100px)' }}
       >
         <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
