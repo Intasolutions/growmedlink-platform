@@ -373,8 +373,9 @@ export default function Hero() {
   useEffect(() => {
     gsapCtx.current = gsap.context(() => {
 
-      /* Sunburst spin */
-      if (sunburstRef.current) {
+      /* Sunburst spin — skip on touch devices to avoid competing with scroll */
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      if (sunburstRef.current && !isTouch) {
         gsap.to(sunburstRef.current, {
           rotation: 360,
           duration: 80,
@@ -408,16 +409,18 @@ export default function Hero() {
           { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.5);
       }
 
-      /* Arrow callout: reveal then float */
+      /* Arrow callout: reveal then float — no repeat animation on touch devices */
       if (arrowRef.current) {
         gsap.set(arrowRef.current, { opacity: 0, y: 14 });
         gsap.to(arrowRef.current, {
           opacity: 1, y: 0,
           duration: 0.7, ease: 'power3.out', delay: 0.82,
           onComplete: () => {
-            gsap.to(arrowRef.current, {
-              y: -8, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
-            });
+            if (!isTouch) {
+              gsap.to(arrowRef.current, {
+                y: -8, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
+              });
+            }
           },
         });
       }

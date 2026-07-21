@@ -133,11 +133,6 @@ export default function StatsBanner() {
           style={{ padding: 'clamp(18px,4vw,48px) 0', touchAction: 'pan-y' }}
           onMouseEnter={() => { paused.current = true; }}
           onMouseLeave={() => { paused.current = false; }}
-          onTouchStart={() => {
-            paused.current = true;
-            if (touchResumeTimer.current) clearTimeout(touchResumeTimer.current);
-            touchResumeTimer.current = setTimeout(() => { paused.current = false; }, 4000);
-          }}
         >
           {/* ── GREEN BAR ── */}
           <div
@@ -161,7 +156,6 @@ export default function StatsBanner() {
                       borderRight: !isLast ? '1px solid rgba(255,255,255,0.3)' : 'none',
                     }}
                     onMouseEnter={() => activateCard(i)}
-                    onTouchStart={() => activateCard(i)}
                   >
                     {/*
                       Dark active card — absolutely positioned relative to THIS column,
