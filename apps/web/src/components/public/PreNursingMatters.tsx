@@ -221,7 +221,7 @@ export default function PreNursingMatters({ products = [] }: Props) {
   return (
     <section
       className="bg-white relative font-['Power_Grotesk'] text-[#252525] pnm-section"
-      style={{ paddingTop: 'clamp(48px,8vw,96px)', paddingBottom: 'clamp(64px,10vw,128px)', overflow: 'hidden' }}
+      style={{ paddingTop: 'clamp(48px,8vw,96px)', paddingBottom: 'clamp(64px,10vw,128px)', overflowX: 'clip' }}
     >
       <style>{`
         @media (max-width: 767px) {

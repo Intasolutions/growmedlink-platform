@@ -119,7 +119,7 @@ export default function StatsBanner() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white overflow-hidden"
+      className="bg-white overflow-x-clip"
       style={{ padding: 'clamp(20px,4vw,56px) 0' }}
     >
       <div className="max-w-[1440px] mx-auto" style={{ padding: '0 clamp(12px,3vw,48px)', overflow: 'hidden' }}>

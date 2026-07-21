@@ -465,8 +465,8 @@ export default function Hero() {
 
       <section
         ref={sectionRef}
-        className="relative w-full bg-black overflow-hidden font-['Power_Grotesk'] text-white"
-        style={{ paddingBottom: 'clamp(60px,8vw,100px)' }}
+        className="relative w-full bg-black overflow-x-clip font-['Power_Grotesk'] text-white"
+        style={{ paddingBottom: 'clamp(60px,8vw,100px)', touchAction: 'pan-y' }}
       >
         <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
 
@@ -696,7 +696,7 @@ export default function Hero() {
               </div>
 
               {/* ── MOBILE: compact vertical list ── */}
-              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%' }}>
+              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%', touchAction: 'pan-y' }}>
                 {COUNTRIES.map((country, idx) => {
                   const isActive = idx === activeIdx;
                   return (
@@ -714,6 +714,7 @@ export default function Hero() {
                         cursor: isActive ? 'default' : 'pointer',
                         transition: 'background 0.3s ease, border-color 0.3s ease',
                         boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.25)' : 'none',
+                        touchAction: 'pan-y',
                       }}
                     >
                       {/* Map icon */}

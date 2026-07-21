@@ -61,10 +61,12 @@ const STYLES = `
   background: #0d0d0d;
   will-change: transform, opacity;
   transform-origin: top center;
+  touch-action: none;
 }
 .sl-overlay.sl-exit {
   animation: sl-exit-up 0.7s cubic-bezier(0.77,0,0.18,1) 0.12s both;
   pointer-events: none;
+  touch-action: none;
 }
 
 /* subtle grid overlay */
@@ -209,18 +211,19 @@ export default function SiteLoader() {
   useEffect(() => {
     const onLoad = () => {
       setExiting(true);
-      setTimeout(() => setGone(true), 900);
+      setTimeout(() => setGone(true), 800);
     };
 
     if (document.readyState === 'complete') {
-      // already loaded — short delay so animation plays at least briefly
-      const t = setTimeout(onLoad, 1600);
+      // Already loaded — show briefly so animation plays, then exit.
+      // On mobile keep it short so users aren't waiting before they can scroll.
+      const t = setTimeout(onLoad, 1200);
       return () => clearTimeout(t);
     }
 
     window.addEventListener('load', onLoad);
-    // fallback: never block longer than 3.5s
-    const fallback = setTimeout(onLoad, 3500);
+    // Fallback: never block longer than 2.5s on any device
+    const fallback = setTimeout(onLoad, 2500);
     return () => {
       window.removeEventListener('load', onLoad);
       clearTimeout(fallback);

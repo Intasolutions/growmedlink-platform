@@ -9,30 +9,31 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Initialize Lenis
+    // On touch devices (phones/tablets), native iOS/Android scroll is already
+    // smooth and momentum-based. Lenis intercepts touch events and causes the
+    // "needs 2-3 swipes to start scrolling" bug on iPhone. Only run Lenis on
+    // pointer-based (mouse/trackpad) devices.
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 2,
+      touchMultiplier: 0,
     });
 
-    // Synchronize Lenis scrolling with GSAP's ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
     const update = (time: number) => {
       lenis.raf(time * 1000);
     };
 
     gsap.ticker.add(update);
-
-    // Update GSAP's lag smoothing to match Lenis
     gsap.ticker.lagSmoothing(0);
 
-    // Cleanup on unmount
     return () => {
       gsap.ticker.remove(update);
       lenis.destroy();

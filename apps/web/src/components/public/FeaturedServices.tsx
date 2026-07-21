@@ -144,7 +144,7 @@ export default function FeaturedServices({ services }: { services: any[] }) {
   return (
     <section
       ref={sectionRef}
-      style={{ background: '#fff', padding: 'clamp(24px,4vw,32px) 0 clamp(40px,6vw,64px)', overflow: 'hidden' }}
+      style={{ background: '#fff', padding: 'clamp(24px,4vw,32px) 0 clamp(40px,6vw,64px)', overflowX: 'clip' }}
     >
       <style>{`
         .fs-row   { display: flex; flex-direction: row; gap: 20px; align-items: stretch; }

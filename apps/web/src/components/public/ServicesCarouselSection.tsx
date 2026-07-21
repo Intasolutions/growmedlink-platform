@@ -128,7 +128,7 @@ export default function ServicesCarouselSection({ services }: { services: any[] 
   return (
     <section
       ref={sectionRef}
-      className="bg-white overflow-hidden"
+      className="bg-white overflow-x-clip"
       style={{
         padding: 'clamp(40px,6vw,96px) 0',
         fontFamily: "'Power Grotesk', sans-serif",

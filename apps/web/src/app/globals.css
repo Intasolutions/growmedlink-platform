@@ -9,11 +9,14 @@
   }
 
   html {
+    overflow-x: hidden;
+    /* Native iOS momentum scroll — critical for smooth feel on iPhone */
     -webkit-overflow-scrolling: touch;
   }
 
   body {
     @apply text-primary bg-background font-sans antialiased;
+    overflow-x: hidden;
   }
 
   /* ── Prevent touch handlers from blocking native scroll ── */
