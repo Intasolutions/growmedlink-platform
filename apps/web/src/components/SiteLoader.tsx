@@ -212,21 +212,21 @@ export default function SiteLoader() {
   const [gone,    setGone]    = useState(false);
 
   useEffect(() => {
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-
     const onLoad = () => {
       setExiting(true);
-      // On mobile: remove from DOM immediately so fixed overlay never blocks scroll
-      setTimeout(() => setGone(true), isTouch ? 50 : 800);
+      setTimeout(() => setGone(true), 800);
     };
 
     if (document.readyState === 'complete') {
-      const t = setTimeout(onLoad, isTouch ? 600 : 1200);
+      // Already loaded — show briefly so animation plays, then exit.
+      // On mobile keep it short so users aren't waiting before they can scroll.
+      const t = setTimeout(onLoad, 1200);
       return () => clearTimeout(t);
     }
 
     window.addEventListener('load', onLoad);
-    const fallback = setTimeout(onLoad, isTouch ? 1500 : 2500);
+    // Fallback: never block longer than 2.5s on any device
+    const fallback = setTimeout(onLoad, 2500);
     return () => {
       window.removeEventListener('load', onLoad);
       clearTimeout(fallback);
