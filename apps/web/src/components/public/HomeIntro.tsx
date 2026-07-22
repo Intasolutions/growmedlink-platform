@@ -304,7 +304,7 @@ export default function HomeIntro() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <div className={`hi-wrap${show ? ' hi-active' : ''}${!show ? ' hi-gone' : ''}`}>
+      <div className={`hi-wrap${show && !exiting ? ' hi-active' : ''}${!show ? ' hi-gone' : ''}`}>
 
         {/* curtain split */}
         <div className="hi-curtain hi-curtain-l" style={{ '--delay': exiting ? '0s' : '1.8s' } as React.CSSProperties} />

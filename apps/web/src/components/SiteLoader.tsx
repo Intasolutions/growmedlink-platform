@@ -61,12 +61,10 @@ const STYLES = `
   background: #0d0d0d;
   will-change: transform, opacity;
   transform-origin: top center;
-  touch-action: none;
 }
 .sl-overlay.sl-exit {
   animation: sl-exit-up 0.7s cubic-bezier(0.77,0,0.18,1) 0.12s both;
   pointer-events: none;
-  touch-action: none;
 }
 
 /* subtle grid overlay */
@@ -193,14 +191,19 @@ const STYLES = `
 }
 `;
 
+const pseudoRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
 const PARTICLES = Array.from({ length: 16 }, (_, i) => {
   const angle = (i / 16) * Math.PI * 2;
-  const dist  = 80 + Math.random() * 80;
+  const dist  = 80 + pseudoRandom(i) * 80;
   return {
-    px: `${Math.cos(angle) * dist}px`,
-    py: `${Math.sin(angle) * dist}px`,
-    delay: `${0.6 + Math.random() * 0.4}s`,
-    opacity: 0.4 + Math.random() * 0.6,
+    px: `${(Math.cos(angle) * dist).toFixed(1)}px`,
+    py: `${(Math.sin(angle) * dist).toFixed(1)}px`,
+    delay: `${(0.6 + pseudoRandom(i + 16) * 0.4).toFixed(2)}s`,
+    opacity: Number((0.4 + pseudoRandom(i + 32) * 0.6).toFixed(2)),
   };
 });
 

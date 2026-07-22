@@ -17,6 +17,7 @@ const outfit = Outfit({
 
 import { getGlobalSettings } from "@/lib/api/settings";
 import SmoothScroll from "@/components/SmoothScroll";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -50,6 +51,7 @@ export default function RootLayout({
         <SiteLoader />
         <AuthProvider>
           <SmoothScroll>
+            <ScrollToTop />
             <div className="overflow-x-clip w-full relative flex flex-col flex-1">
               {children}
             </div>
