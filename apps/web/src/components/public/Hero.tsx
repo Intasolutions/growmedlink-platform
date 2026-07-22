@@ -371,11 +371,22 @@ export default function Hero() {
 
   /* ── GSAP entrance + persistent animations ── */
   useEffect(() => {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+    /* On mobile: skip ALL GSAP — just make elements visible immediately */
+    if (isTouch) {
+      if (h1Ref.current)      h1Ref.current.style.opacity      = '1';
+      if (avatarsRef.current) avatarsRef.current.style.opacity  = '1';
+      if (leftColRef.current) leftColRef.current.style.opacity  = '1';
+      if (cardsRef.current)   cardsRef.current.style.opacity    = '1';
+      if (arrowRef.current)   arrowRef.current.style.opacity    = '1';
+      return;
+    }
+
+    /* Desktop only: full GSAP animations */
     gsapCtx.current = gsap.context(() => {
 
-      /* Sunburst spin — skip on touch devices to avoid competing with scroll */
-      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-      if (sunburstRef.current && !isTouch) {
+      if (sunburstRef.current) {
         gsap.to(sunburstRef.current, {
           rotation: 360,
           duration: 80,
@@ -385,7 +396,6 @@ export default function Hero() {
         });
       }
 
-      /* Staggered entrance */
       const tl = gsap.timeline({ delay: 0.06 });
 
       if (h1Ref.current) {
@@ -409,18 +419,15 @@ export default function Hero() {
           { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.5);
       }
 
-      /* Arrow callout: reveal then float — no repeat animation on touch devices */
       if (arrowRef.current) {
         gsap.set(arrowRef.current, { opacity: 0, y: 14 });
         gsap.to(arrowRef.current, {
           opacity: 1, y: 0,
           duration: 0.7, ease: 'power3.out', delay: 0.82,
           onComplete: () => {
-            if (!isTouch) {
-              gsap.to(arrowRef.current, {
-                y: -8, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
-              });
-            }
+            gsap.to(arrowRef.current, {
+              y: -8, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
+            });
           },
         });
       }
@@ -463,6 +470,9 @@ export default function Hero() {
           .hero-cards-desktop { display: none !important; }
           .hero-cards-mobile  { display: flex !important; }
           .hero-map-wrap      { margin: -20px 0 !important; }
+          .hero-section, .hero-section * {
+            touch-action: pan-y !important;
+          }
         }
         @media (min-width: 768px) {
           .hero-cards-desktop { display: flex !important; }
@@ -472,7 +482,7 @@ export default function Hero() {
 
       <section
         ref={sectionRef}
-        className="relative w-full bg-black overflow-x-hidden font-['Power_Grotesk'] text-white"
+        className="hero-section relative w-full bg-black overflow-x-hidden font-['Power_Grotesk'] text-white"
         style={{ paddingBottom: 'clamp(60px,8vw,100px)' }}
       >
         <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -716,7 +726,6 @@ export default function Hero() {
                         borderRadius: 10,
                         background: isActive ? '#fff' : 'rgba(255,255,255,0.06)',
                         border: isActive ? '1.5px solid rgba(150,202,69,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
-                        transition: 'background 0.3s ease, border-color 0.3s ease',
                         boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.25)' : 'none',
                       }}
                     >
@@ -753,7 +762,6 @@ export default function Hero() {
                         flexShrink: 0,
                         minWidth: 46,
                         textAlign: 'right',
-                        transition: 'font-size 0.3s ease',
                       }}>
                         {country.percentage}%
                       </span>
