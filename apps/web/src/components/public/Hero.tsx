@@ -437,17 +437,14 @@ export default function Hero() {
     return () => gsapCtx.current?.revert();
   }, []);
 
-  /* ── Auto-cycle — faster on mobile so users aren't waiting to scroll ── */
-  const cycleMs = typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches
-    ? 2000
-    : AUTO_CYCLE_MS;
-
+  /* ── Auto-cycle — desktop only ── */
   const startAutoPlay = useCallback(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     if (autoTimer.current) clearInterval(autoTimer.current);
     autoTimer.current = setInterval(() => {
       setActiveIdx(i => { setCycleKey(k => k + 1); return (i + 1) % COUNTRIES.length; });
-    }, cycleMs);
-  }, [cycleMs]);
+    }, AUTO_CYCLE_MS);
+  }, []);
 
   useEffect(() => {
     startAutoPlay();
@@ -470,6 +467,7 @@ export default function Hero() {
           .hero-cards-desktop { display: none !important; }
           .hero-cards-mobile  { display: flex !important; }
           .hero-map-wrap      { margin: -20px 0 !important; }
+          .hero-cards-col     { display: none !important; }
           .hero-section, .hero-section * {
             touch-action: pan-y !important;
           }
@@ -672,10 +670,10 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Right: cards carousel + controls */}
+            {/* Right: cards carousel + controls — hidden entirely on mobile via hero-cards-col */}
             <div
               ref={cardsRef}
-              className="w-full lg:w-auto flex flex-col gap-3"
+              className="hero-cards-col w-full lg:w-auto flex flex-col gap-3"
               style={{ opacity: 0, flexShrink: 0, minWidth: 0 }}
             >
               {/* ── DESKTOP: horizontal accordion row ── */}
