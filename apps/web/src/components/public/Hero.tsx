@@ -711,66 +711,7 @@ export default function Hero() {
                 <WaveDots />
               </div>
 
-              {/* ── MOBILE: compact vertical list — no onClick/touch handlers, auto-cycle only ── */}
-              <div className="hero-cards-mobile" style={{ flexDirection: 'column', gap: 8, width: '100%', pointerEvents: 'none' }}>
-                {COUNTRIES.map((country, idx) => {
-                  const isActive = idx === activeIdx;
-                  return (
-                    <div
-                      key={country.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: '10px 14px',
-                        borderRadius: 10,
-                        background: isActive ? '#fff' : 'rgba(255,255,255,0.06)',
-                        border: isActive ? '1.5px solid rgba(150,202,69,0.35)' : '1.5px solid rgba(255,255,255,0.08)',
-                        boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.25)' : 'none',
-                      }}
-                    >
-                      {/* Map icon */}
-                      <div style={{ width: 36, height: 36, flexShrink: 0, position: 'relative' }}>
-                        <Image src={country.mapSrc} alt={country.name} fill
-                          style={{ objectFit: 'contain', filter: isActive ? 'none' : GREEN_TINT }}
-                          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-                        />
-                      </div>
-                      {/* Name */}
-                      <span style={{
-                        flex: 1,
-                        fontFamily: "'Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-                        fontSize: 14, fontWeight: 600,
-                        color: isActive ? '#000' : '#fff',
-                      }}>
-                        {country.name}
-                      </span>
-                      {/* Avatars */}
-                      {isActive && (
-                        <Image src="/avatars-group.png" alt="Students" width={80} height={28}
-                          style={{ height: 28, width: 'auto', display: 'block', flexShrink: 0 }}
-                          onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-                        />
-                      )}
-                      {/* Percentage */}
-                      <span style={{
-                        fontFamily: "'Haffer VF-TRIAL','Haffer XH-TRIAL','Helvetica Neue',Arial,sans-serif",
-                        fontSize: isActive ? 22 : 14,
-                        fontWeight: 600,
-                        color: '#96CA45',
-                        letterSpacing: '-0.02em',
-                        flexShrink: 0,
-                        minWidth: 46,
-                        textAlign: 'right',
-                      }}>
-                        {country.percentage}%
-                      </span>
-                    </div>
-                  );
-                })}
-                {/* Progress bar */}
-                <AutoCycleBar key={`mob-${cycleKey}`} duration={AUTO_CYCLE_MS} />
-              </div>
+              {/* MOBILE CAROUSEL TEMPORARILY COMMENTED OUT FOR SCROLL TESTING */}
             </div>
 
           </div>
