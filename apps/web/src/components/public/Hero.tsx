@@ -470,9 +470,6 @@ export default function Hero() {
           .hero-cards-desktop { display: none !important; }
           .hero-cards-mobile  { display: flex !important; }
           .hero-map-wrap      { margin: -20px 0 !important; }
-          .hero-section, .hero-section * {
-            touch-action: pan-y !important;
-          }
         }
         @media (min-width: 768px) {
           .hero-cards-desktop { display: flex !important; }
@@ -493,7 +490,7 @@ export default function Hero() {
             style={{ paddingTop: 'clamp(160px,18vh,220px)' }}
           >
             {/* Sunburst + H1 + Avatars */}
-            <div className="relative inline-flex flex-col items-center justify-center" style={{ touchAction: 'pan-y', pointerEvents: 'none' }}>
+            <div className="relative inline-flex flex-col items-center justify-center" style={{ pointerEvents: 'none' }}>
               <div
                 ref={sunburstRef}
                 className="absolute pointer-events-none"
@@ -574,14 +571,14 @@ export default function Hero() {
           {/* ── ROW 3: Left copy + Right carousel — BELOW the map ── */}
           <div
             className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10 lg:gap-8"
-            style={{ marginTop: 'clamp(20px,4vw,48px)', touchAction: 'pan-y' }}
+            style={{ marginTop: 'clamp(20px,4vw,48px)' }}
           >
 
             {/* Left: description + button + arrow callout */}
             <div
               ref={leftColRef}
               className="w-full lg:max-w-[360px] xl:max-w-[400px]"
-              style={{ opacity: 0, pointerEvents: 'auto', touchAction: 'pan-y' }}
+              style={{ opacity: 0, pointerEvents: 'auto' }}
             >
               <p
                 className="text-white font-bold leading-snug mb-3"

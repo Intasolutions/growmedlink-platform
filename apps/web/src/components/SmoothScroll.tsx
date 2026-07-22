@@ -7,6 +7,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Prevent GSAP from recalculating ScrollTriggers on iOS address bar hide/show
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // On touch devices (phones/tablets), native iOS/Android scroll is already

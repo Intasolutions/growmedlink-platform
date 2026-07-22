@@ -46,8 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} scroll-smooth`}>
-      <body className="antialiased min-h-screen flex flex-col">
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="antialiased min-h-[100dvh] flex flex-col">
         <SiteLoader />
         <AuthProvider>
           <SmoothScroll>
