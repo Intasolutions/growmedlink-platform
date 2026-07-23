@@ -2074,7 +2074,7 @@ function ServicesCarouselSection({ services }: { services: any[] }) {
                 paddingBottom: 'clamp(12px,1.5vw,20px)',
                 paddingTop: '4px',
                 scrollBehavior: 'smooth',
-                touchAction: 'pan-x',
+                touchAction: 'pan-y pan-x',
               }}
             >
               {items.map((service, idx) => {
@@ -2479,8 +2479,9 @@ function FeaturedServices({ services }: { services: any[] }) {
             ref={leftPanelRef}
             className="fs-left"
           >
-            {/* Shimmer overlay */}
+            {/* Shimmer overlay — desktop only, costs GPU on mobile */}
             <div
+              className="fs-shimmer-el"
               style={{
                 position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
                 background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)',
@@ -2488,9 +2489,11 @@ function FeaturedServices({ services }: { services: any[] }) {
                 animation: 'fs-shimmer 3.5s ease-in-out infinite',
               }}
             />
+            <style>{`@media(hover:none)and(pointer:coarse){.fs-shimmer-el,.fs-orb-el{animation:none!important;}}`}</style>
 
             {/* Ambient orb */}
             <div
+              className="fs-orb-el"
               style={{
                 position: 'absolute', pointerEvents: 'none',
                 width: '280px', height: '280px', borderRadius: '50%',
@@ -3553,16 +3556,18 @@ const ReviewsSection_STYLES = `
   .rvs-section .rvs-ccard-map {
     width: clamp(38px,5.5vw,60px); height: clamp(38px,5.5vw,60px);
     position: relative; flex-shrink: 0;
-    /* idle gentle float */
     animation: rvs-map-float 4s ease-in-out infinite;
-    /* stagger each card's float so they don't sync */
     will-change: transform;
   }
   .rvs-section .rvs-ccard:nth-child(2) .rvs-ccard-map { animation-delay: 1s;   }
   .rvs-section .rvs-ccard:nth-child(3) .rvs-ccard-map { animation-delay: 0.5s; }
   .rvs-section .rvs-ccard:nth-child(4) .rvs-ccard-map { animation-delay: 1.5s; }
-  /* pause float on hover so the card's lift transform isn't fighting it */
   .rvs-section .rvs-ccard:hover .rvs-ccard-map { animation-play-state: paused; }
+  @media (hover: none) and (pointer: coarse) {
+    .rvs-section .rvs-dot { animation: none !important; }
+    .rvs-section .rvs-left { animation: none !important; }
+    .rvs-section .rvs-ccard-map { animation: none !important; will-change: auto; }
+  }
 
   /* country label */
   .rvs-section .rvs-ccard-name {
@@ -4271,7 +4276,7 @@ const LatestNewsSection_STYLES = `
     66%      { transform:translate(-14px,16px) scale(0.94); }
   }
 
-  .lns { background:#1e1e1e; padding:clamp(40px,6vw,72px) 0 clamp(48px,7vw,80px); position:relative; overflow:hidden; }
+  .lns { background:#1e1e1e; padding:clamp(40px,6vw,72px) 0 clamp(48px,7vw,80px); position:relative; overflow-x:clip; }
   .lns-wrap { max-width:1200px; margin:0 auto; padding:0 clamp(16px,4vw,48px); position:relative; z-index:2; }
 
   /* ambient orbs */
@@ -4421,6 +4426,10 @@ const LatestNewsSection_STYLES = `
   @media (prefers-reduced-motion:reduce) {
     .lns-orb { animation:none !important; }
     .lns-dot { animation:none !important; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .lns-orb { animation:none !important; }
+    .lns-dot.lns-dot-on { animation:none !important; }
   }
 `;
 function LatestNewsSection({ initialNews = [] }: { initialNews?: any[] }) {
