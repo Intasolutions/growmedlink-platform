@@ -214,6 +214,20 @@
   .step-icon-wrap { transition-duration: 0.01ms !important; }
 }
 
+/* On touch devices, will-change wastes GPU memory and can degrade scroll performance */
+@media (hover: none) and (pointer: coarse) {
+  .why-img-wrap,
+  .will-change-transform,
+  [style*="will-change"] {
+    will-change: auto !important;
+  }
+
+  /* Tell browser vertical scroll is always the intent — processed before any JS */
+  html, body {
+    touch-action: pan-y;
+  }
+}
+
 
 /* ── Navbar logo carousel ── */
 @keyframes navbar-logo-in-left {

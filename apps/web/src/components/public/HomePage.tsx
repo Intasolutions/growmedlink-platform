@@ -500,6 +500,7 @@ function Hero_WaveDots() {
 
   useEffect(() => {
     if (!containerRef.current) return;
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     const els = Array.from(containerRef.current.querySelectorAll<HTMLElement>('.wdot'));
     const tweens = els.map((el, i) =>
       gsap.to(el, {
@@ -1221,7 +1222,7 @@ function StatsBanner() {
       className="bg-white overflow-x-hidden"
       style={{ padding: 'clamp(20px,4vw,56px) 0' }}
     >
-      <div className="max-w-[1440px] mx-auto" style={{ padding: '0 clamp(12px,3vw,48px)', overflow: 'hidden' }}>
+      <div className="max-w-[1440px] mx-auto" style={{ padding: '0 clamp(12px,3vw,48px)', overflowX: 'clip' }}>
 
         {/*
           Outer wrapper gives vertical room for the dark card to overflow
@@ -1433,15 +1434,16 @@ function PreNursingMatters({ products = [] }: PreNursingMatters_Props) {
       revealedRef.current = true;
       io.disconnect();
 
-      /* slide in */
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
       gsap.to(el, {
         y: 0, opacity: 1, duration: 0.7, ease: 'back.out(1.2)',
         onComplete: () => {
-          /* pure GSAP float — no CSS keyframes at all */
-          floatTweenRef.current = gsap.to(el, {
-            y: -6, duration: 1.3, ease: 'sine.inOut',
-            yoyo: true, repeat: -1,
-          });
+          if (!isTouch) {
+            floatTweenRef.current = gsap.to(el, {
+              y: -6, duration: 1.3, ease: 'sine.inOut',
+              yoyo: true, repeat: -1,
+            });
+          }
         },
       });
     }, { threshold: 0.2 });
@@ -1861,12 +1863,15 @@ function ServicesCarouselSection({ services }: { services: any[] }) {
         ease: 'back.out(1.2)',
       }, 0.55);
 
-      /* 8. Arrow bounce loop — starts after arrow is visible */
-      tl.call(() => {
-        gsap.to(arrowWrapRef.current, {
-          y: -7, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
-        });
-      }, [], 0.9);
+      /* 8. Arrow bounce loop — desktop only (repeat:-1 competes with mobile scroll thread) */
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      if (!isTouch) {
+        tl.call(() => {
+          gsap.to(arrowWrapRef.current, {
+            y: -7, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
+          });
+        }, [], 0.9);
+      }
     }, { threshold: 0.08 });
 
     io.observe(section);
@@ -2963,10 +2968,11 @@ function WhySection() {
   const pointRefs     = useRef<(HTMLDivElement | null)[]>([]);
   const triggeredRef  = useRef(false);
 
-  /* ── Cursor trail ── */
+  /* ── Cursor trail — desktop mouse only ── */
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
 
     const SRC        = `${window.location.origin}/cursor-trail.png`;
     const SIZE       = 96;
@@ -3150,14 +3156,17 @@ function WhySection() {
         opacity: 1, x: 0, duration: 0.48, stagger: 0.1, ease: 'back.out(1.3)',
       }, 1.05);
 
-      /* 9. Brackets spring in then float */
+      /* 9. Brackets spring in then float (float only on desktop) */
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
       bracketRefs.current.forEach((el, i) => {
         if (!el) return;
         const b = WhySection_BRACKETS[i];
         tl.to(el, { scale: 1, duration: 0.62, ease: 'back.out(1.7)' }, b.entryDelay);
-        tl.call(() => {
-          gsap.to(el, { y: -5, duration: b.floatDur / 2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-        }, [], b.entryDelay + 0.65);
+        if (!isTouch) {
+          tl.call(() => {
+            gsap.to(el, { y: -5, duration: b.floatDur / 2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+          }, [], b.entryDelay + 0.65);
+        }
       });
     }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
 
@@ -3877,25 +3886,31 @@ function ReviewsSection({ initialReviews = [] }: { initialReviews?: ReviewsSecti
       tl.to(els.strip1, { y: '0%', duration: 0.65 }, 0.72);
       tl.to(els.strip2, { y: '0%', duration: 0.65 }, 0.86);
 
+      const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
       /* 7. Write-review button slides in */
       tl.to(els.writeBtn, { opacity: 1, x: 0, duration: 0.5, ease: 'back.out(1.4)' }, 0.6);
-      tl.call(() => {
-        gsap.to(els.writeBtn, {
-          boxShadow: '0 0 0 8px rgba(150,202,69,0)', duration: 1.4,
-          ease: 'power2.out', repeat: -1, repeatDelay: 1.4,
-        });
-      }, [], 2.2);
+      if (!isTouch) {
+        tl.call(() => {
+          gsap.to(els.writeBtn, {
+            boxShadow: '0 0 0 8px rgba(150,202,69,0)', duration: 1.4,
+            ease: 'power2.out', repeat: -1, repeatDelay: 1.4,
+          });
+        }, [], 2.2);
+      }
 
-      /* 7. Dots pop in with stagger then wave loop */
+      /* 8. Dots pop in with stagger then wave loop (wave only on desktop) */
       tl.to(dotRefs.current.filter(Boolean), {
         scale: 1, opacity: 1, duration: 0.4, stagger: 0.055, ease: 'back.out(1.6)',
       }, 0.2);
-      tl.call(() => {
-        dotRefs.current.forEach((d, i) => {
-          if (!d) return;
-          gsap.to(d, { y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.14 });
-        });
-      }, [], 0.9);
+      if (!isTouch) {
+        tl.call(() => {
+          dotRefs.current.forEach((d, i) => {
+            if (!d) return;
+            gsap.to(d, { y: -8, duration: 1.15, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.14 });
+          });
+        }, [], 0.9);
+      }
     };
 
     const io = new IntersectionObserver(([entry]) => {
@@ -4938,7 +4953,6 @@ export default function HomePage({
 }: any) {
   return (
     <div className="flex flex-col min-h-screen">
-      <HomeIntro />
       <Hero />
       <StatsBanner />
       <PreNursingMatters products={sortedProducts} />

@@ -163,6 +163,7 @@ function WaveDots() {
 
   useEffect(() => {
     if (!containerRef.current) return;
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     const els = Array.from(containerRef.current.querySelectorAll<HTMLElement>('.wdot'));
     const tweens = els.map((el, i) =>
       gsap.to(el, {
