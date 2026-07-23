@@ -12,20 +12,13 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // On touch devices (phones/tablets), native iOS/Android scroll is already
-    // smooth and momentum-based. Lenis intercepts touch events and causes the
-    // "needs 2-3 swipes to start scrolling" bug on iPhone. Only run Lenis on
-    // pointer-based (mouse/trackpad) devices.
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (isTouch) return;
-
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 0,
+      smoothTouch: true, // Hijacks native scroll to provide the desktop-like smooth scroll on touch devices
+      syncTouch: true, // Sync lenis with native touch scroll
+      touchMultiplier: 2, 
     });
 
     lenis.on('scroll', ScrollTrigger.update);
