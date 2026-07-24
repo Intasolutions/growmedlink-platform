@@ -279,6 +279,11 @@ function HomeIntro() {
   const counterRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    // Never show the intro overlay on touch devices — it blocks scroll for 2s
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      setShow(false);
+      return;
+    }
     // only show once per session
     if (sessionStorage.getItem('hi-shown')) {
       setShow(false);
@@ -475,7 +480,6 @@ function Hero_SlotWord() {
             ref={el => { reelRefs.current[i] = el; }}
             style={{
               display: 'block',
-              willChange: 'transform',
               transform: `translateY(${REST}%)`,
             }}
           >
@@ -776,6 +780,7 @@ function Hero() {
   }, [cycleMs]);
 
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     startAutoPlay();
     return () => { if (autoTimer.current) clearInterval(autoTimer.current); };
   }, [startAutoPlay]);
@@ -1204,8 +1209,9 @@ function StatsBanner() {
     }
   }, []);
 
-  /* ── Auto-cycle every 2s ── */
+  /* ── Auto-cycle every 2s (desktop only — avoids GSAP on mobile scroll thread) ── */
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     const id = setInterval(() => {
       if (!paused.current) activateCard((prevIndex.current + 1) % StatsBanner_stats.length);
     }, 2000);
@@ -1406,8 +1412,9 @@ function PreNursingMatters({ products = [] }: PreNursingMatters_Props) {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  /* ── rAF-throttled sunburst parallax ── */
+  /* ── rAF-throttled sunburst parallax (desktop only) ── */
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     let ticking = false;
     const apply = () => {
       ticking = false;
@@ -1537,7 +1544,6 @@ function PreNursingMatters({ products = [] }: PreNursingMatters_Props) {
     left: '50%', top: '50%',
     marginLeft: 'calc(clamp(180px,44vw,460px) / -2)',
     marginTop:  'calc(clamp(130px,26vw,300px) / -2)',
-    willChange: 'transform',
     transformOrigin: 'bottom center',
     borderRadius: '16px',
     overflow: 'hidden',
@@ -1549,7 +1555,6 @@ function PreNursingMatters({ products = [] }: PreNursingMatters_Props) {
     left: '50%', top: '50%',
     marginLeft: 'calc(48vw / -2)',
     marginTop:  'calc(30vw / -2)',
-    willChange: 'transform',
     transformOrigin: 'bottom center',
     borderRadius: '14px',
     overflow: 'hidden',
@@ -1579,7 +1584,7 @@ function PreNursingMatters({ products = [] }: PreNursingMatters_Props) {
       {/* rotating sunburst */}
       <div
         ref={sunburstRef}
-        className="absolute top-1/2 left-1/2 pointer-events-none z-0 opacity-35 will-change-transform"
+        className="absolute top-1/2 left-1/2 pointer-events-none z-0 opacity-35"
         style={{ width: 'clamp(600px,85vw,1100px)', height: 'clamp(600px,85vw,1100px)', transform: 'translate(-50%,-50%)' }}
       >
         <Image src="/light-sunburst.png" alt="" fill className="object-contain" />
@@ -2187,13 +2192,12 @@ function ServicesCarouselSection_ServiceCard({
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         textDecoration: 'none',
-        willChange: 'transform',
         transformOrigin: 'center center',
         backgroundColor: '#fff',
       }}
     >
       {/* Image — full width, natural height, zero padding, never cropped */}
-      <div ref={imgRef} style={{ position: 'relative', width: '100%', willChange: 'transform' }}>
+      <div ref={imgRef} style={{ position: 'relative', width: '100%' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={img}
@@ -2287,7 +2291,6 @@ function ServicesCarouselSection_ExploreBtn() {
         border: 'none',
         cursor: 'pointer',
         boxShadow: '0 4px 16px rgba(150,202,69,0.35)',
-        willChange: 'transform',
         display: 'inline-block',
         textDecoration: 'none',
       }}
@@ -2424,6 +2427,7 @@ function FeaturedServices({ services }: { services: any[] }) {
   }, [activeIndex, services?.length, goTo]);
 
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     if (isPaused) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
     intervalRef.current = setInterval(goNext, 4000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
@@ -2857,7 +2861,6 @@ function FeaturedServices_DeckStack({
           className="fs-deck-card"
           data-active={posOf(i, activeIndex) === 0 ? 'true' : 'false'}
           style={{
-            willChange: 'transform, opacity',
             transformOrigin: 'center center',
           }}
           onMouseEnter={() => onEnter(i)}
@@ -3073,8 +3076,9 @@ function WhySection() {
     };
   }, []);
 
-  /* ── rAF-throttled scroll parallax ── */
+  /* ── rAF-throttled scroll parallax (desktop only) ── */
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     const card    = cardRef.current;
     const imgWrap = imgWrapRef.current;
     const bWrap   = bracketsWrap.current;
@@ -3085,14 +3089,8 @@ function WhySection() {
       ticking = false;
       const r = card.getBoundingClientRect();
       const par = r.top + r.height / 2 - window.innerHeight / 2;
-      /* skip parallax on very small screens — layout is stacked, no room */
-      if (window.innerWidth >= 768) {
-        gsap.set(imgWrap, { y: par * -0.045 });
-        gsap.set(bWrap,   { y: par *  0.022 });
-      } else {
-        gsap.set(imgWrap, { y: 0 });
-        gsap.set(bWrap,   { y: 0 });
-      }
+      gsap.set(imgWrap, { y: par * -0.045 });
+      gsap.set(bWrap,   { y: par *  0.022 });
     };
     const onScrollResize = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
     window.addEventListener('scroll', onScrollResize, { passive: true });
@@ -3188,7 +3186,7 @@ function WhySection() {
         {/* ── IMAGE: D-shape, wipe-reveal + Ken Burns + parallax ── */}
         <div ref={imgWrapRef} className="why-img-wrap">
           {/* Ken Burns inner wrapper */}
-          <div ref={imgInnerRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <div ref={imgInnerRef} style={{ position: 'absolute', inset: 0 }}>
             <Image
               src="/why-image.png"
               alt="Why GrowMedLink"
@@ -3205,7 +3203,6 @@ function WhySection() {
               position: 'absolute', inset: 0,
               background: '#F0F0F0',
               zIndex: 3,
-              willChange: 'transform',
             }}
           />
         </div>
@@ -3643,7 +3640,6 @@ const ReviewsSection_STYLES = `
     width: 100%; height: clamp(240px,27vw,350px);
     background: #155BA9; border-radius: clamp(8px,1vw,12px);
     position: relative; overflow: hidden;
-    will-change: transform;
   }
   .rvs-section .rvs-deco {
     position: absolute; left: clamp(14px,2.5vw,30px); top: 0;
@@ -3733,7 +3729,6 @@ const ReviewsSection_STYLES = `
   .rvs-section .rvs-card-mobile {
     background: #155BA9; border-radius: 12px; overflow: hidden;
     display: none; flex-direction: column; width: 100%; box-sizing: border-box;
-    will-change: transform;
   }
   .rvs-section .rvs-card-mobile .mob-deco { display: flex; gap: 8px; padding-left: 16px; }
   .rvs-section .rvs-card-mobile .mob-strip { width: 28px; height: 68px; border-radius: 0 0 6px 6px; }
@@ -4320,7 +4315,7 @@ const LatestNewsSection_STYLES = `
 
   .lns-cw {
     position:absolute; left:50%; top:50%;
-    border-radius:14px; will-change:transform,opacity;
+    border-radius:14px;
     transform-origin:center bottom;
   }
   .lns-cw { cursor:pointer; }
@@ -4364,7 +4359,7 @@ const LatestNewsSection_STYLES = `
   /* ── MOBILE single-card stack (< 640px) ── */
   .lns-mobile { display:none; flex-direction:column; gap:0; position:relative; }
   .lns-mobile-viewport { overflow:hidden; border-radius:16px; position:relative; }
-  .lns-mobile-track { display:flex; will-change:transform; }
+  .lns-mobile-track { display:flex; }
   .lns-mobile-card { flex-shrink:0; width:100%; border-radius:16px; overflow:hidden; position:relative; background:#2e2e2e; }
   .lns-mobile-img  { width:100%; aspect-ratio:16/9; position:relative; overflow:hidden; }
   .lns-mobile-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.3); }

@@ -25,6 +25,7 @@ function LogoCarousel() {
   const [direction, setDirection] = useState<1 | -1>(1);
 
   useEffect(() => {
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
     const timer = setInterval(() => {
       setDirection((prevDir) => (prevDir === 1 ? -1 : 1));
       setNextIndex((index + 1) % LOGO_VARIANTS.length);

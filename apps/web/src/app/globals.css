@@ -9,14 +9,13 @@
   }
 
   html {
-    overflow-x: hidden;
-    /* Native iOS momentum scroll — critical for smooth feel on iPhone */
+    overflow-x: clip;
     -webkit-overflow-scrolling: touch;
   }
 
   body {
     @apply text-primary bg-background font-sans antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* ── Prevent touch handlers from blocking native scroll ── */
@@ -137,7 +136,6 @@
   overflow: hidden;
   position: relative;
   filter: grayscale(100%);
-  will-change: transform;
 }
 
 
